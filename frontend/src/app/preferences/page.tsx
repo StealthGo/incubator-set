@@ -399,7 +399,7 @@ export default function PreferencesPage() {
                             <p className="text-gray-700 mb-2">{opt.description}</p>
                             <p className="text-sm text-gray-600 mb-4"><strong>Duration:</strong> {opt.duration}</p>
                             <div className="flex justify-between items-center">
-                                <p className="font-semibold text-lg">{opt.estimated_cost}</p>
+                                <p className="text-gray-800 font-semibold text-lg">{opt.estimated_cost}</p>
                                 <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
                                     <Icon name="confirmation_number" /> Book Now
                                 </a>
@@ -428,7 +428,7 @@ export default function PreferencesPage() {
                                 </div>
                                 <p className="text-gray-700 mb-4">{opt.description}</p>
                                 <div className="flex justify-between items-center">
-                                    <p className="font-semibold text-lg">{opt.estimated_cost}</p>
+                                    <p className="text-gray-800 font-semibold text-lg">{opt.estimated_cost}</p>
                                     <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
                                         <Icon name="hotel" /> Book on MMT
                                     </a>
@@ -446,10 +446,10 @@ export default function PreferencesPage() {
             <h3 className="text-3xl font-bold text-orange-800 mb-4 flex items-center gap-3"><Icon name="info" className="text-4xl"/> Trip Overview</h3>
             <p className="text-gray-700 mb-6 text-lg leading-relaxed">{itinerary.trip_overview.destination_insights}</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-base">
-              <div className="flex items-center gap-3"><Icon name="thermostat" className="text-orange-600" /><div><strong>Weather:</strong> {itinerary.trip_overview.weather_during_visit}</div></div>
-              <div className="flex items-center gap-3"><Icon name="calendar_today" className="text-orange-600" /><div><strong>Season:</strong> {itinerary.trip_overview.seasonal_context}</div></div>
-              <div className="flex items-center gap-3"><Icon name="festival" className="text-orange-600" /><div><strong>Culture:</strong> {itinerary.trip_overview.cultural_context}</div></div>
-              <div className="flex items-center gap-3"><Icon name="group" className="text-orange-600" /><div><strong>Customs:</strong> {Array.isArray(itinerary.trip_overview.local_customs_to_know) ? itinerary.trip_overview.local_customs_to_know.join(', ') : 'N/A'}</div></div>
+              <div className="text-gray-800 flex items-center gap-3"><Icon name="thermostat" className="text-orange-600" /><div><strong>Weather:</strong> {itinerary.trip_overview.weather_during_visit}</div></div>
+              <div className="text-gray-800 flex items-center gap-3"><Icon name="calendar_today" className="text-orange-600" /><div><strong>Season:</strong> {itinerary.trip_overview.seasonal_context}</div></div>
+              <div className="text-gray-800 flex items-center gap-3"><Icon name="festival" className="text-orange-600" /><div><strong>Culture:</strong> {itinerary.trip_overview.cultural_context}</div></div>
+              <div className="text-gray-800 flex items-center gap-3"><Icon name="group" className="text-orange-600" /><div><strong>Customs:</strong> {Array.isArray(itinerary.trip_overview.local_customs_to_know) ? itinerary.trip_overview.local_customs_to_know.join(', ') : 'N/A'}</div></div>
             </div>
             <div className="text-orange-900 font-bold mt-6 text-xl text-right">Estimated Cost: {itinerary.trip_overview.estimated_total_cost}</div>
           </section>
@@ -513,7 +513,7 @@ export default function PreferencesPage() {
                                     <div key={mealType} className="bg-gray-50 rounded-xl p-4 shadow-md">
                                         <p className="font-bold text-gray-800 capitalize">{mealType}</p>
                                         <img src={meal.image_url} alt={meal.dish} className="w-full h-40 object-cover rounded-lg my-2"/>
-                                        <p className="font-semibold text-lg">{meal.dish}</p>
+                                        <p className="text-gray-800 font-semibold text-lg">{meal.dish}</p>
                                         <p className="text-sm text-gray-600">{meal.restaurant}</p>
                                         <p className="text-sm text-gray-500 my-2 italic">"{meal.description}"</p>
                                         <a href={meal.zomato_link} target="_blank" rel="noopener noreferrer" className="text-sm text-red-600 hover:underline font-semibold inline-flex items-center gap-1">
@@ -563,7 +563,7 @@ export default function PreferencesPage() {
                     <p className="text-gray-700 text-base mb-3">{exp.description}</p>
                     <div className="text-base text-orange-800 bg-orange-200/50 p-3 rounded-lg italic"><strong>Local's Take:</strong> {exp.why_local_loves_it}</div>
                     <div className="flex justify-between items-center mt-4">
-                        <p className="font-semibold text-lg">{exp.estimated_cost}</p>
+                        <p className="text-gray-800 font-semibold text-lg">{exp.estimated_cost}</p>
                         <a href={exp.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
                             <Icon name="confirmation_number"/> Book Experience
                         </a>
