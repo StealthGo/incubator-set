@@ -213,16 +213,19 @@ export default function PreferencesPage() {
             localStorage.removeItem("token");
             setIsLoggedIn(false);
             setUser(null);
+            setShowSignInModal(true); // Show sign-in modal immediately
           }
         } catch (error) {
           console.error("Error checking user status:", error);
           localStorage.removeItem("token");
           setIsLoggedIn(false);
           setUser(null);
+          setShowSignInModal(true); // Show sign-in modal immediately
         }
       } else {
         setIsLoggedIn(false);
         setUser(null);
+        setShowSignInModal(true); // Show sign-in modal immediately for new users
       }
     };
 
