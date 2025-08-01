@@ -234,6 +234,13 @@ export default function PreferencesPage() {
 
   const handleSend = async (e?: React.FormEvent, value?: string) => {
     if (e) e.preventDefault();
+    
+    // Check if user is logged in before allowing any prompts
+    if (!isLoggedIn) {
+      setShowSignInModal(true);
+      return;
+    }
+    
     const currentInput = value || input;
     if (!currentInput.trim()) return;
 
@@ -709,7 +716,27 @@ export default function PreferencesPage() {
         <section className={`w-full md:w-2/5 flex flex-col bg-white p-4 md:p-6 border-r border-gray-200 ${showFullItinerary ? 'hidden md:flex' : ''}`}>
           <div className="flex-1 flex flex-col justify-end overflow-y-auto hide-scrollbar">
             <div className="flex flex-col gap-4 mb-4">
-              {messages.map((msg, i) => <ChatBubble key={i} sender={msg.sender}>{msg.text}</ChatBubble>)}
+              {/* Show welcome message for non-authenticated users */}
+              {!isLoggedIn && (
+                <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border border-orange-200 rounded-2xl p-6 mb-4">
+                  <div className="text-center">
+                    <Icon name="travel_explore" className="text-4xl text-orange-500 mb-3" />
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">Welcome to The Modern Chanakya!</h3>
+                    <p className="text-gray-700 mb-4">
+                      Ready to plan your perfect trip? Sign in to start creating personalized itineraries with our AI travel expert.
+                    </p>
+                    <button 
+                      onClick={() => setShowSignInModal(true)}
+                      className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-all shadow-lg"
+                    >
+                      🚀 Sign In to Start Planning
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Show messages only if logged in */}
+              {isLoggedIn && messages.map((msg, i) => <ChatBubble key={i} sender={msg.sender}>{msg.text}</ChatBubble>)}
               <div ref={chatEndRef} />
             </div>
           </div>
@@ -732,22 +759,71 @@ export default function PreferencesPage() {
             {!itinerary && !showOptions && quickReplies[systemQuestions[step]?.key]?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {quickReplies[systemQuestions[step]?.key].map((option) => (
-                  <button key={option} type="button" className="px-4 py-1 rounded-full bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-200 transition text-sm font-semibold" onClick={() => handleSend(undefined, option)}>
+                  <button 
+                    key={option} 
+                    type="button" 
+                    className={`px-4 py-1 rounded-full border transition text-sm font-semibold ${
+                      isLoggedIn 
+                        ? 'bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200' 
+                        : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
+                    }`} 
+                    onClick={() => handleSend(undefined, option)}
+                    disabled={!isLoggedIn}
+                  >
                     {option}
                   </button>
                 ))}
               </div>
             )}
             <form onSubmit={handleSend} className="flex items-center gap-2">
-              <input type="text" className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder={itinerary ? "Any changes? Type here..." : "Type your answer..."} value={input} onChange={e => setInput(e.target.value)} disabled={isGenerating} />
-              <button type="submit" className="p-2 rounded-full bg-orange-500 text-white font-semibold shadow hover:bg-orange-600 transition-all" disabled={isGenerating}>
+              <input 
+                type="text" 
+                className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:text-gray-400" 
+                placeholder={
+                  !isLoggedIn 
+                    ? "Please sign in to start planning your trip..." 
+                    : itinerary 
+                      ? "Any changes? Type here..." 
+                      : "Type your answer..."
+                } 
+                value={input} 
+                onChange={e => setInput(e.target.value)} 
+                disabled={isGenerating || !isLoggedIn} 
+              />
+              <button 
+                type="submit" 
+                className={`p-2 rounded-full font-semibold shadow transition-all ${
+                  isLoggedIn 
+                    ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`} 
+                disabled={isGenerating || !isLoggedIn}
+              >
                 <Icon name="send" />
               </button>
             </form>
              {showOptions && (
                 <div className="flex gap-4 mt-4">
-                <button onClick={handleAskMore} className="px-5 py-2 rounded-full bg-gray-200 text-gray-900 font-semibold shadow hover:bg-gray-300 transition-all text-sm">Ask More</button>
-                <button onClick={() => handleGenerate()} className="px-5 py-2 rounded-full bg-orange-500 text-white font-semibold shadow hover:bg-orange-600 transition-all text-sm" disabled={isGenerating}>
+                <button 
+                  onClick={handleAskMore} 
+                  className={`px-5 py-2 rounded-full font-semibold shadow transition-all text-sm ${
+                    isLoggedIn 
+                      ? 'bg-gray-200 text-gray-900 hover:bg-gray-300' 
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                  disabled={!isLoggedIn}
+                >
+                  Ask More
+                </button>
+                <button 
+                  onClick={() => handleGenerate()} 
+                  className={`px-5 py-2 rounded-full font-semibold shadow transition-all text-sm ${
+                    isLoggedIn 
+                      ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`} 
+                  disabled={isGenerating || !isLoggedIn}
+                >
                     {isGenerating ? "Generating..." : "Generate Itinerary"}
                 </button>
                 </div>
@@ -780,7 +856,13 @@ export default function PreferencesPage() {
       {showSignInModal && (
         <SignInModal 
           onClose={() => setShowSignInModal(false)} 
-          onSuccess={() => handleGenerate()} 
+          onSuccess={() => {
+            // Start the conversation after successful sign in
+            setMessages([{ sender: 'system', text: systemQuestions[0].text }]);
+            setStep(0);
+            setShowOptions(false);
+            setItinerary(null);
+          }} 
           onUserUpdate={(userData) => {
             setUser(userData);
             setIsLoggedIn(true);
