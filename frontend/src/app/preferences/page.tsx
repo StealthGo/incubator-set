@@ -6,6 +6,7 @@ import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { addDays, format } from 'date-fns';
+import SubscriptionPopup from './SubscriptionPopup';
 
 // --- Configuration ---
 const API_BASE_URL = "http://localhost:8000"; // Your backend URL
@@ -185,6 +186,7 @@ export default function PreferencesPage() {
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -327,6 +329,19 @@ export default function PreferencesPage() {
         ...msgs,
         { sender: "llm", text: data.llm_message || "Your itinerary is ready! Check it out on the right." },
       ]);
+      
+      // Show subscription popup after itinerary is generated (only if not shown before or cooldown expired)
+      const hasSeenSubscriptionPopup = localStorage.getItem('hasSeenSubscriptionPopup');
+      const cooldownExpiry = localStorage.getItem('subscriptionPopupCooldown');
+      const now = new Date();
+      const isCooldownActive = cooldownExpiry && new Date(cooldownExpiry) > now;
+      
+      if (!hasSeenSubscriptionPopup && !isCooldownActive) {
+        setTimeout(() => {
+          setShowSubscriptionPopup(true);
+          localStorage.setItem('hasSeenSubscriptionPopup', 'true');
+        }, 2000); // Show popup after 2 seconds
+      }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setMessages((msgs) => [
@@ -633,7 +648,7 @@ export default function PreferencesPage() {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-100 font-sans flex flex-col ${showSignInModal ? 'overflow-hidden' : ''}`}>
+    <div className={`min-h-screen bg-gray-100 font-sans flex flex-col ${showSignInModal || showSubscriptionPopup ? 'overflow-hidden' : ''}`}>
       <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet" />
       <nav className="sticky top-0 z-20 bg-white/80 backdrop-blur flex items-center justify-between px-6 md:px-12 py-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
@@ -769,6 +784,12 @@ export default function PreferencesPage() {
           }}
         />
       )}
+      
+      {/* Subscription Popup */}
+      <SubscriptionPopup 
+        isOpen={showSubscriptionPopup}
+        onClose={() => setShowSubscriptionPopup(false)}
+      />
     </div>
   );
 }

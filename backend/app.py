@@ -12,10 +12,66 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import datetime
+from bson import ObjectId
+import asyncio
+import httpx
+from fastapi import BackgroundTasks
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
-app = FastAPI()
+# Keep-alive configuration
+RENDER_SERVICE_URL = os.getenv("RENDER_SERVICE_URL", "http://localhost:8000")
+KEEP_ALIVE_INTERVAL = 14 * 60  # 14 minutes
+
+# Global variable to store the keep-alive task
+keep_alive_task = None
+
+async def ping_self():
+    """Ping the server to keep it awake"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{RENDER_SERVICE_URL}/api/health", timeout=10)
+            print(f"Keep-alive ping successful: {response.status_code}")
+    except Exception as e:
+        print(f"Keep-alive ping failed: {e}")
+
+async def start_keep_alive_task():
+    """Start the keep-alive background task with proper cancellation handling"""
+    try:
+        while True:
+            await asyncio.sleep(KEEP_ALIVE_INTERVAL)
+            await ping_self()
+    except asyncio.CancelledError:
+        print("Keep-alive task cancelled gracefully")
+        raise
+    except Exception as e:
+        print(f"Keep-alive task error: {e}")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage the application lifespan"""
+    global keep_alive_task
+    
+    # Startup
+    await start_database()
+    if "render" in RENDER_SERVICE_URL.lower() or os.getenv("RENDER") == "true":
+        keep_alive_task = asyncio.create_task(start_keep_alive_task())
+        print("Keep-alive task started for Render deployment")
+    
+    yield
+    
+    # Shutdown
+    await close_database()
+    if keep_alive_task:
+        keep_alive_task.cancel()
+        try:
+            await keep_alive_task
+        except asyncio.CancelledError:
+            pass
+        print("Keep-alive task stopped")
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,6 +85,20 @@ MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
 client_mongo = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
 db = client_mongo["user_database"]
 users_collection = db["users"]
+itineraries_collection = db["itineraries"]
+
+async def start_database():
+    """Connect to MongoDB"""
+    try:
+        await client_mongo.admin.command('ismaster')
+        print("Connected to MongoDB")
+    except Exception as e:
+        print(f"Failed to connect to MongoDB: {e}")
+
+async def close_database():
+    """Close MongoDB connection"""
+    client_mongo.close()
+    print("MongoDB connection closed")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -64,14 +134,22 @@ class Token(BaseModel):
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/signin")
 
 async def get_user(email: str):
-    user = await users_collection.find_one({"email": email})
-    return user
+    try:
+        user = await users_collection.find_one({"email": email})
+        return user
+    except asyncio.CancelledError:
+        print("Get user operation cancelled")
+        raise
 
 async def authenticate_user(email: str, password: str):
-    user = await get_user(email)
-    if not user or not verify_password(password, user["hashed_password"]):
-        return False
-    return user
+    try:
+        user = await get_user(email)
+        if not user or not verify_password(password, user["hashed_password"]):
+            return False
+        return user
+    except asyncio.CancelledError:
+        print("Authentication cancelled")
+        raise
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -86,28 +164,63 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await get_user(email)
-    if user is None:
-        raise credentials_exception
-    return user
+    except asyncio.CancelledError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service is shutting down"
+        )
+    
+    try:
+        user = await get_user(email)
+        if user is None:
+            raise credentials_exception
+        return user
+    except asyncio.CancelledError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service is shutting down"
+        )
 
 @app.post("/api/signup", response_model=UserOut)
 async def signup(user: UserIn):
-    if await users_collection.find_one({"email": user.email}):
-        raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_password = get_password_hash(user.password)
-    await users_collection.insert_one({
-        "name": user.name, "dob": user.dob, "email": user.email, "hashed_password": hashed_password
-    })
-    return {"email": user.email}
+    try:
+        if await users_collection.find_one({"email": user.email}):
+            raise HTTPException(status_code=400, detail="Email already registered")
+        hashed_password = get_password_hash(user.password)
+        await users_collection.insert_one({
+            "name": user.name, "dob": user.dob, "email": user.email, "hashed_password": hashed_password
+        })
+        return {"email": user.email}
+    except HTTPException:
+        raise
+    except asyncio.CancelledError:
+        raise HTTPException(
+            status_code=status.HTTP_408_REQUEST_TIMEOUT,
+            detail="Request was cancelled. Please try again."
+        )
+    except Exception as e:
+        print(f"Signup error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create account. Please try again."
+        )
 
 @app.post("/api/signin", response_model=Token)
 async def signin(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    access_token = create_access_token(data={"sub": user["email"]})
-    return {"access_token": access_token, "token_type": "bearer"}
+    try:
+        user = await authenticate_user(form_data.username, form_data.password)
+        if not user:
+            raise HTTPException(status_code=400, detail="Incorrect email or password")
+        access_token = create_access_token(data={"sub": user["email"]})
+        return {"access_token": access_token, "token_type": "bearer"}
+    except asyncio.CancelledError:
+        print("Signin cancelled")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service is shutting down"
+        )
+    except HTTPException:
+        raise
 
 @app.get("/api/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
@@ -115,6 +228,161 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "name": current_user.get("name", ""),
         "email": current_user.get("email", ""),
         "dob": current_user.get("dob", "")
+    }
+
+@app.get("/api/my-itineraries")
+async def get_my_itineraries(current_user: dict = Depends(get_current_user)):
+    """Fetch all itineraries created by the current user"""
+    try:
+        # Find all itineraries for the current user
+        cursor = itineraries_collection.find(
+            {"user_email": current_user.get("email")},
+            {
+                "_id": 1,
+                "destination": 1,
+                "dates": 1,
+                "travelers": 1,
+                "itinerary_data.destination_name": 1,
+                "itinerary_data.personalized_title": 1,
+                "itinerary_data.hero_image_url": 1,
+                "created_at": 1
+            }
+        ).sort("created_at", -1)  # Sort by newest first
+        
+        itineraries = []
+        async for doc in cursor:
+            itinerary_summary = {
+                "itinerary_id": str(doc["_id"]),
+                "destination": doc.get("destination", "Unknown"),
+                "dates": doc.get("dates", ""),
+                "travelers": doc.get("travelers", ""),
+                "destination_name": doc.get("itinerary_data", {}).get("destination_name", doc.get("destination", "Unknown")),
+                "personalized_title": doc.get("itinerary_data", {}).get("personalized_title", f"Trip to {doc.get('destination', 'Unknown')}"),
+                "hero_image_url": doc.get("itinerary_data", {}).get("hero_image_url", "https://picsum.photos/800/400"),
+                "created_at": doc.get("created_at")
+            }
+            itineraries.append(itinerary_summary)
+        
+        return {"itineraries": itineraries}
+    
+    except asyncio.CancelledError:
+        raise HTTPException(
+            status_code=status.HTTP_408_REQUEST_TIMEOUT,
+            detail="Request was cancelled. Please try again."
+        )
+    except Exception as e:
+        print(f"Error fetching itineraries: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch itineraries"
+        )
+
+@app.get("/api/itinerary/{itinerary_id}")
+async def get_itinerary_details(itinerary_id: str, current_user: dict = Depends(get_current_user)):
+    """Fetch full details of a specific itinerary"""
+    try:
+        # Validate ObjectId format
+        if not ObjectId.is_valid(itinerary_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid itinerary ID format"
+            )
+        
+        # Find the itinerary
+        itinerary = await itineraries_collection.find_one({
+            "_id": ObjectId(itinerary_id),
+            "user_email": current_user.get("email")  # Ensure user can only access their own itineraries
+        })
+        
+        if not itinerary:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Itinerary not found"
+            )
+        
+        # Return the full itinerary data
+        return {
+            "itinerary_id": str(itinerary["_id"]),
+            "user_info": {
+                "email": itinerary.get("user_email"),
+                "name": itinerary.get("user_name")
+            },
+            "trip_parameters": {
+                "destination": itinerary.get("destination"),
+                "dates": itinerary.get("dates"),
+                "travelers": itinerary.get("travelers"),
+                "interests": itinerary.get("interests"),
+                "budget": itinerary.get("budget"),
+                "pace": itinerary.get("pace")
+            },
+            "itinerary": itinerary.get("itinerary_data"),
+            "created_at": itinerary.get("created_at"),
+            "updated_at": itinerary.get("updated_at")
+        }
+    
+    except asyncio.CancelledError:
+        print("Get itinerary details cancelled")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service is shutting down"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error fetching itinerary details: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch itinerary details"
+        )
+
+@app.delete("/api/itinerary/{itinerary_id}")
+async def delete_itinerary(itinerary_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a specific itinerary"""
+    try:
+        # Validate ObjectId format
+        if not ObjectId.is_valid(itinerary_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid itinerary ID format"
+            )
+        
+        # Delete the itinerary (ensure user can only delete their own)
+        result = await itineraries_collection.delete_one({
+            "_id": ObjectId(itinerary_id),
+            "user_email": current_user.get("email")
+        })
+        
+        if result.deleted_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Itinerary not found or you don't have permission to delete it"
+            )
+        
+        return {"message": "Itinerary deleted successfully"}
+    
+    except asyncio.CancelledError:
+        print("Delete itinerary cancelled")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Service is shutting down"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error deleting itinerary: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete itinerary"
+        )
+
+# Health check endpoint for keep-alive
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint to keep the server awake"""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "message": "Server is running"
     }
 
 class Message(BaseModel):
@@ -313,6 +581,47 @@ Generate a complete travel plan in JSON format. Every field must be filled with 
         
         llm_message = "Your premium itinerary is ready. Every detail has been crafted for your journey."
 
+        # Store the itinerary in the database
+        itinerary_document = {
+            "user_email": current_user.get("email"),
+            "user_name": current_user.get("name"),
+            "destination": destination,
+            "dates": dates,
+            "travelers": travelers,
+            "interests": interests,
+            "budget": budget,
+            "pace": pace,
+            "itinerary_data": itinerary_data,
+            "created_at": datetime.datetime.now(datetime.timezone.utc),
+            "updated_at": datetime.datetime.now(datetime.timezone.utc)
+        }
+        
+        # Insert the itinerary into the database with error handling
+        try:
+            result = await itineraries_collection.insert_one(itinerary_document)
+            itinerary_id = str(result.inserted_id)
+            
+            # Add the ID to the response
+            itinerary_data["itinerary_id"] = itinerary_id
+        except asyncio.CancelledError:
+            # Handle cancellation gracefully
+            raise HTTPException(
+                status_code=status.HTTP_408_REQUEST_TIMEOUT,
+                detail="Request was cancelled. Please try again."
+            )
+        except Exception as db_error:
+            print(f"Database error: {db_error}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to save itinerary. Please try again."
+            )
+
+    except asyncio.CancelledError:
+        # Handle cancellation at the top level
+        raise HTTPException(
+            status_code=status.HTTP_408_REQUEST_TIMEOUT,
+            detail="Request was cancelled. Please try again."
+        )
     except Exception as e:
         print(f"Error calling Gemini API or parsing JSON: {e}")
         error_detail = str(e)

@@ -1,7 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { SiInstagram, SiLinkedin, SiYoutube, SiPinterest, SiReddit } from "react-icons/si";
+import Image from "next/image";
+import imageLinks from '../imageLinks';
 import { motion, useScroll, useTransform } from "framer-motion";
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Float, Icosahedron } from '@react-three/drei';
 import { useState, useEffect } from "react";
 
 export default function Home() {
@@ -20,7 +25,40 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 font-sans relative overflow-x-hidden flex flex-col">
+      {/* Enhanced 3D Animated Background */}
+      <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-40">
+        <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
+          <ambientLight intensity={0.8} />
+          <directionalLight position={[10, 10, 5]} intensity={0.9} />
+          <Float speed={1.5} rotationIntensity={1.5} floatIntensity={2}>
+            <Icosahedron args={[2, 1]}>
+              <meshStandardMaterial 
+                color="#6366f1" 
+                wireframe={false} 
+                metalness={0.4} 
+                roughness={0.6}
+                transparent
+                opacity={0.7}
+              />
+            </Icosahedron>
+          </Float>
+          <Float speed={2.2} rotationIntensity={0.8} floatIntensity={1.8}>
+            <mesh position={[4, 2, -2]}>
+              <sphereGeometry args={[1, 32, 32]} />
+              <meshStandardMaterial 
+                color="#f59e0b" 
+                metalness={0.6} 
+                roughness={0.4}
+                transparent
+                opacity={0.5}
+              />
+            </mesh>
+          </Float>
+          <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+        </Canvas>
+      </div>
+
       {/* Mouse Follow Effect */}
       <div 
         className="fixed pointer-events-none z-10 w-6 h-6 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 opacity-20 transition-all duration-300"
@@ -30,6 +68,9 @@ export default function Home() {
           transform: 'scale(1.5)',
         }}
       />
+
+      {/* Google Material Icons CDN */}
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
       
       {/* Enhanced Navbar */}
       <motion.nav 
@@ -43,7 +84,7 @@ export default function Home() {
           whileHover={{ scale: 1.02 }}
         >
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <span className="text-white text-xl">🌍</span>
+            <span className="material-icons text-white text-xl">travel_explore</span>
           </div>
           <span className="text-2xl font-bold text-gray-900 tracking-tight">
             The Modern <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Chanakya</span>
@@ -72,8 +113,10 @@ export default function Home() {
       {/* Enhanced Hero Section */}
       <motion.section
         className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center pt-32 pb-20 px-6 md:px-0 text-center"
+        style={{ marginBottom: '5rem' }}
         initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.9, ease: 'easeOut' }}
       >
         {/* Floating Background Elements */}
@@ -152,7 +195,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-3">
-                <span className="text-white text-2xl">🧭</span>
+                <span className="material-icons text-white text-2xl">explore</span>
               </div>
               <span className="font-bold text-2xl text-gray-900">5,000+</span>
               <span className="text-gray-600 font-medium">Trips Planned</span>
@@ -164,7 +207,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-3">
-                <span className="text-white text-2xl">👥</span>
+                <span className="material-icons text-white text-2xl">groups</span>
               </div>
               <span className="font-bold text-2xl text-gray-900">2,000+</span>
               <span className="text-gray-600 font-medium">Happy Travellers</span>
@@ -176,7 +219,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <div className="w-14 h-14 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mb-3">
-                <span className="text-white text-2xl">⭐</span>
+                <span className="material-icons text-white text-2xl">star_rate</span>
               </div>
               <span className="font-bold text-2xl text-gray-900">4.9/5</span>
               <span className="text-gray-600 font-medium">Avg. Rating</span>
@@ -188,11 +231,19 @@ export default function Home() {
       {/* Enhanced How it Works Section */}
       <motion.section
         className="w-full flex flex-col items-center justify-center py-32 bg-gradient-to-br from-white via-indigo-50 to-purple-50 relative overflow-hidden"
+        style={{ marginBottom: '5rem' }}
         initial={{ opacity: 0, y: 60 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 }}
       >
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23667eea' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='m0 40l40-40h-40z'/%3E%3Cpath d='m40 40v-40h-40z' fill='%23764ba2'/%3E%3C/g%3E%3C/svg%3E")`
+          }}></div>
+        </div>
+
         <motion.h2 
           className="text-5xl md:text-6xl font-extrabold text-gray-900 text-center mb-4"
           initial={{ opacity: 0, y: 30 }}
@@ -223,7 +274,7 @@ export default function Home() {
               className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg"
               whileHover={{ scale: 1.1, rotate: 5 }}
             >
-              <span className="text-white text-3xl">💬</span>
+              <span className="material-icons text-white text-3xl">chat</span>
             </motion.div>
             <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
               Start chatting<br/>with us.
@@ -273,7 +324,7 @@ export default function Home() {
                 whileHover={{ scale: 1.1 }}
               >
                 <div className="w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl border-4 border-white">
-                  <span className="text-white text-4xl">👨‍💻</span>
+                  <Image src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" width={80} height={80} className="w-20 h-20 rounded-full object-cover" unoptimized />
                 </div>
               </motion.div>
 
@@ -290,14 +341,14 @@ export default function Home() {
                   ease: "easeInOut"
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-gradient-to-br from-pink-400 to-red-500 flex items-center justify-center">
-                  <span className="text-white text-2xl">🧘‍♀️</span>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white">
+                  <Image src="https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=facearea&w=80&h=80" alt="Spa" width={64} height={64} className="w-full h-full object-cover" unoptimized />
                 </div>
                 <motion.span 
                   className="mt-3 px-4 py-2 bg-white rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                 >
-                  Wellness & Spa
+                  🧘‍♀️ Wellness & Spa
                 </motion.span>
               </motion.div>
 
@@ -314,14 +365,14 @@ export default function Home() {
                   delay: 0.5
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-gradient-to-br from-orange-400 to-yellow-500 flex items-center justify-center">
-                  <span className="text-white text-2xl">🍽️</span>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white">
+                  <Image src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=facearea&w=80&h=80" alt="Dining" width={64} height={64} className="w-full h-full object-cover" unoptimized />
                 </div>
                 <motion.span 
                   className="mt-3 px-4 py-2 bg-white rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                 >
-                  Fine Dining
+                  🍽️ Fine Dining
                 </motion.span>
               </motion.div>
 
@@ -338,14 +389,14 @@ export default function Home() {
                   delay: 1
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center">
-                  <span className="text-white text-2xl">🏨</span>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white">
+                  <Image src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=facearea&w=80&h=80" alt="Hotels" width={64} height={64} className="w-full h-full object-cover" unoptimized />
                 </div>
                 <motion.span 
                   className="mt-3 px-4 py-2 bg-white rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                 >
-                  Luxury Hotels
+                  🏨 Luxury Hotels
                 </motion.span>
               </motion.div>
 
@@ -362,14 +413,14 @@ export default function Home() {
                   delay: 1.5
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                  <span className="text-white text-2xl">🏄‍♂️</span>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-white">
+                  <Image src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=facearea&w=80&h=80" alt="Water Sports" width={64} height={64} className="w-full h-full object-cover" unoptimized />
                 </div>
                 <motion.span 
                   className="mt-3 px-4 py-2 bg-white rounded-full shadow-lg text-sm font-medium flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                 >
-                  Adventure Sports
+                  🏄‍♂️ Adventure Sports
                 </motion.span>
               </motion.div>
             </div>
@@ -390,11 +441,11 @@ export default function Home() {
               <div className="p-6">
                 <div className="flex items-center px-4 py-3 bg-gray-50 rounded-xl border border-gray-200">
                   <motion.span 
-                    className="text-indigo-500 mr-3 text-xl"
+                    className="material-icons text-indigo-500 mr-3"
                     animate={{ rotate: [0, 360] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   >
-                    ➕
+                    add_circle_outline
                   </motion.span>
                   <motion.span
                     className="flex-1 text-gray-500 text-base"
@@ -408,7 +459,7 @@ export default function Home() {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
-                    <span className="text-lg">📤</span>
+                    <span className="material-icons text-lg">send</span>
                   </motion.button>
                 </div>
               </div>
@@ -429,6 +480,17 @@ export default function Home() {
         
         .backdrop-blur-lg {
           backdrop-filter: blur(16px);
+        }
+        
+        @keyframes shimmer {
+          0% { background-position: -200px 0; }
+          100% { background-position: calc(200px + 100%) 0; }
+        }
+        
+        .shimmer {
+          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background-size: 200px 100%;
+          animation: shimmer 1.5s infinite;
         }
       `}</style>
     </div>

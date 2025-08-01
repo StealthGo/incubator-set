@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+motor
+pymongo
+passlib[bcrypt]
+python-jose[cryptography]
+python-dotenv
+google-genai
+httpx
