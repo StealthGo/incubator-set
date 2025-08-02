@@ -12,23 +12,46 @@ import { TagBadge } from "@/components/ui/badge";
 // --- Configuration ---
 const API_BASE_URL = "http://localhost:8000"; // Your backend URL
 
-const systemQuestions = [
-  { key: "destination", text: "Where would you like to go for your next trip?" },
-  { key: "dates", text: "What dates are you planning for?" },
-  { key: "travelers", text: "Who is travelling with you?" },
-  { key: "interests", text: "What are your primary interests for this trip?" },
-  { key: "budget", text: "What is your approximate budget (Low, Medium, High)?" },
-  { key: "pace", text: "What pace would you prefer (Relaxed, Balanced, or Packed)?" },
-  { key: "aboutYou", text: "Anything else you'd like to share?" },
-];
+// Dynamic conversation system - now LLM handles all interactions
+const systemPrompt = `You are an enthusiastic, friendly travel planning assistant named "The Modern Chanakya". Your goal is to have a natural conversation with users to gather all the information needed to create their perfect itinerary.
 
-const quickReplies: Record<string, string[]> = {
-  destination: ["Delhi", "Mumbai", "Leh", "Goa", "Jaipur", "Kerala"],
-  dates: ["Choose Date", "Flexible"],
-  travelers: ["Just me", "Friends", "Family", "Big group"],
-  interests: ["Adventure", "Food", "Culture", "Nature", "Relaxation", "Nightlife"],
-  budget: ["Low", "Medium", "High"],
-  pace: ["Relaxed", "Balanced", "Packed"],
+CONVERSATION FLOW:
+1. Start with a warm, personalized greeting asking about their destination
+2. Naturally follow up based on their responses to gather:
+   - Destination (where they want to go)
+   - Dates (when they're traveling) 
+   - Travelers (who's going - solo, couple, family, friends, etc.)
+   - Interests (what they want to do - adventure, culture, food, relaxation, etc.)
+   - Budget (budget-friendly, mid-range, luxury)
+   - Pace (relaxed, balanced, action-packed)
+   - Special preferences (dietary needs, accessibility, must-see items, etc.)
+
+PERSONALITY:
+- Be enthusiastic and use emojis naturally
+- Ask follow-up questions that show you're listening
+- Reference their previous answers to create connection
+- Make them excited about their trip
+- Be conversational, not robotic
+- Use phrases like "That sounds amazing!", "I'm getting excited just thinking about it!", etc.
+
+RULES:
+- Only ask ONE question at a time
+- Keep responses concise but enthusiastic  
+- Always acknowledge their previous answer before asking the next question
+- Don't rush - let the conversation flow naturally
+- When you have gathered all essential information, enthusiastically summarize what you understand and ask if they're ready to generate their itinerary
+- If they say something unclear, ask for clarification in a friendly way
+
+Current conversation context will be provided. Respond as the next message in the conversation.`;
+
+// Quick replies for different conversation stages
+const smartQuickReplies: Record<string, string[]> = {
+  destination: ["🇮🇳 India", "🏔️ Mountains", "🏖️ Beach Paradise", "🏛️ Historic Cities", "🌸 Japan", "🗼 Europe"],
+  dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "🎯 Specific Season"],
+  travelers: ["✈️ Just me", "👫 My partner", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends group", "👥 Big group (5+)"],
+  interests: ["🎿 Adventure", "🍜 Food & Culture", "🎭 Arts & History", "🌿 Nature", "🧘‍♀️ Wellness", "🌃 Nightlife"],
+  budget: ["💸 Budget-friendly", "💰 Mid-range", "💎 Luxury", "🎯 Best value"],
+  pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Action-packed"],
 };
 
 // --- Helper Functions & Components ---
@@ -175,14 +198,14 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
 
 export default function PreferencesPage() {
   const [messages, setMessages] = useState([
-    { sender: "system", text: systemQuestions[0].text },
+    { sender: "system", text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" },
   ]);
   const [input, setInput] = useState("");
   const [itinerary, setItinerary] = useState<Record<string, any> | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showFullItinerary, setShowFullItinerary] = useState(false);
-  const [step, setStep] = useState(0);
   const [showOptions, setShowOptions] = useState(false);
+  const [isConversing, setIsConversing] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -190,6 +213,10 @@ export default function PreferencesPage() {
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Store conversation state
+  const [conversationComplete, setConversationComplete] = useState(false);
+  const [currentQuestionType, setCurrentQuestionType] = useState("destination");
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -233,6 +260,7 @@ export default function PreferencesPage() {
     checkUserStatus();
   }, []);
 
+  // LLM-powered conversation handler
   const handleSend = async (e?: React.FormEvent, value?: string) => {
     if (e) e.preventDefault();
     
@@ -247,41 +275,99 @@ export default function PreferencesPage() {
 
     if (itinerary) {
         setItinerary(null);
+        setConversationComplete(false);
     }
 
-    const key = systemQuestions[step]?.key;
-    if (key === 'dates' && !itinerary) {
-        if(currentInput === "Choose Date") {
-            setShowDatePicker(true);
-            return;
-        }
-        if(currentInput === "Flexible") {
-            const randomDates = getRandomFlexibleDates();
-            setMessages((msgs) => [...msgs, { sender: "user", text: randomDates }]);
-            setInput("");
-             if (step < systemQuestions.length - 1) {
-                setTimeout(() => {
-                    setMessages((msgs) => [...msgs, { sender: "system", text: systemQuestions[step + 1].text }]);
-                    setStep(step + 1);
-                }, 400);
-            } else {
-                setShowOptions(true);
-            }
-            return;
-        }
+    // Handle date picker special case
+    if (currentInput === "📅 Pick Dates") {
+        setShowDatePicker(true);
+        return;
+    }
+    
+    if (currentInput === "🤷‍♀️ I'm Flexible") {
+        const randomDates = getRandomFlexibleDates();
+        setMessages((msgs) => [...msgs, { sender: "user", text: randomDates }]);
+        setInput("");
+        
+        // Let LLM handle the response to flexible dates
+        await getLLMResponse([...messages, { sender: "user", text: randomDates }]);
+        return;
     }
     
     setMessages((msgs) => [...msgs, { sender: "user", text: currentInput }]);
     setInput("");
 
-    if (step < systemQuestions.length - 1) {
-        setTimeout(() => {
-          setMessages((msgs) => [...msgs, { sender: "system", text: systemQuestions[step + 1].text }]);
-          setStep(step + 1);
-        }, 400);
-    } else {
-        setShowOptions(true);
+    // Get LLM response to continue conversation
+    await getLLMResponse([...messages, { sender: "user", text: currentInput }]);
+  };
+
+  // Function to get intelligent responses from LLM
+  const getLLMResponse = async (conversationHistory: Array<{sender: string, text: string}>) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setShowSignInModal(true);
+      return;
     }
+
+    setIsConversing(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat-conversation`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          system_prompt: systemPrompt,
+          conversation_history: conversationHistory,
+          user_name: user?.name
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          setShowSignInModal(true);
+          return;
+        }
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Add LLM response to conversation
+      setMessages((msgs) => [...msgs, { sender: "system", text: data.response }]);
+      
+      // Check if conversation is ready for itinerary generation
+      if (data.ready_for_itinerary || data.response.toLowerCase().includes("ready to generate") || data.response.toLowerCase().includes("work my magic")) {
+        setConversationComplete(true);
+        setShowOptions(true);
+      }
+
+    } catch (error) {
+      console.error("Error getting LLM response:", error);
+      setMessages((msgs) => [...msgs, { 
+        sender: "system", 
+        text: "I'm having trouble responding right now. Could you try again? 😅" 
+      }]);
+    } finally {
+      setIsConversing(false);
+    }
+  };
+
+  // Determine current question type for quick replies
+  const getCurrentQuestionType = () => {
+    const lastMessage = messages[messages.length - 1]?.text.toLowerCase() || "";
+    
+    if (lastMessage.includes("where") && lastMessage.includes("go")) return "destination";
+    if (lastMessage.includes("when") || lastMessage.includes("date")) return "dates";
+    if (lastMessage.includes("who") || lastMessage.includes("travel")) return "travelers";
+    if (lastMessage.includes("interest") || lastMessage.includes("want to do")) return "interests";
+    if (lastMessage.includes("budget") || lastMessage.includes("cost")) return "budget";
+    if (lastMessage.includes("pace") || lastMessage.includes("rhythm")) return "pace";
+    
+    return "destination";
   };
 
   const handleGenerate = async (followUpPrompt?: string) => {
@@ -725,8 +811,9 @@ export default function PreferencesPage() {
         <div className="flex items-center gap-2">
           <button onClick={() => { 
             setItinerary(null); 
-            setMessages([{ sender: 'system', text: systemQuestions[0].text }]); 
-            setStep(0); 
+            setMessages([{ sender: 'system', text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" }]); 
+            setConversationComplete(false);
+            setCurrentQuestionType("destination");
             setShowOptions(false);
             setShowSignInModal(false);
           }} className="px-5 py-2 rounded-full bg-orange-500 text-white font-semibold shadow hover:bg-orange-600 transition-all text-sm">
@@ -809,9 +896,9 @@ export default function PreferencesPage() {
                 </div>
               </div>
             )}
-            {!itinerary && !showOptions && quickReplies[systemQuestions[step]?.key]?.length > 0 && (
+            {!itinerary && !showOptions && !conversationComplete && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
-                {quickReplies[systemQuestions[step]?.key].map((option) => (
+                {smartQuickReplies[getCurrentQuestionType()].map((option: string) => (
                   <button 
                     key={option} 
                     type="button" 
@@ -835,24 +922,32 @@ export default function PreferencesPage() {
                 placeholder={
                   !isLoggedIn 
                     ? "Please sign in to start planning your trip..." 
+                    : isConversing
+                      ? "I'm thinking of the perfect response..."
+                    : conversationComplete
+                      ? "Ready to generate your itinerary! Hit the button below."
                     : itinerary 
                       ? "Any changes? Type here..." 
                       : "Type your answer..."
                 } 
                 value={input} 
                 onChange={e => setInput(e.target.value)} 
-                disabled={isGenerating || !isLoggedIn} 
+                disabled={isGenerating || !isLoggedIn || isConversing} 
               />
               <button 
                 type="submit" 
                 className={`p-2 rounded-full font-semibold shadow transition-all ${
-                  isLoggedIn 
+                  isLoggedIn && !isConversing
                     ? 'bg-orange-500 text-white hover:bg-orange-600' 
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`} 
-                disabled={isGenerating || !isLoggedIn}
+                disabled={isGenerating || !isLoggedIn || isConversing}
               >
-                <Icon name="send" />
+                {isConversing ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <Icon name="send" />
+                )}
               </button>
             </form>
              {showOptions && (
@@ -877,9 +972,32 @@ export default function PreferencesPage() {
                   }`} 
                   disabled={isGenerating || !isLoggedIn}
                 >
-                    {isGenerating ? "Generating..." : "Generate Itinerary"}
+                  {isGenerating ? "Generating..." : "🚀 Generate My Itinerary"}
                 </button>
                 </div>
+            )}
+
+            {conversationComplete && !showOptions && (
+              <div className="mt-4">
+                <button 
+                  onClick={() => handleGenerate()} 
+                  className={`w-full px-6 py-3 rounded-full font-bold shadow-lg transition-all text-lg ${
+                    isLoggedIn 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 transform hover:scale-105' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`} 
+                  disabled={isGenerating || !isLoggedIn}
+                >
+                  {isGenerating ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Creating your perfect itinerary...
+                    </div>
+                  ) : (
+                    "🎉 Generate My Perfect Itinerary!"
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </section>
@@ -911,8 +1029,9 @@ export default function PreferencesPage() {
           onClose={() => setShowSignInModal(false)} 
           onSuccess={() => {
             // Start the conversation after successful sign in
-            setMessages([{ sender: 'system', text: systemQuestions[0].text }]);
-            setStep(0);
+            setMessages([{ sender: 'system', text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" }]);
+            setConversationComplete(false);
+            setCurrentQuestionType("destination");
             setShowOptions(false);
             setItinerary(null);
           }} 

@@ -188,7 +188,14 @@ async def signup(user: UserIn):
             raise HTTPException(status_code=400, detail="Email already registered")
         hashed_password = get_password_hash(user.password)
         await users_collection.insert_one({
-            "name": user.name, "dob": user.dob, "email": user.email, "hashed_password": hashed_password
+            "name": user.name, 
+            "dob": user.dob, 
+            "email": user.email, 
+            "hashed_password": hashed_password,
+            "subscription_status": "free",  # free, premium
+            "itineraries_created": 0,
+            "free_itinerary_used": False,
+            "created_at": datetime.datetime.now(datetime.timezone.utc)
         })
         return {"email": user.email}
     except HTTPException:
@@ -227,7 +234,10 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return {
         "name": current_user.get("name", ""),
         "email": current_user.get("email", ""),
-        "dob": current_user.get("dob", "")
+        "dob": current_user.get("dob", ""),
+        "subscription_status": current_user.get("subscription_status", "free"),
+        "itineraries_created": current_user.get("itineraries_created", 0),
+        "free_itinerary_used": current_user.get("free_itinerary_used", False)
     }
 
 @app.get("/api/my-itineraries")
@@ -389,9 +399,80 @@ class Message(BaseModel):
     sender: str
     text: str
 
+class ChatConversationRequest(BaseModel):
+    system_prompt: str
+    conversation_history: List[Message]
+    user_name: Optional[str] = None
+
 class ItineraryRequest(BaseModel):
     messages: List[Message]
     current_itinerary: Optional[dict] = None
+
+@app.post("/api/chat-conversation")
+async def chat_conversation(
+    request: ChatConversationRequest, 
+    current_user: dict = Depends(get_current_user)
+):
+    """Handle conversational AI for trip planning"""
+    try:
+        # Use Gemini for conversational responses
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        
+        # Convert conversation history to Gemini format
+        conversation_text = ""
+        for msg in request.conversation_history:
+            if msg.sender == "user":
+                conversation_text += f"User: {msg.text}\n"
+            elif msg.sender == "system":
+                conversation_text += f"Assistant: {msg.text}\n"
+        
+        # Create the prompt for conversational response
+        prompt = f"""
+{request.system_prompt}
+
+CONVERSATION SO FAR:
+{conversation_text}
+
+USER NAME: {request.user_name or current_user.get('name', 'there')}
+
+Based on the conversation above, respond as "The Modern Chanakya" with the next appropriate message. 
+- Be enthusiastic and use emojis naturally
+- Ask ONE follow-up question that builds on what they've shared
+- Reference their previous answers to show you're listening
+- If you have enough information to create an itinerary (destination, rough dates, and some preferences), indicate that you're ready to generate their itinerary
+- Keep responses conversational and friendly
+
+IMPORTANT: Respond as if you're continuing this conversation naturally. Do not repeat information already covered.
+"""
+
+        # Generate response using Gemini
+        response = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=300,
+            )
+        )
+        
+        ai_response = response.text.strip()
+        
+        # Check if we have enough information to suggest itinerary generation
+        conversation_length = len(request.conversation_history)
+        has_destination = any("where" in msg.text.lower() for msg in request.conversation_history if msg.sender == "system")
+        has_enough_info = conversation_length >= 6 or "ready to generate" in ai_response.lower() or "work my magic" in ai_response.lower()
+        
+        return {
+            "response": ai_response,
+            "ready_for_itinerary": has_enough_info
+        }
+        
+    except Exception as e:
+        print(f"Error in chat conversation: {e}")
+        return {
+            "response": "I'm having a moment of wanderlust distraction! 😅 Could you repeat that? I want to make sure I get every detail right for your perfect trip!",
+            "ready_for_itinerary": False
+        }
 
 # Initialize Gemini client
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -459,7 +540,7 @@ Generate a complete travel plan in JSON format. Every field must be filled with 
 
 **REQUIRED JSON STRUCTURE:**
 {{
-  "hero_image_url": "A stunning, high-quality direct image URL for the destination (e.g., 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1600&h=900&fit=crop' or use Picsum for reliable placeholder: 'https://picsum.photos/1600/900').",
+  "hero_image_url": "A stunning, high-quality direct image URL for the destination (e.g., 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1600&h=900&fit=crop').",
   "destination_name": "{destination}",
   "personalized_title": "Create a catchy, personalized title like '{user_name}'s Unforgettable Goa Getaway'.",
   "journey_details": {{
