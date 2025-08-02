@@ -498,12 +498,13 @@ Generate a complete travel plan in JSON format. Every field must be filled with 
           "icon": "A relevant Material Icons name (e.g., 'local_cafe', 'storefront').",
           "image_url": "A direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=800&h=600&fit=crop' for placeholder).",
           "google_maps_link": "A direct Google Maps search URL for the location.",
-          "booking_link": "A Zomato link for restaurants or MMT for activities, if applicable, otherwise null."
+          "booking_link": "A Zomato link for restaurants or MMT for activities, if applicable, otherwise null.",
+          "tags": ["Adventure", "Cultural", "Heritage", "Nature", "Food", "Shopping", "Religious", "Nightlife", "Family-Friendly", "Budget", "Luxury", "Photography", "Historical"]
         }}
       ],
       "meals": {{
-          "lunch": {{ "dish": "Famous Local Dish", "restaurant": "Recommended Restaurant", "description": "A short, enticing description.", "image_url": "Direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=400&h=300&fit=crop').", "zomato_link": "Direct Zomato link for the restaurant." }},
-          "dinner": {{ "dish": "Famous Local Dish", "restaurant": "Recommended Restaurant", "description": "A short, enticing description.", "image_url": "Direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=400&h=300&fit=crop' or 'https://picsum.photos/400/300').", "zomato_link": "Direct Zomato link for the restaurant." }}
+          "lunch": {{ "dish": "Famous Local Dish", "restaurant": "Recommended Restaurant", "description": "A short, enticing description.", "image_url": "Direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=400&h=300&fit=crop').", "zomato_link": "Direct Zomato link for the restaurant.", "tags": ["Vegetarian", "Vegan", "Non-Vegetarian", "Street Food", "Fine Dining", "Local Specialty", "Spicy", "Sweet", "Traditional", "Fusion", "Budget", "Premium"] }},
+          "dinner": {{ "dish": "Famous Local Dish", "restaurant": "Recommended Restaurant", "description": "A short, enticing description.", "image_url": "Direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=400&h=300&fit=crop' or 'https://picsum.photos/400/300').", "zomato_link": "Direct Zomato link for the restaurant.", "tags": ["Vegetarian", "Vegan", "Non-Vegetarian", "Street Food", "Fine Dining", "Local Specialty", "Spicy", "Sweet", "Traditional", "Fusion", "Budget", "Premium"] }}
       }}
     }}
   ],
@@ -511,10 +512,10 @@ Generate a complete travel plan in JSON format. Every field must be filled with 
       {{ "name": "Gem Name", "description": "What it is.", "why_special": "Why it's a hidden gem.", "search_link": "Google Maps search link." }}
   ],
   "signature_experiences": [
-      {{ "name": "Experience Name", "description": "Short description.", "why_local_loves_it": "Why locals love this.", "estimated_cost": "Cost range in INR.", "booking_link": "Direct MakeMyTrip activity booking URL." }}
+      {{ "name": "Experience Name", "description": "Short description.", "why_local_loves_it": "Why locals love this.", "estimated_cost": "Cost range in INR.", "booking_link": "Direct MakeMyTrip activity booking URL.", "tags": ["Adventure", "Cultural", "Heritage", "Nature", "Food", "Shopping", "Religious", "Nightlife", "Family-Friendly", "Budget", "Luxury", "Photography", "Historical", "Wellness", "Sports"] }}
   ],
   "hyperlocal_food_guide": [
-      {{ "dish": "Dish Name", "description": "Description.", "where_to_find": "Specific place to eat.", "local_tip": "Insider tip.", "search_link": "Zomato search link." }}
+      {{ "dish": "Dish Name", "description": "Description.", "where_to_find": "Specific place to eat.", "local_tip": "Insider tip.", "search_link": "Zomato search link.", "tags": ["Vegetarian", "Vegan", "Non-Vegetarian", "Street Food", "Fine Dining", "Local Specialty", "Spicy", "Sweet", "Traditional", "Fusion", "Budget", "Premium"] }}
   ],
   "shopping_insider_guide": [
       {{ "item": "Item to buy", "where_to_buy": "Specific store/market.", "local_tip": "Bargaining tips etc.", "search_link": "Google search link." }}
