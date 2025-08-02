@@ -706,7 +706,12 @@ const ItineraryDetails = () => {
               }}
               variants={floatingAnimation}
               animate="animate"
-              transition={{ delay: i * 0.2 }}
+              transition={{ 
+                delay: i * 0.2,
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             />
           ))}
         </div>
