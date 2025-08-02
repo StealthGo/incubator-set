@@ -116,7 +116,8 @@ const mockItineraryData = {
         description: "Buttery pastry with chocolate",
         where_to_find: "Local boulangeries",
         local_tip: "Best enjoyed warm in the morning",
-        search_link: "https://example.com/bakery"
+        search_link: "https://example.com/bakery",
+        tags: ["Sweet", "Traditional", "Budget", "Local Specialty"]
       }
     ],
     shopping_insider_guide: [
