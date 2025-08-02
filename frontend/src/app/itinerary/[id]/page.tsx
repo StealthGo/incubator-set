@@ -11,22 +11,26 @@ import {
 } from "lucide-react";
 
 // Simplified Button component for the layout
-const Button = ({ children, onClick, variant = "default", size = "default", className = "", ...props }: any) => {
+const Button = ({ children, onClick, variant = "default", size = "default", className = "", asChild, ...props }: any) => {
   const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50";
-  const variants = {
+  const variants: Record<string, string> = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
     outline: "border border-gray-300 bg-white hover:bg-gray-50",
     ghost: "hover:bg-gray-100"
   };
-  const sizes = {
+  const sizes: Record<string, string> = {
     default: "h-10 px-4 py-2",
     sm: "h-8 px-3 text-xs",
     lg: "h-12 px-8"
   };
   
+  if (asChild) {
+    return children;
+  }
+  
   return (
     <button 
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`${baseClasses} ${variants[variant] || variants.default} ${sizes[size] || sizes.default} ${className}`}
       onClick={onClick}
       {...props}
     >
@@ -44,14 +48,63 @@ const Card = ({ children, className = "", ...props }: any) => (
 
 // Simplified Badge component
 const Badge = ({ children, variant = "default", className = "", ...props }: any) => {
-  const variants = {
+  const variants: Record<string, string> = {
     default: "bg-blue-100 text-blue-800",
     outline: "border border-gray-300 bg-white"
   };
   
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${variants[variant]} ${className}`} {...props}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${variants[variant] || variants.default} ${className}`} {...props}>
       {children}
+    </span>
+  );
+};
+
+// Tag Badge component for food and activity tags
+const TagBadge = ({ tag, type = "activity" }: { tag: string; type?: "activity" | "food" }) => {
+  const getTagStyle = (tag: string, type: string) => {
+    const foodColors: Record<string, string> = {
+      "Vegetarian": "bg-green-100 text-green-800",
+      "Vegan": "bg-green-200 text-green-900",
+      "Non-Vegetarian": "bg-red-100 text-red-800",
+      "Street Food": "bg-orange-100 text-orange-800",
+      "Fine Dining": "bg-purple-100 text-purple-800",
+      "Local Specialty": "bg-yellow-100 text-yellow-800",
+      "Spicy": "bg-red-200 text-red-900",
+      "Sweet": "bg-pink-100 text-pink-800",
+      "Traditional": "bg-amber-100 text-amber-800",
+      "Fusion": "bg-indigo-100 text-indigo-800",
+      "Budget": "bg-green-100 text-green-700",
+      "Premium": "bg-purple-100 text-purple-700"
+    };
+
+    const activityColors: Record<string, string> = {
+      "Adventure": "bg-red-100 text-red-800",
+      "Cultural": "bg-blue-100 text-blue-800",
+      "Heritage": "bg-amber-100 text-amber-800",
+      "Nature": "bg-green-100 text-green-800",
+      "Food": "bg-orange-100 text-orange-800",
+      "Shopping": "bg-pink-100 text-pink-800",
+      "Religious": "bg-purple-100 text-purple-800",
+      "Nightlife": "bg-indigo-100 text-indigo-800",
+      "Family-Friendly": "bg-cyan-100 text-cyan-800",
+      "Budget": "bg-green-100 text-green-700",
+      "Luxury": "bg-purple-100 text-purple-700",
+      "Photography": "bg-gray-100 text-gray-800",
+      "Historical": "bg-amber-100 text-amber-800",
+      "Wellness": "bg-teal-100 text-teal-800",
+      "Sports": "bg-blue-100 text-blue-800"
+    };
+
+    if (type === "food") {
+      return foodColors[tag] || "bg-gray-100 text-gray-800";
+    }
+    return activityColors[tag] || "bg-gray-100 text-gray-800";
+  };
+
+  return (
+    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTagStyle(tag, type)}`}>
+      {tag}
     </span>
   );
 };
@@ -68,10 +121,10 @@ interface FullItinerary {
         journey_details: { title: string; options: Array<{ mode: string; duration: string; description: string; estimated_cost: string; booking_link: string; }> };
         accommodation_suggestions: Array<{ name: string; type: string; icon: string; description: string; estimated_cost: string; booking_link: string; image_url: string; }>;
         trip_overview: { destination_insights: string; weather_during_visit: string; seasonal_context: string; cultural_context: string; local_customs_to_know: string[]; estimated_total_cost: string; };
-        daily_itinerary: Array<{ date: string; theme: string; activities: Array<{ time: string; activity: string; location: string; description: string; local_guide_tip: string; icon: string; image_url: string; Maps_link: string; booking_link: string | null; }>; meals: { lunch: { dish: string; restaurant: string; description: string; image_url: string; zomato_link: string; }; dinner: { dish: string; restaurant: string; description: string; image_url: string; zomato_link: string; }; }; }>;
+        daily_itinerary: Array<{ date: string; theme: string; activities: Array<{ time: string; activity: string; location: string; description: string; local_guide_tip: string; icon: string; image_url: string; Maps_link: string; booking_link: string | null; tags: string[]; }>; meals: { lunch: { dish: string; restaurant: string; description: string; image_url: string; zomato_link: string; tags: string[]; }; dinner: { dish: string; restaurant: string; description: string; image_url: string; zomato_link: string; tags: string[]; }; }; }>;
         hidden_gems: Array<{ name: string; description: string; why_special: string; search_link: string; }>;
-        signature_experiences: Array<{ name: string; description: string; why_local_loves_it: string; estimated_cost: string; booking_link: string; }>;
-        hyperlocal_food_guide: Array<{ dish: string; description: string; where_to_find: string; local_tip: string; search_link: string; }>;
+        signature_experiences: Array<{ name: string; description: string; why_local_loves_it: string; estimated_cost: string; booking_link: string; tags: string[]; }>;
+        hyperlocal_food_guide: Array<{ dish: string; description: string; where_to_find: string; local_tip: string; search_link: string; tags: string[]; }>;
         shopping_insider_guide: Array<{ item: string; where_to_buy: string; local_tip: string; search_link: string; }>;
         practical_local_wisdom: { safety_tips: string; health_and_wellness: string; connectivity: string; transport: string; };
     };
@@ -412,6 +465,19 @@ const ItineraryDetails = () => {
                               <MapPin className="w-4 h-4 mr-1" />
                               {activity.location}
                             </p>
+                            
+                            {/* Activity Tags */}
+                            {activity.tags && activity.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {activity.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                  <TagBadge key={tagIndex} tag={tag} type="activity" />
+                                ))}
+                                {activity.tags.length > 3 && (
+                                  <span className="text-xs text-gray-500">+{activity.tags.length - 3} more</span>
+                                )}
+                              </div>
+                            )}
+                            
                             <p className="text-gray-700 mb-3">{activity.description}</p>
                             
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
@@ -451,6 +517,19 @@ const ItineraryDetails = () => {
                       </h5>
                       <p className="font-medium">{day.meals.lunch.dish}</p>
                       <p className="text-sm text-gray-600">{day.meals.lunch.restaurant}</p>
+                      
+                      {/* Lunch Tags */}
+                      {day.meals.lunch.tags && day.meals.lunch.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {day.meals.lunch.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                            <TagBadge key={tagIndex} tag={tag} type="food" />
+                          ))}
+                          {day.meals.lunch.tags.length > 3 && (
+                            <span className="text-xs text-gray-500">+{day.meals.lunch.tags.length - 3} more</span>
+                          )}
+                        </div>
+                      )}
+                      
                       <p className="text-xs text-gray-500 mt-1">{day.meals.lunch.description}</p>
                       {day.meals.lunch.zomato_link && (
                         <Button asChild size="sm" variant="outline" className="mt-2 text-xs">
@@ -467,6 +546,19 @@ const ItineraryDetails = () => {
                       </h5>
                       <p className="font-medium">{day.meals.dinner.dish}</p>
                       <p className="text-sm text-gray-600">{day.meals.dinner.restaurant}</p>
+                      
+                      {/* Dinner Tags */}
+                      {day.meals.dinner.tags && day.meals.dinner.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {day.meals.dinner.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                            <TagBadge key={tagIndex} tag={tag} type="food" />
+                          ))}
+                          {day.meals.dinner.tags.length > 3 && (
+                            <span className="text-xs text-gray-500">+{day.meals.dinner.tags.length - 3} more</span>
+                          )}
+                        </div>
+                      )}
+                      
                       <p className="text-xs text-gray-500 mt-1">{day.meals.dinner.description}</p>
                       {day.meals.dinner.zomato_link && (
                         <Button asChild size="sm" variant="outline" className="mt-2 text-xs">
@@ -516,6 +608,19 @@ const ItineraryDetails = () => {
                 {signature_experiences.map((exp, index) => (
                   <div key={index} className="border-l-4 border-green-400 pl-4 py-2">
                     <h3 className="font-medium text-gray-900">{exp.name}</h3>
+                    
+                    {/* Experience Tags */}
+                    {exp.tags && exp.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 my-2">
+                        {exp.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="activity" />
+                        ))}
+                        {exp.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{exp.tags.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                    
                     <p className="text-sm text-gray-700 mb-1">{exp.description}</p>
                     <p className="text-sm text-green-700 italic mb-1">{exp.why_local_loves_it}</p>
                     <div className="flex justify-between items-center">
@@ -545,6 +650,19 @@ const ItineraryDetails = () => {
                 {hyperlocal_food_guide.map((food, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <h3 className="font-medium text-gray-900">{food.dish}</h3>
+                    
+                    {/* Food Tags */}
+                    {food.tags && food.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 my-2">
+                        {food.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="food" />
+                        ))}
+                        {food.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{food.tags.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                    
                     <p className="text-sm text-gray-700 mb-2">{food.description}</p>
                     <p className="text-sm text-gray-600 mb-1">
                       <strong>Where to find:</strong> {food.where_to_find}
