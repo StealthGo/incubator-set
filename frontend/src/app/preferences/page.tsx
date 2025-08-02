@@ -211,12 +211,23 @@ export default function PreferencesPage() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ 
+    name: string; 
+    email: string; 
+    subscription_status?: string;
+    free_itinerary_used?: boolean;
+    itineraries_created?: number;
+  } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   // Store conversation state
   const [conversationComplete, setConversationComplete] = useState(false);
   const [currentQuestionType, setCurrentQuestionType] = useState("destination");
+
+  // Check if user is locked due to subscription limits
+  const isUserLocked = () => {
+    return user?.subscription_status === "free" && user?.free_itinerary_used === true;
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -267,6 +278,12 @@ export default function PreferencesPage() {
     // Check if user is logged in before allowing any prompts
     if (!isLoggedIn) {
       setShowSignInModal(true);
+      return;
+    }
+    
+    // Check if user is locked due to subscription limits
+    if (isUserLocked()) {
+      setShowSubscriptionPopup(true);
       return;
     }
     
@@ -408,6 +425,17 @@ export default function PreferencesPage() {
           setIsGenerating(false);
           return;
         }
+        if (res.status === 403) {
+          // Subscription limit reached
+          const errorData = await res.json();
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "llm", text: errorData.detail || "You have reached your free itinerary limit. Please upgrade to continue creating itineraries." },
+          ]);
+          setIsGenerating(false);
+          setShowSubscriptionPopup(true);
+          return;
+        }
         if (res.status === 429) {
           // Quota exceeded
           setMessages((msgs) => [
@@ -427,17 +455,13 @@ export default function PreferencesPage() {
         { sender: "llm", text: data.llm_message || "Your itinerary is ready! Check it out on the right." },
       ]);
       
-      // Show subscription popup after itinerary is generated (only if not shown before or cooldown expired)
-      const hasSeenSubscriptionPopup = localStorage.getItem('hasSeenSubscriptionPopup');
-      const cooldownExpiry = localStorage.getItem('subscriptionPopupCooldown');
-      const now = new Date();
-      const isCooldownActive = cooldownExpiry && new Date(cooldownExpiry) > now;
-      
-      if (!hasSeenSubscriptionPopup && !isCooldownActive) {
+      // Show subscription popup for free users after first itinerary
+      if (user?.subscription_status === "free" || !user?.subscription_status) {
         setTimeout(() => {
           setShowSubscriptionPopup(true);
-          localStorage.setItem('hasSeenSubscriptionPopup', 'true');
-        }, 2000); // Show popup after 2 seconds
+          // Update user state to reflect they've used their free itinerary
+          setUser(prev => prev ? { ...prev, free_itinerary_used: true } : null);
+        }, 3000); // Show popup after 3 seconds to let them see the itinerary
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -810,14 +834,22 @@ export default function PreferencesPage() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => { 
+            if (isUserLocked()) {
+              setShowSubscriptionPopup(true);
+              return;
+            }
             setItinerary(null); 
             setMessages([{ sender: 'system', text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" }]); 
             setConversationComplete(false);
             setCurrentQuestionType("destination");
             setShowOptions(false);
             setShowSignInModal(false);
-          }} className="px-5 py-2 rounded-full bg-orange-500 text-white font-semibold shadow hover:bg-orange-600 transition-all text-sm">
-              New Trip
+          }} className={`px-5 py-2 rounded-full font-semibold shadow transition-all text-sm ${
+            isUserLocked() 
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-orange-500 text-white hover:bg-orange-600'
+          }`}>
+              {isUserLocked() ? '🔒 Upgrade for New Trips' : 'New Trip'}
           </button>
           
           {isLoggedIn && user ? (
@@ -896,19 +928,19 @@ export default function PreferencesPage() {
                 </div>
               </div>
             )}
-            {!itinerary && !showOptions && !conversationComplete && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
+            {!itinerary && !showOptions && !conversationComplete && !isUserLocked() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {smartQuickReplies[getCurrentQuestionType()].map((option: string) => (
                   <button 
                     key={option} 
                     type="button" 
                     className={`px-4 py-1 rounded-full border transition text-sm font-semibold ${
-                      isLoggedIn 
+                      isLoggedIn && !isUserLocked()
                         ? 'bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200' 
                         : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
                     }`} 
                     onClick={() => handleSend(undefined, option)}
-                    disabled={!isLoggedIn}
+                    disabled={!isLoggedIn || isUserLocked()}
                   >
                     {option}
                   </button>
@@ -922,6 +954,8 @@ export default function PreferencesPage() {
                 placeholder={
                   !isLoggedIn 
                     ? "Please sign in to start planning your trip..." 
+                    : isUserLocked()
+                      ? "🔒 Upgrade to premium to create more itineraries..."
                     : isConversing
                       ? "I'm thinking of the perfect response..."
                     : conversationComplete
@@ -932,16 +966,16 @@ export default function PreferencesPage() {
                 } 
                 value={input} 
                 onChange={e => setInput(e.target.value)} 
-                disabled={isGenerating || !isLoggedIn || isConversing} 
+                disabled={isGenerating || !isLoggedIn || isConversing || isUserLocked()} 
               />
               <button 
                 type="submit" 
                 className={`p-2 rounded-full font-semibold shadow transition-all ${
-                  isLoggedIn && !isConversing
+                  isLoggedIn && !isConversing && !isUserLocked()
                     ? 'bg-orange-500 text-white hover:bg-orange-600' 
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`} 
-                disabled={isGenerating || !isLoggedIn || isConversing}
+                disabled={isGenerating || !isLoggedIn || isConversing || isUserLocked()}
               >
                 {isConversing ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -950,7 +984,7 @@ export default function PreferencesPage() {
                 )}
               </button>
             </form>
-             {showOptions && (
+             {showOptions && !isUserLocked() && (
                 <div className="flex gap-4 mt-4">
                 <button 
                   onClick={handleAskMore} 
@@ -977,7 +1011,7 @@ export default function PreferencesPage() {
                 </div>
             )}
 
-            {conversationComplete && !showOptions && (
+            {conversationComplete && !showOptions && !isUserLocked() && (
               <div className="mt-4">
                 <button 
                   onClick={() => handleGenerate()} 
@@ -996,6 +1030,23 @@ export default function PreferencesPage() {
                   ) : (
                     "🎉 Generate My Perfect Itinerary!"
                   )}
+                </button>
+              </div>
+            )}
+
+            {/* Subscription Lock Message */}
+            {isUserLocked() && (
+              <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-6 text-center">
+                <div className="text-4xl mb-3">🔒</div>
+                <h3 className="text-xl font-bold text-orange-800 mb-2">You've used your free itinerary!</h3>
+                <p className="text-gray-700 mb-4">
+                  Upgrade to premium to create unlimited personalized itineraries with advanced AI features.
+                </p>
+                <button 
+                  onClick={() => setShowSubscriptionPopup(true)}
+                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105 shadow-lg"
+                >
+                  🚀 Upgrade to Premium
                 </button>
               </div>
             )}
