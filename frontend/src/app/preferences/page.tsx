@@ -12,23 +12,67 @@ import { TagBadge } from "@/components/ui/badge";
 // --- Configuration ---
 const API_BASE_URL = "http://localhost:8000"; // Your backend URL
 
-const systemQuestions = [
-  { key: "destination", text: "Where would you like to go for your next trip?" },
-  { key: "dates", text: "What dates are you planning for?" },
-  { key: "travelers", text: "Who is travelling with you?" },
-  { key: "interests", text: "What are your primary interests for this trip?" },
-  { key: "budget", text: "What is your approximate budget (Low, Medium, High)?" },
-  { key: "pace", text: "What pace would you prefer (Relaxed, Balanced, or Packed)?" },
-  { key: "aboutYou", text: "Anything else you'd like to share?" },
-];
+// Dynamic conversation system that adapts based on user responses
+const conversationFlow = {
+  greeting: (userName?: string) => ({
+    key: "greeting",
+    text: userName 
+      ? `Hey ${userName}! 👋 I'm so excited to help you plan your next adventure! Where's your heart calling you to explore?`
+      : `Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?`,
+    followUp: "I can already imagine the incredible experiences waiting for you there! ✨"
+  }),
+  
+  getDestinationResponse: (destination: string) => ({
+    key: "dates",
+    text: `${destination}! What an incredible choice! 🌟 I'm getting butterflies just thinking about all the amazing experiences we'll plan for you there. When are you thinking of embarking on this adventure?`,
+    followUp: "Perfect timing can make or break a trip, so let's get this just right! 📅"
+  }),
 
+  getDatesResponse: (destination: string, dates: string) => ({
+    key: "travelers", 
+    text: `Oh wonderful! ${dates} sounds absolutely perfect for ${destination}! 🎉 Now, who's going to be joining you on this incredible journey? Are you flying solo, bringing your favorite travel buddy, or making it a group adventure?`,
+    followUp: "The company we keep shapes our adventures in the most beautiful ways! 👥"
+  }),
+
+  getTravelersResponse: (destination: string, travelers: string) => ({
+    key: "interests",
+    text: `A ${travelers.toLowerCase()} trip to ${destination} - I'm already envisioning so many possibilities! 💭 What's really calling to your soul for this trip? Are you craving heart-pounding adventures, cultural deep-dives, foodie experiences, or maybe some blissful relaxation?`,
+    followUp: "Your interests will be the compass that guides us to the most magical experiences! 🧭"
+  }),
+
+  getInterestsResponse: (destination: string, interests: string) => ({
+    key: "budget",
+    text: `${interests} in ${destination} - now we're talking! 🔥 I can already see this trip shaping up to be absolutely unforgettable! To make sure we find the perfect balance of amazing experiences within your comfort zone, what's your budget feeling like? Are we keeping things budget-friendly, going for that sweet middle ground, or ready to splurge on something truly special?`,
+    followUp: "Don't worry - incredible experiences exist at every budget level! 💰"
+  }),
+
+  getBudgetResponse: (destination: string, budget: string, interests: string) => ({
+    key: "pace",
+    text: `Perfect! With a ${budget.toLowerCase()} budget for ${interests.toLowerCase()} experiences in ${destination}, we're going to create something truly special! 🎊 Now, let's talk about your travel rhythm - are you the type who loves to soak in every moment at a relaxed pace, prefers a nice balance of activity and chill time, or wants to pack in as many adventures as humanly possible?`,
+    followUp: "The right pace makes all the difference between a good trip and an unforgettable one! ⚡"
+  }),
+
+  getPaceResponse: (destination: string, pace: string) => ({
+    key: "aboutYou",
+    text: `A ${pace.toLowerCase()} pace in ${destination} - I can already feel the vibe of your perfect trip! 🌈 Before I start crafting your personalized itinerary, is there anything special about you, your travel style, dietary needs, must-see bucket list items, or secret dreams for this trip that you'd love me to weave into your adventure?`,
+    followUp: "These personal touches are what transform a good itinerary into pure magic! ✨"
+  }),
+
+  getFinalResponse: (destination: string) => ({
+    key: "generate",
+    text: `This is going to be INCREDIBLE! 🚀 I have everything I need to craft you an absolutely amazing, personalized itinerary for ${destination}. I'm talking hidden local gems, perfect timing for everything, restaurants that'll blow your mind, and experiences that'll give you goosebumps just thinking about them! Ready for me to work my magic?`,
+    followUp: "Trust me, you're going to love what I create for you! 💫"
+  })
+};
+
+// Updated quick replies with more personality
 const quickReplies: Record<string, string[]> = {
-  destination: ["Delhi", "Mumbai", "Leh", "Goa", "Jaipur", "Kerala"],
-  dates: ["Choose Date", "Flexible"],
-  travelers: ["Just me", "Friends", "Family", "Big group"],
-  interests: ["Adventure", "Food", "Culture", "Nature", "Relaxation", "Nightlife"],
-  budget: ["Low", "Medium", "High"],
-  pace: ["Relaxed", "Balanced", "Packed"],
+  destination: ["🇮🇳 India", "🏔️ Mountains", "🏖️ Beach Paradise", "🏛️ Historic Cities", "🌸 Japan", "🗼 Europe"],
+  dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "🎯 Specific Season"],
+  travelers: ["✈️ Just me", "👫 My partner", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends group", "👥 Big group (5+)"],
+  interests: ["🎿 Adventure", "🍜 Food & Culture", "🎭 Arts & History", "🌿 Nature", "🧘‍♀️ Wellness", "🌃 Nightlife"],
+  budget: ["💸 Budget-friendly", "💰 Mid-range", "💎 Luxury", "🎯 Best value"],
+  pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Action-packed"],
 };
 
 // --- Helper Functions & Components ---
@@ -175,7 +219,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
 
 export default function PreferencesPage() {
   const [messages, setMessages] = useState([
-    { sender: "system", text: systemQuestions[0].text },
+    { sender: "system", text: conversationFlow.greeting().text },
   ]);
   const [input, setInput] = useState("");
   const [itinerary, setItinerary] = useState<Record<string, any> | null>(null);
@@ -190,6 +234,15 @@ export default function PreferencesPage() {
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Store user responses for dynamic conversation
+  const [userResponses, setUserResponses] = useState<Record<string, string>>({});
+  const [currentQuestionKey, setCurrentQuestionKey] = useState("greeting");
+
+  // Conversation steps mapping
+  const conversationSteps = [
+    "greeting", "dates", "travelers", "interests", "budget", "pace", "aboutYou", "generate"
+  ];
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
