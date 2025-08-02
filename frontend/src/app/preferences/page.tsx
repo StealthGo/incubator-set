@@ -380,18 +380,21 @@ export default function PreferencesPage() {
     }
   };
 
-  // Determine current question type for quick replies
+  // Determine current question type for quick replies based on conversation flow
   const getCurrentQuestionType = () => {
-    const lastMessage = messages[messages.length - 1]?.text.toLowerCase() || "";
+    const userMessages = messages.filter(msg => msg.sender === "user");
+    const conversationStep = userMessages.length;
     
-    if (lastMessage.includes("where") && lastMessage.includes("go")) return "destination";
-    if (lastMessage.includes("when") || lastMessage.includes("date")) return "dates";
-    if (lastMessage.includes("who") || lastMessage.includes("travel")) return "travelers";
-    if (lastMessage.includes("interest") || lastMessage.includes("want to do")) return "interests";
-    if (lastMessage.includes("budget") || lastMessage.includes("cost")) return "budget";
-    if (lastMessage.includes("pace") || lastMessage.includes("rhythm")) return "pace";
-    
-    return "destination";
+    // Follow the sequence: destination → dates → travelers → interests → budget → pace
+    switch (conversationStep) {
+      case 0: return "destination";  // First question about destination
+      case 1: return "dates";       // Second question about dates
+      case 2: return "travelers";   // Third question about travelers
+      case 3: return "interests";   // Fourth question about interests
+      case 4: return "budget";      // Fifth question about budget
+      case 5: return "pace";        // Sixth question about pace
+      default: return "destination"; // Default fallback
+    }
   };
 
   const handleGenerate = async (followUpPrompt?: string) => {
