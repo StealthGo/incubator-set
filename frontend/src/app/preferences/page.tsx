@@ -12,61 +12,40 @@ import { TagBadge } from "@/components/ui/badge";
 // --- Configuration ---
 const API_BASE_URL = "http://localhost:8000"; // Your backend URL
 
-// Dynamic conversation system that adapts based on user responses
-const conversationFlow = {
-  greeting: (userName?: string) => ({
-    key: "greeting",
-    text: userName 
-      ? `Hey ${userName}! 👋 I'm so excited to help you plan your next adventure! Where's your heart calling you to explore?`
-      : `Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?`,
-    followUp: "I can already imagine the incredible experiences waiting for you there! ✨"
-  }),
-  
-  getDestinationResponse: (destination: string) => ({
-    key: "dates",
-    text: `${destination}! What an incredible choice! 🌟 I'm getting butterflies just thinking about all the amazing experiences we'll plan for you there. When are you thinking of embarking on this adventure?`,
-    followUp: "Perfect timing can make or break a trip, so let's get this just right! 📅"
-  }),
+// Dynamic conversation system - now LLM handles all interactions
+const systemPrompt = `You are an enthusiastic, friendly travel planning assistant named "The Modern Chanakya". Your goal is to have a natural conversation with users to gather all the information needed to create their perfect itinerary.
 
-  getDatesResponse: (destination: string, dates: string) => ({
-    key: "travelers", 
-    text: `Oh wonderful! ${dates} sounds absolutely perfect for ${destination}! 🎉 Now, who's going to be joining you on this incredible journey? Are you flying solo, bringing your favorite travel buddy, or making it a group adventure?`,
-    followUp: "The company we keep shapes our adventures in the most beautiful ways! 👥"
-  }),
+CONVERSATION FLOW:
+1. Start with a warm, personalized greeting asking about their destination
+2. Naturally follow up based on their responses to gather:
+   - Destination (where they want to go)
+   - Dates (when they're traveling) 
+   - Travelers (who's going - solo, couple, family, friends, etc.)
+   - Interests (what they want to do - adventure, culture, food, relaxation, etc.)
+   - Budget (budget-friendly, mid-range, luxury)
+   - Pace (relaxed, balanced, action-packed)
+   - Special preferences (dietary needs, accessibility, must-see items, etc.)
 
-  getTravelersResponse: (destination: string, travelers: string) => ({
-    key: "interests",
-    text: `A ${travelers.toLowerCase()} trip to ${destination} - I'm already envisioning so many possibilities! 💭 What's really calling to your soul for this trip? Are you craving heart-pounding adventures, cultural deep-dives, foodie experiences, or maybe some blissful relaxation?`,
-    followUp: "Your interests will be the compass that guides us to the most magical experiences! 🧭"
-  }),
+PERSONALITY:
+- Be enthusiastic and use emojis naturally
+- Ask follow-up questions that show you're listening
+- Reference their previous answers to create connection
+- Make them excited about their trip
+- Be conversational, not robotic
+- Use phrases like "That sounds amazing!", "I'm getting excited just thinking about it!", etc.
 
-  getInterestsResponse: (destination: string, interests: string) => ({
-    key: "budget",
-    text: `${interests} in ${destination} - now we're talking! 🔥 I can already see this trip shaping up to be absolutely unforgettable! To make sure we find the perfect balance of amazing experiences within your comfort zone, what's your budget feeling like? Are we keeping things budget-friendly, going for that sweet middle ground, or ready to splurge on something truly special?`,
-    followUp: "Don't worry - incredible experiences exist at every budget level! 💰"
-  }),
+RULES:
+- Only ask ONE question at a time
+- Keep responses concise but enthusiastic  
+- Always acknowledge their previous answer before asking the next question
+- Don't rush - let the conversation flow naturally
+- When you have gathered all essential information, enthusiastically summarize what you understand and ask if they're ready to generate their itinerary
+- If they say something unclear, ask for clarification in a friendly way
 
-  getBudgetResponse: (destination: string, budget: string, interests: string) => ({
-    key: "pace",
-    text: `Perfect! With a ${budget.toLowerCase()} budget for ${interests.toLowerCase()} experiences in ${destination}, we're going to create something truly special! 🎊 Now, let's talk about your travel rhythm - are you the type who loves to soak in every moment at a relaxed pace, prefers a nice balance of activity and chill time, or wants to pack in as many adventures as humanly possible?`,
-    followUp: "The right pace makes all the difference between a good trip and an unforgettable one! ⚡"
-  }),
+Current conversation context will be provided. Respond as the next message in the conversation.`;
 
-  getPaceResponse: (destination: string, pace: string) => ({
-    key: "aboutYou",
-    text: `A ${pace.toLowerCase()} pace in ${destination} - I can already feel the vibe of your perfect trip! 🌈 Before I start crafting your personalized itinerary, is there anything special about you, your travel style, dietary needs, must-see bucket list items, or secret dreams for this trip that you'd love me to weave into your adventure?`,
-    followUp: "These personal touches are what transform a good itinerary into pure magic! ✨"
-  }),
-
-  getFinalResponse: (destination: string) => ({
-    key: "generate",
-    text: `This is going to be INCREDIBLE! 🚀 I have everything I need to craft you an absolutely amazing, personalized itinerary for ${destination}. I'm talking hidden local gems, perfect timing for everything, restaurants that'll blow your mind, and experiences that'll give you goosebumps just thinking about them! Ready for me to work my magic?`,
-    followUp: "Trust me, you're going to love what I create for you! 💫"
-  })
-};
-
-// Updated quick replies with more personality
-const quickReplies: Record<string, string[]> = {
+// Quick replies for different conversation stages
+const smartQuickReplies: Record<string, string[]> = {
   destination: ["🇮🇳 India", "🏔️ Mountains", "🏖️ Beach Paradise", "🏛️ Historic Cities", "🌸 Japan", "🗼 Europe"],
   dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "🎯 Specific Season"],
   travelers: ["✈️ Just me", "👫 My partner", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends group", "👥 Big group (5+)"],
@@ -302,24 +281,25 @@ export default function PreferencesPage() {
         setItinerary(null);
     }
 
-    const key = systemQuestions[step]?.key;
-    if (key === 'dates' && !itinerary) {
-        if(currentInput === "Choose Date") {
+    // Handle date picker special case
+    if (currentQuestionKey === 'dates' && !itinerary) {
+        if(currentInput === "📅 Pick Dates") {
             setShowDatePicker(true);
             return;
         }
-        if(currentInput === "Flexible") {
+        if(currentInput === "🤷‍♀️ I'm Flexible") {
             const randomDates = getRandomFlexibleDates();
             setMessages((msgs) => [...msgs, { sender: "user", text: randomDates }]);
             setInput("");
-             if (step < systemQuestions.length - 1) {
-                setTimeout(() => {
-                    setMessages((msgs) => [...msgs, { sender: "system", text: systemQuestions[step + 1].text }]);
-                    setStep(step + 1);
-                }, 400);
-            } else {
-                setShowOptions(true);
-            }
+            setUserResponses(prev => ({ ...prev, dates: randomDates }));
+            
+            // Move to next conversation step
+            setTimeout(() => {
+              const nextResponse = conversationFlow.getDatesResponse(userResponses.destination || "your destination", randomDates);
+              setMessages((msgs) => [...msgs, { sender: "system", text: nextResponse.text }]);
+              setCurrentQuestionKey(nextResponse.key);
+              setStep(step + 1);
+            }, 800);
             return;
         }
     }
@@ -327,14 +307,57 @@ export default function PreferencesPage() {
     setMessages((msgs) => [...msgs, { sender: "user", text: currentInput }]);
     setInput("");
 
-    if (step < systemQuestions.length - 1) {
-        setTimeout(() => {
-          setMessages((msgs) => [...msgs, { sender: "system", text: systemQuestions[step + 1].text }]);
-          setStep(step + 1);
-        }, 400);
-    } else {
+    // Store user response
+    setUserResponses(prev => ({ ...prev, [currentQuestionKey]: currentInput }));
+
+    // Generate next question based on conversation flow
+    setTimeout(() => {
+      let nextResponse;
+      
+      switch (currentQuestionKey) {
+        case "greeting":
+          nextResponse = conversationFlow.getDestinationResponse(currentInput);
+          break;
+        case "dates":
+          nextResponse = conversationFlow.getDatesResponse(userResponses.destination || currentInput, currentInput);
+          break;
+        case "travelers":
+          nextResponse = conversationFlow.getInterestsResponse(userResponses.destination || "", currentInput);
+          break;
+        case "interests":
+          nextResponse = conversationFlow.getBudgetResponse(userResponses.destination || "", currentInput, currentInput);
+          break;
+        case "budget":
+          nextResponse = conversationFlow.getPaceResponse(userResponses.destination || "", currentInput);
+          break;
+        case "pace":
+          nextResponse = conversationFlow.getFinalResponse(userResponses.destination || "");
+          break;
+        case "aboutYou":
+          nextResponse = conversationFlow.getFinalResponse(userResponses.destination || "");
+          break;
+        default:
+          setShowOptions(true);
+          return;
+      }
+
+      if (nextResponse) {
+        setMessages((msgs) => [...msgs, { sender: "system", text: nextResponse.text }]);
+        setCurrentQuestionKey(nextResponse.key);
+        setStep(step + 1);
+        
+        // Add follow-up message with slight delay for more natural feel
+        if (nextResponse.followUp) {
+          setTimeout(() => {
+            setMessages((msgs) => [...msgs, { sender: "system", text: nextResponse.followUp }]);
+          }, 1500);
+        }
+      }
+
+      if (nextResponse?.key === "generate") {
         setShowOptions(true);
-    }
+      }
+    }, 800); // Delay to make conversation feel more natural
   };
 
   const handleGenerate = async (followUpPrompt?: string) => {
@@ -778,8 +801,10 @@ export default function PreferencesPage() {
         <div className="flex items-center gap-2">
           <button onClick={() => { 
             setItinerary(null); 
-            setMessages([{ sender: 'system', text: systemQuestions[0].text }]); 
+            setMessages([{ sender: 'system', text: conversationFlow.greeting(user?.name).text }]); 
             setStep(0); 
+            setCurrentQuestionKey("greeting");
+            setUserResponses({});
             setShowOptions(false);
             setShowSignInModal(false);
           }} className="px-5 py-2 rounded-full bg-orange-500 text-white font-semibold shadow hover:bg-orange-600 transition-all text-sm">
@@ -862,9 +887,9 @@ export default function PreferencesPage() {
                 </div>
               </div>
             )}
-            {!itinerary && !showOptions && quickReplies[systemQuestions[step]?.key]?.length > 0 && (
+            {!itinerary && !showOptions && quickReplies[currentQuestionKey]?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
-                {quickReplies[systemQuestions[step]?.key].map((option) => (
+                {quickReplies[currentQuestionKey].map((option) => (
                   <button 
                     key={option} 
                     type="button" 
