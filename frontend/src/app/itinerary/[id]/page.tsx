@@ -60,14 +60,10 @@ const progressiveReveal = {
 
 // Floating elements animation
 const floatingAnimation = {
+  initial: { y: 0, rotate: 0 },
   animate: {
     y: [0, -20, 0],
     rotate: [0, 5, -5, 0],
-    transition: {
-      duration: 6,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }
   }
 };
 
