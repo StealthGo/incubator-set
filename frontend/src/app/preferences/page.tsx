@@ -504,14 +504,14 @@ export default function PreferencesPage() {
       return (
         <div className="text-gray-400 text-center mt-16 p-4">
           <Icon name="explore" className="text-5xl mb-4" />
-          <div className="text-lg font-medium mb-2">Your Detailed Itinerary Will Appear Here</div>
-          <div className="text-sm">Complete the chat to get a comprehensive travel plan with:</div>
+          <div className="text-lg font-medium mb-2">Your Detailed Indian Itinerary Will Appear Here</div>
+          <div className="text-sm">Complete the chat to get a comprehensive Bharat travel plan with:</div>
           <div className="text-sm mt-2 space-y-1 text-left inline-block">
-            <div><Icon name="map" className="text-sm mr-2 text-orange-500"/>Day-by-day detailed schedule</div>
-            <div><Icon name="restaurant" className="text-sm mr-2 text-orange-500"/>Local food recommendations</div>
-            <div><Icon name="star" className="text-sm mr-2 text-orange-500"/>Signature experiences</div>
-            <div><Icon name="shopping_cart" className="text-sm mr-2 text-orange-500"/>Shopping guides & insider tips</div>
-            <div><Icon name="account_balance_wallet" className="text-sm mr-2 text-orange-500"/>Budget breakdown & practical wisdom</div>
+            <div><Icon name="map" className="text-sm mr-2 text-orange-500"/>Day-by-day detailed Indian schedule</div>
+            <div><Icon name="restaurant" className="text-sm mr-2 text-orange-500"/>Authentic local food recommendations</div>
+            <div><Icon name="star" className="text-sm mr-2 text-orange-500"/>Cultural experiences & festivals</div>
+            <div><Icon name="shopping_cart" className="text-sm mr-2 text-orange-500"/>Local markets & handicraft guides</div>
+            <div><Icon name="account_balance_wallet" className="text-sm mr-2 text-orange-500"/>Budget breakdown in Indian rupees</div>
           </div>
         </div>
       );
@@ -962,7 +962,7 @@ export default function PreferencesPage() {
                   !isLoggedIn 
                     ? "Please sign in to start planning your trip..." 
                     : isUserLocked()
-                      ? "🔒 Upgrade to premium to create more itineraries..."
+                      ? "🔒 Upgrade kar ke aur Indian adventures explore karo..."
                     : isConversing
                       ? "I'm thinking of the perfect response..."
                     : conversationComplete
@@ -1045,15 +1045,15 @@ export default function PreferencesPage() {
             {isUserLocked() && (
               <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-6 text-center">
                 <div className="text-4xl mb-3">🔒</div>
-                <h3 className="text-xl font-bold text-orange-800 mb-2">You've used your free itinerary!</h3>
+                <h3 className="text-xl font-bold text-orange-800 mb-2">Aapka free Indian itinerary complete ho gaya!</h3>
                 <p className="text-gray-700 mb-4">
-                  Upgrade to premium to create unlimited personalized itineraries with advanced AI features.
+                  Upgrade to premium to create unlimited personalized Indian travel itineraries with advanced AI features for exploring incredible Bharat.
                 </p>
                 <button 
                   onClick={() => setShowSubscriptionPopup(true)}
                   className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105 shadow-lg"
                 >
-                  🚀 Upgrade to Premium
+                  🇮🇳 Upgrade for More Bharat Adventures
                 </button>
               </div>
             )}
