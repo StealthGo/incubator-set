@@ -231,6 +231,18 @@ export default function PreferencesPage() {
   const [conversationComplete, setConversationComplete] = useState(false);
   const [currentQuestionType, setCurrentQuestionType] = useState("destination");
 
+  // Helper function to clear conversation data
+  const clearConversationData = () => {
+    localStorage.removeItem("currentItinerary");
+    localStorage.removeItem("conversationMessages");
+    localStorage.removeItem("conversationComplete");
+    setItinerary(null);
+    setMessages([{ sender: 'system', text: "Namaste! 🙏 Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]);
+    setConversationComplete(false);
+    setCurrentQuestionType("destination");
+    setShowOptions(false);
+  };
+
   // Check if user is locked due to subscription limits
   const isUserLocked = () => {
     return user?.subscription_status === "free" && user?.free_itinerary_used === true;
@@ -239,6 +251,59 @@ export default function PreferencesPage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Persist itinerary and conversation state to localStorage
+  useEffect(() => {
+    if (itinerary) {
+      localStorage.setItem("currentItinerary", JSON.stringify(itinerary));
+    }
+  }, [itinerary]);
+
+  useEffect(() => {
+    if (messages.length > 1) { // More than just the initial greeting
+      localStorage.setItem("conversationMessages", JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem("conversationComplete", JSON.stringify(conversationComplete));
+  }, [conversationComplete]);
+
+  // Restore itinerary and conversation state from localStorage on component mount
+  useEffect(() => {
+    const savedItinerary = localStorage.getItem("currentItinerary");
+    const savedMessages = localStorage.getItem("conversationMessages");
+    const savedConversationComplete = localStorage.getItem("conversationComplete");
+
+    if (savedItinerary) {
+      try {
+        const parsedItinerary = JSON.parse(savedItinerary);
+        setItinerary(parsedItinerary);
+      } catch (error) {
+        console.error("Error parsing saved itinerary:", error);
+      }
+    }
+
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        if (Array.isArray(parsedMessages) && parsedMessages.length > 1) {
+          setMessages(parsedMessages);
+        }
+      } catch (error) {
+        console.error("Error parsing saved messages:", error);
+      }
+    }
+
+    if (savedConversationComplete) {
+      try {
+        const parsedComplete = JSON.parse(savedConversationComplete);
+        setConversationComplete(parsedComplete);
+      } catch (error) {
+        console.error("Error parsing conversation state:", error);
+      }
+    }
+  }, []);
 
   // Check if user is logged in on component mount
   useEffect(() => {
@@ -848,6 +913,11 @@ export default function PreferencesPage() {
               setShowSubscriptionPopup(true);
               return;
             }
+            // Clear localStorage for fresh start
+            localStorage.removeItem("currentItinerary");
+            localStorage.removeItem("conversationMessages");
+            localStorage.removeItem("conversationComplete");
+            
             setItinerary(null); 
             setMessages([{ sender: 'system', text: "Namaste! � Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]); 
             setConversationComplete(false);
@@ -877,6 +947,7 @@ export default function PreferencesPage() {
               {/* Sign Out Button */}
               <button onClick={() => { 
                 localStorage.removeItem("token");
+                clearConversationData();
                 setUser(null);
                 setIsLoggedIn(false);
                 setShowSignInModal(true);
