@@ -900,15 +900,15 @@ export default function PreferencesPage() {
                 <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border border-orange-200 rounded-2xl p-6 mb-4">
                   <div className="text-center">
                     <Icon name="travel_explore" className="text-4xl text-orange-500 mb-3" />
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Welcome to The Modern Chanakya!</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">Namaste! Welcome to The Modern Chanakya!</h3>
                     <p className="text-gray-700 mb-4">
-                      Ready to plan your perfect trip? Sign in to start creating personalized itineraries with our AI travel expert.
+                      Ready to explore Incredible India? Sign in to start creating personalized Indian travel itineraries with our desi AI travel expert - from Kashmir to Kanyakumari!
                     </p>
                     <button 
                       onClick={() => setShowSignInModal(true)}
                       className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-all shadow-lg"
                     >
-                      🚀 Sign In to Start Planning
+                      🇮🇳 Start Your Bharat Yatra
                     </button>
                   </div>
                 </div>
