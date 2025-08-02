@@ -68,7 +68,8 @@ const mockItineraryData = {
             icon: "🎨",
             image_url: "https://images.unsplash.com/photo-1539650116574-75c0c6d73d0e?auto=format&fit=crop&w=1000&q=80",
             Maps_link: "https://maps.google.com",
-            booking_link: "https://example.com/louvre"
+            booking_link: "https://example.com/louvre",
+            tags: ["Cultural", "Heritage", "Photography", "Historical"]
           }
         ],
         meals: {
@@ -77,14 +78,16 @@ const mockItineraryData = {
             restaurant: "L'Ami Jean",
             description: "Traditional French bistro",
             image_url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=1000&q=80",
-            zomato_link: "https://example.com/restaurant"
+            zomato_link: "https://example.com/restaurant",
+            tags: ["Traditional", "Non-Vegetarian", "Local Specialty"]
           },
           dinner: {
             dish: "Coq au Vin",
             restaurant: "Le Comptoir du Relais",
             description: "Classic French dinner",
             image_url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=1000&q=80",
-            zomato_link: "https://example.com/restaurant"
+            zomato_link: "https://example.com/restaurant",
+            tags: ["Traditional", "Non-Vegetarian", "Fine Dining"]
           }
         }
       }

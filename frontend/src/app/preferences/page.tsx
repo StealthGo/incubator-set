@@ -602,6 +602,19 @@ export default function PreferencesPage() {
                                         <img src={meal.image_url} alt={meal.dish} className="w-full h-40 object-cover rounded-lg my-2"/>
                                         <p className="text-gray-800 font-semibold text-lg">{meal.dish}</p>
                                         <p className="text-sm text-gray-600">{meal.restaurant}</p>
+                                        
+                                        {/* Meal Tags */}
+                                        {meal.tags && meal.tags.length > 0 && (
+                                          <div className="flex flex-wrap gap-1 my-2">
+                                            {meal.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                              <TagBadge key={tagIndex} tag={tag} type="food" />
+                                            ))}
+                                            {meal.tags.length > 3 && (
+                                              <span className="text-xs text-gray-500">+{meal.tags.length - 3} more</span>
+                                            )}
+                                          </div>
+                                        )}
+                                        
                                         <p className="text-sm text-gray-500 my-2 italic">"{meal.description}"</p>
                                         <a href={meal.zomato_link} target="_blank" rel="noopener noreferrer" className="text-sm text-red-600 hover:underline font-semibold inline-flex items-center gap-1">
                                             <Icon name="restaurant_menu"/> View on Zomato
@@ -647,6 +660,19 @@ export default function PreferencesPage() {
                 {itinerary.signature_experiences.map((exp: any, i: number) => (
                     <div key={i} className="bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl p-6 border border-orange-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div className="font-bold text-lg text-gray-900 mb-2">{exp.name}</div>
+                    
+                    {/* Experience Tags */}
+                    {exp.tags && exp.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {exp.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="activity" />
+                        ))}
+                        {exp.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{exp.tags.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                    
                     <p className="text-gray-700 text-base mb-3">{exp.description}</p>
                     <div className="text-base text-orange-800 bg-orange-200/50 p-3 rounded-lg italic"><strong>Local's Take:</strong> {exp.why_local_loves_it}</div>
                     <div className="flex justify-between items-center mt-4">
@@ -669,6 +695,19 @@ export default function PreferencesPage() {
                 {itinerary.hyperlocal_food_guide.map((food: any, i: number) => (
                     <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div className="font-bold text-lg text-gray-900 mb-1">{food.dish}</div>
+                    
+                    {/* Food Tags */}
+                    {food.tags && food.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {food.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="food" />
+                        ))}
+                        {food.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{food.tags.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                    
                     <p className="text-gray-700 text-base mb-2">{food.description}</p>
                     <p className="text-base text-gray-600 mb-3"><strong>Find it at:</strong> {food.where_to_find}</p>
                     <div className="text-base text-green-800 bg-green-100/60 p-3 rounded-lg italic"><strong>Tip:</strong> {food.local_tip}</div>
