@@ -187,6 +187,55 @@ export default function PreferencesPage() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
+
+  // Tag Badge component for food and activity tags
+  const TagBadge = ({ tag, type = "activity" }: { tag: string; type?: "activity" | "food" }) => {
+    const getTagStyle = (tag: string, type: string) => {
+      const foodColors: Record<string, string> = {
+        "Vegetarian": "bg-green-100 text-green-800",
+        "Vegan": "bg-green-200 text-green-900",
+        "Non-Vegetarian": "bg-red-100 text-red-800",
+        "Street Food": "bg-orange-100 text-orange-800",
+        "Fine Dining": "bg-purple-100 text-purple-800",
+        "Local Specialty": "bg-yellow-100 text-yellow-800",
+        "Spicy": "bg-red-200 text-red-900",
+        "Sweet": "bg-pink-100 text-pink-800",
+        "Traditional": "bg-amber-100 text-amber-800",
+        "Fusion": "bg-indigo-100 text-indigo-800",
+        "Budget": "bg-green-100 text-green-700",
+        "Premium": "bg-purple-100 text-purple-700"
+      };
+
+      const activityColors: Record<string, string> = {
+        "Adventure": "bg-red-100 text-red-800",
+        "Cultural": "bg-blue-100 text-blue-800",
+        "Heritage": "bg-amber-100 text-amber-800",
+        "Nature": "bg-green-100 text-green-800",
+        "Food": "bg-orange-100 text-orange-800",
+        "Shopping": "bg-pink-100 text-pink-800",
+        "Religious": "bg-purple-100 text-purple-800",
+        "Nightlife": "bg-indigo-100 text-indigo-800",
+        "Family-Friendly": "bg-cyan-100 text-cyan-800",
+        "Budget": "bg-green-100 text-green-700",
+        "Luxury": "bg-purple-100 text-purple-700",
+        "Photography": "bg-gray-100 text-gray-800",
+        "Historical": "bg-amber-100 text-amber-800",
+        "Wellness": "bg-teal-100 text-teal-800",
+        "Sports": "bg-blue-100 text-blue-800"
+      };
+
+      if (type === "food") {
+        return foodColors[tag] || "bg-gray-100 text-gray-800";
+      }
+      return activityColors[tag] || "bg-gray-100 text-gray-800";
+    };
+
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTagStyle(tag, type)}`}>
+        {tag}
+      </span>
+    );
+  };
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -506,6 +555,19 @@ export default function PreferencesPage() {
                               <p className="text-sm font-semibold text-gray-500">{activity.time}</p>
                               <p className="font-bold text-lg text-gray-800">{activity.activity}</p>
                               <div className="text-sm text-gray-600 flex items-center gap-1"><Icon name="location_on" className="text-sm"/> {activity.location}</div>
+                              
+                              {/* Activity Tags */}
+                              {activity.tags && activity.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 my-2">
+                                  {activity.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                    <TagBadge key={tagIndex} tag={tag} type="activity" />
+                                  ))}
+                                  {activity.tags.length > 3 && (
+                                    <span className="text-xs text-gray-500">+{activity.tags.length - 3} more</span>
+                                  )}
+                                </div>
+                              )}
+                              
                               <p className="text-gray-700 my-2">{activity.description}</p>
                               <div className="mt-2 bg-amber-50 p-3 rounded-lg border border-amber-200">
                                 <p className="font-bold text-sm text-amber-800 mb-1">Local Guide Tip:</p>
