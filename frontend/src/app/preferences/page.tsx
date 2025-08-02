@@ -269,8 +269,20 @@ export default function PreferencesPage() {
     localStorage.setItem("conversationComplete", JSON.stringify(conversationComplete));
   }, [conversationComplete]);
 
+  // Clear localStorage if user becomes locked
+  useEffect(() => {
+    if (isUserLocked()) {
+      localStorage.removeItem("currentItinerary");
+      localStorage.removeItem("conversationMessages");
+      localStorage.removeItem("conversationComplete");
+    }
+  }, [user?.free_itinerary_used, user?.subscription_status]);
+
   // Restore itinerary and conversation state from localStorage on component mount
   useEffect(() => {
+    // Only restore data if user is logged in
+    if (!isLoggedIn) return;
+    
     const savedItinerary = localStorage.getItem("currentItinerary");
     const savedMessages = localStorage.getItem("conversationMessages");
     const savedConversationComplete = localStorage.getItem("conversationComplete");
@@ -303,7 +315,7 @@ export default function PreferencesPage() {
         console.error("Error parsing conversation state:", error);
       }
     }
-  }, []);
+  }, [isLoggedIn]); // Depend on isLoggedIn instead of running on every mount
 
   // Check if user is logged in on component mount
   useEffect(() => {
