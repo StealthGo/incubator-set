@@ -972,9 +972,32 @@ export default function PreferencesPage() {
                   }`} 
                   disabled={isGenerating || !isLoggedIn}
                 >
-                    {isGenerating ? "Generating..." : "Generate Itinerary"}
+                  {isGenerating ? "Generating..." : "🚀 Generate My Itinerary"}
                 </button>
                 </div>
+            )}
+
+            {conversationComplete && !showOptions && (
+              <div className="mt-4">
+                <button 
+                  onClick={() => handleGenerate()} 
+                  className={`w-full px-6 py-3 rounded-full font-bold shadow-lg transition-all text-lg ${
+                    isLoggedIn 
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 transform hover:scale-105' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`} 
+                  disabled={isGenerating || !isLoggedIn}
+                >
+                  {isGenerating ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Creating your perfect itinerary...
+                    </div>
+                  ) : (
+                    "🎉 Generate My Perfect Itinerary!"
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </section>
