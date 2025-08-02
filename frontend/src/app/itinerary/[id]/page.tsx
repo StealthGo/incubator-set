@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import Image from "next/image";
 import { 
   ArrowLeft, BedDouble, Utensils, Gem, Star, MapPin, 
@@ -11,40 +11,81 @@ import {
   Coffee, Mountain, Palmtree, Award, Navigation, Info,
   CloudSun, Globe, Shield, Smartphone, ExternalLink,
   Share2, Download, Eye, Bookmark, ChevronDown,
-  ChevronRight, Play, Pause, Volume2
+  ChevronRight, Play, Pause, Volume2, Menu, X,
+  ZoomIn, ArrowUp, ArrowDown, ArrowRight
 } from "lucide-react";
 import { TagBadge } from "@/components/ui/badge";
 
-// Animation variants
+// Enhanced Animation variants
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
   animate: { opacity: 1, y: 0 }
+};
+
+const fadeInLeft = {
+  initial: { opacity: 0, x: -60 },
+  animate: { opacity: 1, x: 0 }
+};
+
+const fadeInRight = {
+  initial: { opacity: 0, x: 60 },
+  animate: { opacity: 1, x: 0 }
+};
+
+const scaleIn = {
+  initial: { opacity: 0, scale: 0.8 },
+  animate: { opacity: 1, scale: 1 }
 };
 
 const staggerContainer = {
   initial: {},
   animate: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.15,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+// Progressive reveal container
+const progressiveReveal = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.08,
       delayChildren: 0.2,
     },
   },
 };
 
-// Enhanced Button component with animations
+// Floating elements animation
+const floatingAnimation = {
+  animate: {
+    y: [0, -20, 0],
+    rotate: [0, 5, -5, 0],
+    transition: {
+      duration: 6,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  }
+};
+
+// Enhanced Button component with 3D effects
 const Button = ({ children, onClick, variant = "default", size = "default", className = "", asChild, ...props }: any) => {
-  const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 transform hover:scale-105 active:scale-95";
+  const baseClasses = "inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 transform-gpu perspective-1000";
   const variants: Record<string, string> = {
-    default: "bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl",
-    outline: "border border-gray-300 bg-white hover:bg-gray-50 shadow-md hover:shadow-lg",
-    ghost: "hover:bg-gray-100 hover:shadow-md",
-    primary: "bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg hover:shadow-xl",
-    success: "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl"
+    default: "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    outline: "border-2 border-gray-300 bg-white/80 backdrop-blur-sm hover:bg-gray-50 shadow-md hover:shadow-xl hover:border-gray-400 hover:-translate-y-0.5",
+    ghost: "hover:bg-gray-100/80 backdrop-blur-sm hover:shadow-lg hover:-translate-y-0.5",
+    primary: "bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 text-white hover:from-blue-600 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-2xl hover:-translate-y-1 bg-size-200 bg-pos-0 hover:bg-pos-100",
+    success: "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    glass: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 shadow-lg hover:shadow-2xl"
   };
   const sizes: Record<string, string> = {
-    default: "h-10 px-4 py-2",
-    sm: "h-8 px-3 text-xs",
-    lg: "h-12 px-8 text-base"
+    default: "h-11 px-6 py-2",
+    sm: "h-9 px-4 text-xs",
+    lg: "h-14 px-10 text-base font-semibold"
   };
   
   if (asChild) {
@@ -53,48 +94,293 @@ const Button = ({ children, onClick, variant = "default", size = "default", clas
   
   return (
     <motion.button 
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.02, rotateX: 5 }}
+      whileTap={{ scale: 0.98, rotateX: -5 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className={`${baseClasses} ${variants[variant] || variants.default} ${sizes[size] || sizes.default} ${className}`}
       onClick={onClick}
+      style={{ transformStyle: "preserve-3d" }}
       {...props}
     >
-      {children}
+      <span style={{ transform: "translateZ(20px)" }}>{children}</span>
     </motion.button>
   );
 };
 
-// Enhanced Card component with animations
-const Card = ({ children, className = "", hover = true, ...props }: any) => (
+// Enhanced Card component with 3D effects and glass morphism
+const Card = ({ children, className = "", hover = true, glass = false, ...props }: any) => (
   <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-    whileHover={hover ? { y: -5, shadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" } : {}}
-    className={`rounded-xl border border-gray-200 bg-white shadow-lg ${className}`} 
+    initial={{ opacity: 0, y: 30, rotateX: 10 }}
+    animate={{ opacity: 1, y: 0, rotateX: 0 }}
+    transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+    whileHover={hover ? { 
+      y: -8, 
+      rotateX: 5,
+      scale: 1.02,
+      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+    } : {}}
+    className={`rounded-2xl border transform-gpu perspective-1000 ${
+      glass 
+        ? "bg-white/10 backdrop-blur-md border-white/20 shadow-xl" 
+        : "border-gray-200 bg-white shadow-lg"
+    } ${className}`}
+    style={{ transformStyle: "preserve-3d" }}
     {...props}
   >
-    {children}
+    <div style={{ transform: "translateZ(20px)" }}>
+      {children}
+    </div>
   </motion.div>
 );
 
-// Enhanced Badge component
-const Badge = ({ children, variant = "default", className = "", ...props }: any) => {
+// Enhanced Badge component with glow effects
+const Badge = ({ children, variant = "default", className = "", glow = false, ...props }: any) => {
   const variants: Record<string, string> = {
     default: "bg-blue-100 text-blue-800 hover:bg-blue-200",
-    outline: "border border-gray-300 bg-white hover:bg-gray-50",
+    outline: "border border-gray-300 bg-white/80 backdrop-blur-sm hover:bg-gray-50",
     gradient: "bg-gradient-to-r from-blue-500 to-purple-600 text-white",
-    success: "bg-green-100 text-green-800 hover:bg-green-200"
+    success: "bg-green-100 text-green-800 hover:bg-green-200",
+    glow: "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/50"
   };
   
   return (
     <motion.span 
-      whileHover={{ scale: 1.05 }}
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors ${variants[variant] || variants.default} ${className}`} 
+      whileHover={{ scale: 1.05, boxShadow: glow ? "0 0 20px rgba(59, 130, 246, 0.5)" : undefined }}
+      transition={{ type: "spring", stiffness: 300 }}
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-all duration-300 ${variants[variant] || variants.default} ${className}`} 
       {...props}
     >
       {children}
     </motion.span>
+  );
+};
+
+// Image Gallery Component with Lightbox
+const ImageGallery = ({ images, alt }: { images: string[], alt: string }) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const openLightbox = (image: string, index: number) => {
+    setSelectedImage(image);
+    setCurrentIndex(index);
+  };
+
+  const closeLightbox = () => {
+    setSelectedImage(null);
+  };
+
+  const navigateImage = (direction: 'prev' | 'next') => {
+    const newIndex = direction === 'next' 
+      ? (currentIndex + 1) % images.length 
+      : (currentIndex - 1 + images.length) % images.length;
+    setCurrentIndex(newIndex);
+    setSelectedImage(images[newIndex]);
+  };
+
+  return (
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {images.slice(0, 6).map((image, index) => (
+          <motion.div
+            key={index}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group"
+            onClick={() => openLightbox(image, index)}
+          >
+            <Image
+              src={image}
+              alt={`${alt} ${index + 1}`}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <ZoomIn className="w-8 h-8 text-white" />
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4"
+            onClick={closeLightbox}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative max-w-4xl max-h-[90vh] w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={selectedImage}
+                alt={alt}
+                width={1200}
+                height={800}
+                className="w-full h-full object-contain rounded-lg"
+                unoptimized
+              />
+              
+              {/* Navigation */}
+              <button
+                onClick={() => navigateImage('prev')}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 transition-colors"
+              >
+                <ArrowLeft className="w-6 h-6 text-white" />
+              </button>
+              <button
+                onClick={() => navigateImage('next')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 transition-colors"
+              >
+                <ArrowRight className="w-6 h-6 text-white" />
+              </button>
+              
+              {/* Close button */}
+              <button
+                onClick={closeLightbox}
+                className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm p-3 rounded-full hover:bg-white/30 transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+// Floating Progress Indicator
+const FloatingProgress = ({ activeSection, sections }: { activeSection: string, sections: any[] }) => {
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden lg:block"
+    >
+      <div className="bg-white/20 backdrop-blur-md rounded-full p-2 shadow-lg">
+        {sections.map((section, index) => (
+          <motion.div
+            key={section.id}
+            className={`w-3 h-3 rounded-full mb-2 transition-all duration-300 ${
+              activeSection === section.id ? 'bg-blue-500 scale-125' : 'bg-gray-300'
+            }`}
+            whileHover={{ scale: 1.2 }}
+          />
+        ))}
+        
+        {/* Progress bar */}
+        <motion.div
+          className="w-1 bg-blue-500 rounded-full mt-4"
+          style={{ height: useTransform(progress, [0, 1], ["0%", "100%"]) }}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+// Interactive Timeline Component
+const InteractiveTimeline = ({ activities }: { activities: any[] }) => {
+  const [activeActivity, setActiveActivity] = useState(0);
+
+  return (
+    <div className="relative">
+      {/* Timeline line */}
+      <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
+      
+      <div className="space-y-8">
+        {activities.map((activity, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className={`relative flex gap-8 cursor-pointer transition-all duration-300 ${
+              activeActivity === index ? 'scale-105' : 'hover:scale-102'
+            }`}
+            onClick={() => setActiveActivity(index)}
+          >
+            {/* Timeline dot */}
+            <motion.div
+              className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                activeActivity === index 
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg shadow-blue-500/50' 
+                  : 'bg-white border-4 border-blue-200'
+              }`}
+              whileHover={{ scale: 1.1 }}
+            >
+              <Clock className={`w-6 h-6 ${activeActivity === index ? 'text-white' : 'text-blue-600'}`} />
+            </motion.div>
+            
+            {/* Content */}
+            <Card 
+              className={`flex-1 p-6 transition-all duration-300 ${
+                activeActivity === index ? 'border-blue-500 shadow-xl' : ''
+              }`}
+              hover={false}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="text-sm font-medium text-blue-600 mb-1">{activity.time}</p>
+                  <h4 className="text-xl font-semibold text-gray-900">{activity.activity}</h4>
+                </div>
+                <Badge variant="outline">{activity.location}</Badge>
+              </div>
+              
+              <AnimatePresence>
+                {activeActivity === index && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <p className="text-gray-700 mb-4">{activity.description}</p>
+                    
+                    {activity.local_guide_tip && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                        <p className="text-sm text-amber-800">
+                          <strong>💡 Local Tip:</strong> {activity.local_guide_tip}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-3">
+                      {activity.Maps_link && (
+                        <Button size="sm" variant="outline">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          <a href={activity.Maps_link} target="_blank" rel="noopener noreferrer">
+                            View on Map
+                          </a>
+                        </Button>
+                      )}
+                      {activity.booking_link && (
+                        <Button size="sm" variant="primary">
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          <a href={activity.booking_link} target="_blank" rel="noopener noreferrer">
+                            Book Now
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -128,9 +414,31 @@ const ItineraryDetails = () => {
   const [activeDay, setActiveDay] = useState(0);
   const [activeSection, setActiveSection] = useState("overview");
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const router = useRouter();
   const params = useParams();
   const itineraryId = params.id as string;
+
+  // Scroll-based animations
+  const { scrollY } = useScroll();
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
+
+  const sections = [
+    { id: "overview", label: "Overview", icon: Info },
+    { id: "itinerary", label: "Daily Plans", icon: Calendar },
+    { id: "accommodation", label: "Stay", icon: BedDouble },
+    { id: "experiences", label: "Experiences", icon: Star },
+    { id: "food", label: "Food Guide", icon: Coffee },
+    { id: "practical", label: "Practical Tips", icon: Shield }
+  ];
 
   const formatDate = (dateString: string) => {
     try {
@@ -175,24 +483,40 @@ const ItineraryDetails = () => {
     fetchItinerary();
   }, [itineraryId, router]);
 
+  // Auto-scroll to section on navigation
+  useEffect(() => {
+    const element = document.getElementById(activeSection);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [activeSection]);
+
   if (loading) {
     return (
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50"
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
       >
         <div className="text-center">
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-6"
-          />
+            animate={{ 
+              rotate: 360,
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ 
+              rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+              scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+            }}
+            className="w-20 h-20 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-8 relative"
+          >
+            <div className="absolute inset-2 border-2 border-purple-200 border-r-purple-500 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+          </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-2xl font-bold text-gray-800 mb-2"
+            className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3"
           >
             Preparing Your Journey
           </motion.h2>
@@ -200,10 +524,34 @@ const ItineraryDetails = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-gray-600"
+            className="text-gray-600 text-lg"
           >
             Loading your personalized itinerary...
           </motion.p>
+          
+          {/* Floating elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-20"
+                style={{
+                  left: `${20 + i * 15}%`,
+                  top: `${30 + (i % 2) * 40}%`,
+                }}
+                animate={{
+                  y: [0, -30, 0],
+                  opacity: [0.2, 0.5, 0.2],
+                }}
+                transition={{
+                  duration: 3 + i * 0.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.3
+                }}
+              />
+            ))}
+          </div>
         </div>
       </motion.div>
     );
@@ -214,13 +562,13 @@ const ItineraryDetails = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="min-h-screen flex flex-col items-center justify-center text-center p-4 bg-gradient-to-br from-red-50 to-pink-50"
+        className="min-h-screen flex flex-col items-center justify-center text-center p-4 bg-gradient-to-br from-red-50 via-pink-50 to-purple-50"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-6xl mb-4"
+          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          className="text-8xl mb-6"
         >
           😢
         </motion.div>
@@ -228,7 +576,7 @@ const ItineraryDetails = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-3xl font-bold text-gray-800 mb-2"
+          className="text-4xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-4"
         >
           Something went wrong
         </motion.h1>
@@ -236,7 +584,7 @@ const ItineraryDetails = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-gray-600 mb-8 max-w-md"
+          className="text-gray-600 mb-8 max-w-md text-lg"
         >
           {error || "We couldn't find the itinerary you're looking for. Please try again later."}
         </motion.p>
@@ -275,21 +623,25 @@ const ItineraryDetails = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      className="min-h-screen bg-gray-50"
+      transition={{ duration: 0.8 }}
+      className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30"
     >
-      {/* Fixed Navigation Header */}
+      {/* Floating Progress Indicator */}
+      <FloatingProgress activeSection={activeSection} sections={sections} />
+
+      {/* Fixed Navigation Header with Glass Morphism */}
       <motion.header 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 z-50 shadow-sm"
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="fixed top-0 w-full bg-white/20 backdrop-blur-md border-b border-white/20 z-50 shadow-lg"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Button 
-              variant="ghost" 
+              variant="glass" 
               onClick={() => router.push("/profile")}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-gray-800 hover:text-gray-900"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Profile
@@ -297,32 +649,42 @@ const ItineraryDetails = () => {
             
             <div className="flex items-center gap-3">
               <Button
-                variant="ghost"
+                variant="glass"
                 onClick={() => setIsBookmarked(!isBookmarked)}
-                className={isBookmarked ? "text-red-500" : "text-gray-500"}
+                className={isBookmarked ? "text-red-500" : "text-gray-700"}
               >
                 <Heart className={`w-4 h-4 ${isBookmarked ? "fill-current" : ""}`} />
               </Button>
-              <Button variant="ghost">
+              <Button variant="glass" className="text-gray-700">
                 <Share2 className="w-4 h-4" />
               </Button>
-              <Button variant="ghost">
+              <Button variant="glass" className="text-gray-700">
                 <Download className="w-4 h-4" />
+              </Button>
+              
+              {/* Mobile menu toggle */}
+              <Button 
+                variant="glass" 
+                className="md:hidden text-gray-700"
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+              >
+                {showMobileMenu ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </Button>
             </div>
           </div>
         </div>
       </motion.header>
 
-      {/* Hero Section with Large Image */}
+      {/* Enhanced Hero Section with Parallax */}
       <motion.section 
-        initial={{ opacity: 0, scale: 1.1 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1 }}
+        ref={heroRef}
         className="relative h-screen overflow-hidden"
       >
-        {/* Background Image */}
-        <div className="absolute inset-0">
+        {/* Parallax Background */}
+        <motion.div 
+          className="absolute inset-0"
+          style={{ scale: heroScale, opacity: heroOpacity, y: heroY }}
+        >
           <Image
             src={hero_image_url || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2000&q=80`}
             alt={destination_name}
@@ -331,7 +693,26 @@ const ItineraryDetails = () => {
             priority
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        </motion.div>
+
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className={`absolute w-6 h-6 rounded-full opacity-30 ${
+                i % 3 === 0 ? 'bg-blue-400' : i % 3 === 1 ? 'bg-purple-400' : 'bg-pink-400'
+              }`}
+              style={{
+                left: `${10 + i * 12}%`,
+                top: `${20 + (i % 3) * 25}%`,
+              }}
+              variants={floatingAnimation}
+              animate="animate"
+              transition={{ delay: i * 0.2 }}
+            />
+          ))}
         </div>
 
         {/* Hero Content */}
@@ -340,29 +721,34 @@ const ItineraryDetails = () => {
             <motion.div
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
+              transition={{ delay: 0.8, duration: 1, type: "spring", stiffness: 50 }}
               className="max-w-4xl"
             >
-              <motion.div className="flex flex-wrap gap-3 mb-6">
-                <Badge variant="gradient" className="text-white">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {trip_parameters.dates}
-                </Badge>
-                <Badge variant="gradient" className="text-white">
-                  <Users className="w-4 h-4 mr-2" />
-                  {trip_parameters.travelers}
-                </Badge>
-                <Badge variant="gradient" className="text-white">
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  {trip_parameters.budget}
-                </Badge>
+              <motion.div 
+                className="flex flex-wrap gap-3 mb-8"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
+                {[
+                  { icon: Calendar, label: trip_parameters.dates },
+                  { icon: Users, label: trip_parameters.travelers },
+                  { icon: DollarSign, label: trip_parameters.budget }
+                ].map((item, index) => (
+                  <motion.div key={index} variants={fadeInUp}>
+                    <Badge variant="glow" glow className="text-white text-sm px-4 py-2">
+                      <item.icon className="w-4 h-4 mr-2" />
+                      {item.label}
+                    </Badge>
+                  </motion.div>
+                ))}
               </motion.div>
               
               <motion.h1 
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.8 }}
-                className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight"
+                transition={{ delay: 1, duration: 1, type: "spring", stiffness: 50 }}
+                className="text-6xl md:text-8xl font-bold text-white mb-8 leading-tight drop-shadow-2xl"
               >
                 {personalized_title}
               </motion.h1>
@@ -370,8 +756,8 @@ const ItineraryDetails = () => {
               <motion.p 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.8 }}
-                className="text-xl md:text-2xl text-white/90 mb-8 font-light"
+                transition={{ delay: 1.2, duration: 0.8 }}
+                className="text-2xl md:text-3xl text-white/90 mb-10 font-light drop-shadow-lg"
               >
                 {destination_name} • Created {new Date(created_at).toLocaleDateString()}
               </motion.p>
@@ -379,14 +765,14 @@ const ItineraryDetails = () => {
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1, duration: 0.8 }}
-                className="flex flex-wrap gap-4"
+                transition={{ delay: 1.4, duration: 0.8 }}
+                className="flex flex-wrap gap-6"
               >
                 <Button variant="primary" size="lg" onClick={() => setActiveSection("itinerary")}>
                   <Play className="w-5 h-5 mr-2" />
                   Start Journey
                 </Button>
-                <Button variant="outline" size="lg" className="bg-white/20 border-white/30 text-white hover:bg-white/30">
+                <Button variant="glass" size="lg">
                   <Eye className="w-5 h-5 mr-2" />
                   Quick Overview
                 </Button>
@@ -395,98 +781,164 @@ const ItineraryDetails = () => {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
+        {/* Enhanced Scroll Indicator */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 2 }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
         >
           <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-white/70 text-center"
+            animate={{ 
+              y: [0, 15, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 2, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="text-white/80 text-center cursor-pointer group"
+            onClick={() => setActiveSection("overview")}
           >
-            <ChevronDown className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-sm">Scroll to explore</p>
+            <div className="w-8 h-12 border-2 border-white/50 rounded-full mb-4 mx-auto flex justify-center">
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="w-1 h-3 bg-white/70 rounded-full mt-2"
+              />
+            </div>
+            <p className="text-sm group-hover:text-white transition-colors">Scroll to explore</p>
           </motion.div>
         </motion.div>
       </motion.section>
 
-      {/* Navigation Tabs */}
+      {/* Enhanced Navigation Tabs with Mobile Support */}
       <motion.div 
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="sticky top-20 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm"
+        className="sticky top-20 z-40 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-xl"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex overflow-x-auto py-4 space-x-6">
-            {[
-              { id: "overview", label: "Overview", icon: Info },
-              { id: "itinerary", label: "Daily Plans", icon: Calendar },
-              { id: "accommodation", label: "Stay", icon: BedDouble },
-              { id: "experiences", label: "Experiences", icon: Star },
-              { id: "food", label: "Food Guide", icon: Coffee },
-              { id: "practical", label: "Practical Tips", icon: Shield }
-            ].map((section) => (
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex overflow-x-auto py-6 space-x-6">
+            {sections.map((section) => (
               <motion.button
                 key={section.id}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveSection(section.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all duration-200 ${
+                className={`flex items-center gap-3 px-6 py-3 rounded-2xl whitespace-nowrap transition-all duration-300 font-medium ${
                   activeSection === section.id
-                    ? "bg-blue-600 text-white shadow-lg"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50 scale-105"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-white/20 backdrop-blur-sm border border-white/30"
                 }`}
               >
-                <section.icon className="w-4 h-4" />
+                <section.icon className="w-5 h-5" />
                 {section.label}
               </motion.button>
             ))}
           </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden py-4">
+            <Button
+              variant="glass"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="w-full justify-between text-gray-800"
+            >
+              <div className="flex items-center gap-2">
+                {sections.find(s => s.id === activeSection)?.icon && (
+                  <sections.find(s => s.id === activeSection).icon className="w-4 h-4" />
+                )}
+                {sections.find(s => s.id === activeSection)?.label}
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showMobileMenu ? 'rotate-180' : ''}`} />
+            </Button>
+            
+            <AnimatePresence>
+              {showMobileMenu && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 space-y-2 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 p-4"
+                >
+                  {sections.map((section) => (
+                    <motion.button
+                      key={section.id}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setActiveSection(section.id);
+                        setShowMobileMenu(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                        activeSection === section.id
+                          ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                          : "text-gray-700 hover:bg-white/30"
+                      }`}
+                    >
+                      <section.icon className="w-4 h-4" />
+                      {section.label}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </motion.div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Enhanced Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <AnimatePresence mode="wait">
           {activeSection === "overview" && (
             <motion.div
               key="overview"
+              id="overview"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
+              transition={{ duration: 0.5 }}
+              className="space-y-12"
             >
-              {/* Quick Stats */}
+              {/* Enhanced Quick Stats with 3D Cards */}
               <motion.div
-                variants={staggerContainer}
+                variants={progressiveReveal}
                 initial="initial"
                 animate="animate"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
               >
                 {[
-                  { label: "Duration", value: trip_parameters.dates, icon: Calendar, color: "blue" },
-                  { label: "Travelers", value: trip_parameters.travelers, icon: Users, color: "green" },
-                  { label: "Budget", value: trip_parameters.budget, icon: DollarSign, color: "purple" },
-                  { label: "Total Cost", value: trip_overview.estimated_total_cost, icon: Award, color: "orange" }
+                  { label: "Duration", value: trip_parameters.dates, icon: Calendar, gradient: "from-blue-500 to-cyan-500" },
+                  { label: "Travelers", value: trip_parameters.travelers, icon: Users, gradient: "from-green-500 to-emerald-500" },
+                  { label: "Budget", value: trip_parameters.budget, icon: DollarSign, gradient: "from-purple-500 to-pink-500" },
+                  { label: "Total Cost", value: trip_overview.estimated_total_cost, icon: Award, gradient: "from-orange-500 to-red-500" }
                 ].map((stat, index) => (
                   <motion.div
                     key={index}
-                    variants={fadeInUp}
-                    className="bg-gradient-to-br from-blue-50 to-purple-100 p-6 rounded-2xl border border-blue-200"
+                    variants={scaleIn}
+                    whileHover={{ rotateY: 10, rotateX: 5 }}
+                    className="relative group cursor-pointer"
+                    style={{ perspective: '1000px' }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                        <p className="text-2xl font-bold text-blue-700 mt-1">{stat.value}</p>
+                    <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} rounded-3xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300`} />
+                    <Card 
+                      className="relative bg-white/90 backdrop-blur-md p-8 border-2 border-white/50 transform-gpu"
+                      hover={false}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
+                          <p className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mt-2">{stat.value}</p>
+                        </div>
+                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${stat.gradient} flex items-center justify-center shadow-lg`}>
+                          <stat.icon className="w-8 h-8 text-white" />
+                        </div>
                       </div>
-                      <stat.icon className="w-8 h-8 text-blue-500" />
-                    </div>
+                    </Card>
                   </motion.div>
                 ))}
               </motion.div>
@@ -576,39 +1028,58 @@ const ItineraryDetails = () => {
           {activeSection === "itinerary" && (
             <motion.div
               key="itinerary"
+              id="itinerary"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
+              transition={{ duration: 0.5 }}
+              className="space-y-12"
             >
-              {/* Day Selector */}
-              <Card className="p-6">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Calendar className="w-7 h-7 mr-3 text-blue-500" />
-                  Daily Itinerary
-                </h2>
+              {/* Enhanced Day Selector with Glass Cards */}
+              <Card className="p-8 bg-white/80 backdrop-blur-lg border-2 border-white/50" glass>
+                <motion.h2 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-8 flex items-center"
+                >
+                  <Calendar className="w-8 h-8 mr-4 text-blue-500" />
+                  Daily Journey
+                </motion.h2>
                 
-                <div className="flex flex-wrap gap-3 mb-8">
+                <motion.div 
+                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12"
+                  variants={progressiveReveal}
+                  initial="initial"
+                  animate="animate"
+                >
                   {daily_itinerary.map((day, index) => (
                     <motion.button
                       key={index}
-                      whileHover={{ scale: 1.05 }}
+                      variants={fadeInUp}
+                      whileHover={{ scale: 1.05, y: -5 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setActiveDay(index)}
-                      className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                      className={`relative p-6 rounded-2xl font-medium transition-all duration-300 overflow-hidden group ${
                         activeDay === index
-                          ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          ? "bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 text-white shadow-xl shadow-blue-500/50"
+                          : "bg-white/50 backdrop-blur-sm border-2 border-white/30 text-gray-700 hover:bg-white/70 hover:shadow-lg"
                       }`}
                     >
-                      Day {index + 1}
-                      <div className="text-xs opacity-80">
-                        {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {/* Animated background */}
+                      <div className={`absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 ${activeDay === index ? 'opacity-100' : ''}`} />
+                      
+                      <div className="relative z-10">
+                        <div className="text-lg font-bold mb-1">Day {index + 1}</div>
+                        <div className="text-sm opacity-80">
+                          {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
+                        <div className={`text-xs mt-2 font-medium ${activeDay === index ? 'text-white/80' : 'text-gray-500'}`}>
+                          {day.theme}
+                        </div>
                       </div>
                     </motion.button>
                   ))}
-                </div>
+                </motion.div>
 
                 {/* Active Day Content */}
                 <AnimatePresence mode="wait">
@@ -621,146 +1092,114 @@ const ItineraryDetails = () => {
                       transition={{ duration: 0.4 }}
                       className="space-y-8"
                     >
-                      <div className="text-center">
-                        <h3 className="text-2xl font-bold text-gray-900">{day.theme}</h3>
-                        <p className="text-gray-600 mt-2">{formatDate(day.date)}</p>
-                      </div>
+                      <motion.div 
+                        className="text-center mb-12"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <h3 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">{day.theme}</h3>
+                        <p className="text-lg text-gray-600">{formatDate(day.date)}</p>
+                      </motion.div>
                       
-                      {/* Activities Timeline */}
-                      <div className="space-y-6">
-                        {day.activities.map((activity, actIndex) => (
-                          <motion.div
-                            key={actIndex}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: actIndex * 0.1 }}
-                            className="flex gap-6 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                          >
-                            <div className="flex-shrink-0">
-                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                <Clock className="w-6 h-6 text-blue-600" />
-                              </div>
-                              <p className="text-sm font-medium text-blue-600 mt-2 text-center">{activity.time}</p>
-                            </div>
-                            
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between mb-3">
-                                <h4 className="text-xl font-semibold text-gray-900">{activity.activity}</h4>
-                                <Badge variant="outline">{activity.location}</Badge>
-                              </div>
-                              
-                              {activity.tags && activity.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                  {activity.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
-                                    <TagBadge key={tagIndex} tag={tag} type="activity" />
-                                  ))}
-                                  {activity.tags.length > 3 && (
-                                    <span className="text-xs text-gray-500">+{activity.tags.length - 3} more</span>
-                                  )}
-                                </div>
-                              )}
-                              
-                              <p className="text-gray-700 mb-3">{activity.description}</p>
-                              
-                              {activity.local_guide_tip && (
-                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
-                                  <p className="text-sm text-amber-800">
-                                    <strong>💡 Local Tip:</strong> {activity.local_guide_tip}
-                                  </p>
-                                </div>
-                              )}
-                              
-                              <div className="flex gap-3">
-                                {activity.Maps_link && (
-                                  <Button size="sm" variant="outline">
-                                    <MapPin className="w-4 h-4 mr-2" />
-                                    <a href={activity.Maps_link} target="_blank" rel="noopener noreferrer">
-                                      View on Map
-                                    </a>
-                                  </Button>
-                                )}
-                                {activity.booking_link && (
-                                  <Button size="sm" variant="primary">
-                                    <ExternalLink className="w-4 h-4 mr-2" />
-                                    <a href={activity.booking_link} target="_blank" rel="noopener noreferrer">
-                                      Book Now
-                                    </a>
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
+                      {/* Interactive Timeline */}
+                      <InteractiveTimeline activities={day.activities} />
                       
-                      {/* Meals for the day */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                        {/* Lunch */}
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.3 }}
-                          className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-6"
-                        >
-                          <h5 className="font-bold text-orange-900 mb-3 flex items-center text-lg">
-                            <Utensils className="w-5 h-5 mr-2" />
-                            Lunch
-                          </h5>
-                          <h6 className="font-semibold text-gray-900 text-lg mb-2">{day.meals.lunch.dish}</h6>
-                          <p className="text-orange-700 font-medium mb-2">{day.meals.lunch.restaurant}</p>
-                          
-                          {day.meals.lunch.tags && day.meals.lunch.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 my-3">
-                              {day.meals.lunch.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
-                                <TagBadge key={tagIndex} tag={tag} type="food" />
-                              ))}
-                            </div>
-                          )}
-                          
-                          <p className="text-sm text-gray-600 mb-4">{day.meals.lunch.description}</p>
-                          {day.meals.lunch.zomato_link && (
-                            <Button size="sm" variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              <a href={day.meals.lunch.zomato_link} target="_blank" rel="noopener noreferrer">
-                                View Menu
-                              </a>
-                            </Button>
-                          )}
-                        </motion.div>
+                                             {/* Enhanced Meals Section */}
+                       <motion.div 
+                         className="mt-16"
+                         initial={{ opacity: 0, y: 30 }}
+                         animate={{ opacity: 1, y: 0 }}
+                         transition={{ delay: 0.6 }}
+                       >
+                         <h4 className="text-2xl font-bold text-center mb-8 bg-gradient-to-r from-orange-600 to-purple-600 bg-clip-text text-transparent">
+                           Today's Culinary Journey
+                         </h4>
+                         
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           {/* Enhanced Lunch Card */}
+                           <Card 
+                             className="relative overflow-hidden bg-gradient-to-br from-orange-50/80 to-red-50/80 backdrop-blur-sm border-2 border-orange-200/50 p-8"
+                             hover
+                           >
+                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-400/20 to-red-400/20 rounded-full -translate-y-16 translate-x-16" />
+                             
+                             <div className="relative z-10">
+                               <div className="flex items-center justify-between mb-6">
+                                 <h5 className="font-bold text-orange-900 flex items-center text-xl">
+                                   <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-3">
+                                     <Utensils className="w-5 h-5 text-white" />
+                                   </div>
+                                   Lunch
+                                 </h5>
+                                 <Badge variant="outline" className="bg-white/50">Local Pick</Badge>
+                               </div>
+                               
+                               <h6 className="font-bold text-gray-900 text-xl mb-3">{day.meals.lunch.dish}</h6>
+                               <p className="text-orange-700 font-semibold mb-4 text-lg">{day.meals.lunch.restaurant}</p>
+                               
+                               {day.meals.lunch.tags && day.meals.lunch.tags.length > 0 && (
+                                 <div className="flex flex-wrap gap-2 my-4">
+                                   {day.meals.lunch.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                     <TagBadge key={tagIndex} tag={tag} type="food" />
+                                   ))}
+                                 </div>
+                               )}
+                               
+                               <p className="text-gray-700 mb-6 leading-relaxed">{day.meals.lunch.description}</p>
+                               {day.meals.lunch.zomato_link && (
+                                 <Button size="sm" variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100 hover:border-orange-400">
+                                   <ExternalLink className="w-4 h-4 mr-2" />
+                                   <a href={day.meals.lunch.zomato_link} target="_blank" rel="noopener noreferrer">
+                                     View Menu
+                                   </a>
+                                 </Button>
+                               )}
+                             </div>
+                           </Card>
 
-                        {/* Dinner */}
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.4 }}
-                          className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-6"
-                        >
-                          <h5 className="font-bold text-purple-900 mb-3 flex items-center text-lg">
-                            <Utensils className="w-5 h-5 mr-2" />
-                            Dinner
-                          </h5>
-                          <h6 className="font-semibold text-gray-900 text-lg mb-2">{day.meals.dinner.dish}</h6>
-                          <p className="text-purple-700 font-medium mb-2">{day.meals.dinner.restaurant}</p>
-                          
-                          {day.meals.dinner.tags && day.meals.dinner.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 my-3">
-                              {day.meals.dinner.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
-                                <TagBadge key={tagIndex} tag={tag} type="food" />
-                              ))}
-                            </div>
-                          )}
-                          
-                          <p className="text-sm text-gray-600 mb-4">{day.meals.dinner.description}</p>
-                          {day.meals.dinner.zomato_link && (
-                            <Button size="sm" variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-100">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              <a href={day.meals.dinner.zomato_link} target="_blank" rel="noopener noreferrer">
-                                View Menu
-                              </a>
-                            </Button>
-                          )}
-                        </motion.div>
-                      </div>
+                           {/* Enhanced Dinner Card */}
+                           <Card 
+                             className="relative overflow-hidden bg-gradient-to-br from-purple-50/80 to-pink-50/80 backdrop-blur-sm border-2 border-purple-200/50 p-8"
+                             hover
+                           >
+                             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full -translate-y-16 translate-x-16" />
+                             
+                             <div className="relative z-10">
+                               <div className="flex items-center justify-between mb-6">
+                                 <h5 className="font-bold text-purple-900 flex items-center text-xl">
+                                   <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-3">
+                                     <Utensils className="w-5 h-5 text-white" />
+                                   </div>
+                                   Dinner
+                                 </h5>
+                                 <Badge variant="outline" className="bg-white/50">Chef's Choice</Badge>
+                               </div>
+                               
+                               <h6 className="font-bold text-gray-900 text-xl mb-3">{day.meals.dinner.dish}</h6>
+                               <p className="text-purple-700 font-semibold mb-4 text-lg">{day.meals.dinner.restaurant}</p>
+                               
+                               {day.meals.dinner.tags && day.meals.dinner.tags.length > 0 && (
+                                 <div className="flex flex-wrap gap-2 my-4">
+                                   {day.meals.dinner.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                     <TagBadge key={tagIndex} tag={tag} type="food" />
+                                   ))}
+                                 </div>
+                               )}
+                               
+                               <p className="text-gray-700 mb-6 leading-relaxed">{day.meals.dinner.description}</p>
+                               {day.meals.dinner.zomato_link && (
+                                 <Button size="sm" variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-100 hover:border-purple-400">
+                                   <ExternalLink className="w-4 h-4 mr-2" />
+                                   <a href={day.meals.dinner.zomato_link} target="_blank" rel="noopener noreferrer">
+                                     View Menu
+                                   </a>
+                                 </Button>
+                               )}
+                             </div>
+                           </Card>
+                         </div>
+                       </motion.div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -771,11 +1210,12 @@ const ItineraryDetails = () => {
           {activeSection === "accommodation" && (
             <motion.div
               key="accommodation"
+              id="accommodation"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
+              transition={{ duration: 0.5 }}
+              className="space-y-12"
             >
               <Card className="p-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
@@ -881,11 +1321,12 @@ const ItineraryDetails = () => {
           {activeSection === "experiences" && (
             <motion.div
               key="experiences"
+              id="experiences"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
+              transition={{ duration: 0.5 }}
+              className="space-y-12"
             >
               {/* Signature Experiences */}
               <Card className="p-8">
@@ -1019,11 +1460,12 @@ const ItineraryDetails = () => {
           {activeSection === "food" && (
             <motion.div
               key="food"
+              id="food"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
+              transition={{ duration: 0.5 }}
+              className="space-y-12"
             >
               <Card className="p-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
@@ -1088,11 +1530,12 @@ const ItineraryDetails = () => {
           {activeSection === "practical" && (
             <motion.div
               key="practical"
+              id="practical"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
+              transition={{ duration: 0.5 }}
+              className="space-y-12"
             >
               <Card className="p-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
