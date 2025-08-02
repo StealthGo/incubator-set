@@ -198,14 +198,14 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
 
 export default function PreferencesPage() {
   const [messages, setMessages] = useState([
-    { sender: "system", text: conversationFlow.greeting().text },
+    { sender: "system", text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" },
   ]);
   const [input, setInput] = useState("");
   const [itinerary, setItinerary] = useState<Record<string, any> | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showFullItinerary, setShowFullItinerary] = useState(false);
-  const [step, setStep] = useState(0);
   const [showOptions, setShowOptions] = useState(false);
+  const [isConversing, setIsConversing] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -214,14 +214,9 @@ export default function PreferencesPage() {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  // Store user responses for dynamic conversation
-  const [userResponses, setUserResponses] = useState<Record<string, string>>({});
-  const [currentQuestionKey, setCurrentQuestionKey] = useState("greeting");
-
-  // Conversation steps mapping
-  const conversationSteps = [
-    "greeting", "dates", "travelers", "interests", "budget", "pace", "aboutYou", "generate"
-  ];
+  // Store conversation state
+  const [conversationComplete, setConversationComplete] = useState(false);
+  const [currentQuestionType, setCurrentQuestionType] = useState("destination");
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -265,6 +260,7 @@ export default function PreferencesPage() {
     checkUserStatus();
   }, []);
 
+  // LLM-powered conversation handler
   const handleSend = async (e?: React.FormEvent, value?: string) => {
     if (e) e.preventDefault();
     
@@ -279,85 +275,99 @@ export default function PreferencesPage() {
 
     if (itinerary) {
         setItinerary(null);
+        setConversationComplete(false);
     }
 
     // Handle date picker special case
-    if (currentQuestionKey === 'dates' && !itinerary) {
-        if(currentInput === "📅 Pick Dates") {
-            setShowDatePicker(true);
-            return;
-        }
-        if(currentInput === "🤷‍♀️ I'm Flexible") {
-            const randomDates = getRandomFlexibleDates();
-            setMessages((msgs) => [...msgs, { sender: "user", text: randomDates }]);
-            setInput("");
-            setUserResponses(prev => ({ ...prev, dates: randomDates }));
-            
-            // Move to next conversation step
-            setTimeout(() => {
-              const nextResponse = conversationFlow.getDatesResponse(userResponses.destination || "your destination", randomDates);
-              setMessages((msgs) => [...msgs, { sender: "system", text: nextResponse.text }]);
-              setCurrentQuestionKey(nextResponse.key);
-              setStep(step + 1);
-            }, 800);
-            return;
-        }
+    if (currentInput === "📅 Pick Dates") {
+        setShowDatePicker(true);
+        return;
+    }
+    
+    if (currentInput === "🤷‍♀️ I'm Flexible") {
+        const randomDates = getRandomFlexibleDates();
+        setMessages((msgs) => [...msgs, { sender: "user", text: randomDates }]);
+        setInput("");
+        
+        // Let LLM handle the response to flexible dates
+        await getLLMResponse([...messages, { sender: "user", text: randomDates }]);
+        return;
     }
     
     setMessages((msgs) => [...msgs, { sender: "user", text: currentInput }]);
     setInput("");
 
-    // Store user response
-    setUserResponses(prev => ({ ...prev, [currentQuestionKey]: currentInput }));
+    // Get LLM response to continue conversation
+    await getLLMResponse([...messages, { sender: "user", text: currentInput }]);
+  };
 
-    // Generate next question based on conversation flow
-    setTimeout(() => {
-      let nextResponse;
-      
-      switch (currentQuestionKey) {
-        case "greeting":
-          nextResponse = conversationFlow.getDestinationResponse(currentInput);
-          break;
-        case "dates":
-          nextResponse = conversationFlow.getDatesResponse(userResponses.destination || currentInput, currentInput);
-          break;
-        case "travelers":
-          nextResponse = conversationFlow.getInterestsResponse(userResponses.destination || "", currentInput);
-          break;
-        case "interests":
-          nextResponse = conversationFlow.getBudgetResponse(userResponses.destination || "", currentInput, currentInput);
-          break;
-        case "budget":
-          nextResponse = conversationFlow.getPaceResponse(userResponses.destination || "", currentInput);
-          break;
-        case "pace":
-          nextResponse = conversationFlow.getFinalResponse(userResponses.destination || "");
-          break;
-        case "aboutYou":
-          nextResponse = conversationFlow.getFinalResponse(userResponses.destination || "");
-          break;
-        default:
-          setShowOptions(true);
+  // Function to get intelligent responses from LLM
+  const getLLMResponse = async (conversationHistory: Array<{sender: string, text: string}>) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setShowSignInModal(true);
+      return;
+    }
+
+    setIsConversing(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat-conversation`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          system_prompt: systemPrompt,
+          conversation_history: conversationHistory,
+          user_name: user?.name
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          setShowSignInModal(true);
           return;
-      }
-
-      if (nextResponse) {
-        setMessages((msgs) => [...msgs, { sender: "system", text: nextResponse.text }]);
-        setCurrentQuestionKey(nextResponse.key);
-        setStep(step + 1);
-        
-        // Add follow-up message with slight delay for more natural feel
-        if (nextResponse.followUp) {
-          setTimeout(() => {
-            setMessages((msgs) => [...msgs, { sender: "system", text: nextResponse.followUp }]);
-          }, 1500);
         }
+        throw new Error(`API error: ${response.statusText}`);
       }
 
-      if (nextResponse?.key === "generate") {
+      const data = await response.json();
+      
+      // Add LLM response to conversation
+      setMessages((msgs) => [...msgs, { sender: "system", text: data.response }]);
+      
+      // Check if conversation is ready for itinerary generation
+      if (data.ready_for_itinerary || data.response.toLowerCase().includes("ready to generate") || data.response.toLowerCase().includes("work my magic")) {
+        setConversationComplete(true);
         setShowOptions(true);
       }
-    }, 800); // Delay to make conversation feel more natural
+
+    } catch (error) {
+      console.error("Error getting LLM response:", error);
+      setMessages((msgs) => [...msgs, { 
+        sender: "system", 
+        text: "I'm having trouble responding right now. Could you try again? 😅" 
+      }]);
+    } finally {
+      setIsConversing(false);
+    }
+  };
+
+  // Determine current question type for quick replies
+  const getCurrentQuestionType = () => {
+    const lastMessage = messages[messages.length - 1]?.text.toLowerCase() || "";
+    
+    if (lastMessage.includes("where") && lastMessage.includes("go")) return "destination";
+    if (lastMessage.includes("when") || lastMessage.includes("date")) return "dates";
+    if (lastMessage.includes("who") || lastMessage.includes("travel")) return "travelers";
+    if (lastMessage.includes("interest") || lastMessage.includes("want to do")) return "interests";
+    if (lastMessage.includes("budget") || lastMessage.includes("cost")) return "budget";
+    if (lastMessage.includes("pace") || lastMessage.includes("rhythm")) return "pace";
+    
+    return "destination";
   };
 
   const handleGenerate = async (followUpPrompt?: string) => {
@@ -801,10 +811,9 @@ export default function PreferencesPage() {
         <div className="flex items-center gap-2">
           <button onClick={() => { 
             setItinerary(null); 
-            setMessages([{ sender: 'system', text: conversationFlow.greeting(user?.name).text }]); 
-            setStep(0); 
-            setCurrentQuestionKey("greeting");
-            setUserResponses({});
+            setMessages([{ sender: 'system', text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" }]); 
+            setConversationComplete(false);
+            setCurrentQuestionType("destination");
             setShowOptions(false);
             setShowSignInModal(false);
           }} className="px-5 py-2 rounded-full bg-orange-500 text-white font-semibold shadow hover:bg-orange-600 transition-all text-sm">
