@@ -922,24 +922,32 @@ export default function PreferencesPage() {
                 placeholder={
                   !isLoggedIn 
                     ? "Please sign in to start planning your trip..." 
+                    : isConversing
+                      ? "I'm thinking of the perfect response..."
+                    : conversationComplete
+                      ? "Ready to generate your itinerary! Hit the button below."
                     : itinerary 
                       ? "Any changes? Type here..." 
                       : "Type your answer..."
                 } 
                 value={input} 
                 onChange={e => setInput(e.target.value)} 
-                disabled={isGenerating || !isLoggedIn} 
+                disabled={isGenerating || !isLoggedIn || isConversing} 
               />
               <button 
                 type="submit" 
                 className={`p-2 rounded-full font-semibold shadow transition-all ${
-                  isLoggedIn 
+                  isLoggedIn && !isConversing
                     ? 'bg-orange-500 text-white hover:bg-orange-600' 
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`} 
-                disabled={isGenerating || !isLoggedIn}
+                disabled={isGenerating || !isLoggedIn || isConversing}
               >
-                <Icon name="send" />
+                {isConversing ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <Icon name="send" />
+                )}
               </button>
             </form>
              {showOptions && (
@@ -998,8 +1006,9 @@ export default function PreferencesPage() {
           onClose={() => setShowSignInModal(false)} 
           onSuccess={() => {
             // Start the conversation after successful sign in
-            setMessages([{ sender: 'system', text: systemQuestions[0].text }]);
-            setStep(0);
+            setMessages([{ sender: 'system', text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" }]);
+            setConversationComplete(false);
+            setCurrentQuestionType("destination");
             setShowOptions(false);
             setItinerary(null);
           }} 
