@@ -804,170 +804,456 @@ export default function PreferencesPage() {
             </motion.section>
         )}
         
-        {/* Accommodation Suggestions */}
+        {/* Enhanced Accommodation Suggestions */}
         {itinerary.accommodation_suggestions && (
-            <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="hotel" className="text-4xl text-orange-500"/> Accommodation Options</h3>
+            <motion.section
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+                <motion.h3 
+                  className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <BedDouble className="text-2xl text-white" />
+                  </div>
+                  Accommodation Options
+                </motion.h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {itinerary.accommodation_suggestions.map((opt: any, i: number) => (
-                        <div key={i} className="bg-white rounded-2xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden">
-                            <img src={opt.image_url} alt={opt.name} className="w-full h-48 object-cover"/>
-                            <div className="p-6">
-                                <div className="flex items-center gap-4 mb-3">
-                                    <Icon name={opt.icon} className="text-3xl text-orange-600"/>
+                        <motion.div 
+                          key={i} 
+                          className="bg-white rounded-3xl shadow-xl border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden group"
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1, duration: 0.6 }}
+                          viewport={{ once: true }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="relative overflow-hidden">
+                              <motion.img 
+                                src={opt.image_url} 
+                                alt={opt.name} 
+                                className="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110"
+                                initial={{ scale: 1.1 }}
+                                whileInView={{ scale: 1 }}
+                                transition={{ duration: 0.8 }}
+                                viewport={{ once: true }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            </div>
+                            <div className="p-8">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                                      <BedDouble className="text-xl text-white" />
+                                    </div>
                                     <div>
-                                        <h4 className="font-bold text-xl text-gray-800">{opt.name}</h4>
-                                        <p className="text-sm text-gray-500">{opt.type}</p>
+                                        <h4 className="font-bold text-2xl text-gray-800">{opt.name}</h4>
+                                        <p className="text-base text-gray-500">{opt.type}</p>
                                     </div>
                                 </div>
-                                <p className="text-gray-700 mb-4">{opt.description}</p>
+                                <p className="text-gray-700 mb-6 text-lg leading-relaxed">{opt.description}</p>
                                 <div className="flex justify-between items-center">
-                                    <p className="text-gray-800 font-semibold text-lg">{opt.estimated_cost}</p>
-                                    <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
-                                        <Icon name="hotel" /> Book on MMT
-                                    </a>
+                                    <p className="text-gray-800 font-bold text-2xl flex items-center gap-2">
+                                      <DollarSign className="w-6 h-6 text-green-500" />
+                                      {opt.estimated_cost}
+                                    </p>
+                                    <Button variant="primary" size="default" asChild>
+                                      <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                          <BedDouble className="w-4 h-4" /> Book on MMT
+                                      </a>
+                                    </Button>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
-            </section>
+            </motion.section>
         )}
 
-        {/* Trip Overview */}
+        {/* Enhanced Trip Overview */}
         {itinerary.trip_overview && (
-          <section className="bg-orange-50 rounded-2xl p-6 shadow-lg border border-orange-200">
-            <h3 className="text-3xl font-bold text-orange-800 mb-4 flex items-center gap-3"><Icon name="info" className="text-4xl"/> Trip Overview</h3>
-            <p className="text-gray-700 mb-6 text-lg leading-relaxed">{itinerary.trip_overview.destination_insights}</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-base">
-              <div className="text-gray-800 flex items-center gap-3"><Icon name="thermostat" className="text-orange-600" /><div><strong>Weather:</strong> {itinerary.trip_overview.weather_during_visit}</div></div>
-              <div className="text-gray-800 flex items-center gap-3"><Icon name="calendar_today" className="text-orange-600" /><div><strong>Season:</strong> {itinerary.trip_overview.seasonal_context}</div></div>
-              <div className="text-gray-800 flex items-center gap-3"><Icon name="festival" className="text-orange-600" /><div><strong>Culture:</strong> {itinerary.trip_overview.cultural_context}</div></div>
-              <div className="text-gray-800 flex items-center gap-3"><Icon name="group" className="text-orange-600" /><div><strong>Customs:</strong> {Array.isArray(itinerary.trip_overview.local_customs_to_know) ? itinerary.trip_overview.local_customs_to_know.join(', ') : 'N/A'}</div></div>
+          <motion.section 
+            className="relative rounded-3xl p-8 shadow-2xl border border-orange-200 overflow-hidden"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-orange-100/30 to-transparent" />
+            
+            {/* Floating background elements */}
+            <div className="absolute inset-0 overflow-hidden">
+              {[...Array(4)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-32 h-32 bg-orange-200/20 rounded-full"
+                  style={{
+                    left: `${20 + i * 25}%`,
+                    top: `${10 + (i % 2) * 70}%`,
+                  }}
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 360],
+                  }}
+                  transition={{
+                    duration: 20 + i * 5,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                />
+              ))}
             </div>
-            <div className="text-orange-900 font-bold mt-6 text-xl text-right">Estimated Cost: {itinerary.trip_overview.estimated_total_cost}</div>
-          </section>
+
+            <div className="relative z-10">
+              <motion.h3 
+                className="text-4xl font-bold text-orange-800 mb-6 flex items-center gap-4"
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                  <Eye className="text-2xl text-white" />
+                </div>
+                Trip Overview
+              </motion.h3>
+              <motion.p 
+                className="text-gray-700 mb-8 text-xl leading-relaxed font-medium"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                {itinerary.trip_overview.destination_insights}
+              </motion.p>
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg"
+                variants={staggerContainer}
+                initial="initial"
+                whileInView="animate"
+                viewport={{ once: true }}
+              >
+                {[
+                  { icon: Mountain, label: "Weather", value: itinerary.trip_overview.weather_during_visit },
+                  { icon: Calendar, label: "Season", value: itinerary.trip_overview.seasonal_context },
+                  { icon: Heart, label: "Culture", value: itinerary.trip_overview.cultural_context },
+                  { icon: Users, label: "Customs", value: Array.isArray(itinerary.trip_overview.local_customs_to_know) ? itinerary.trip_overview.local_customs_to_know.join(', ') : 'N/A' }
+                ].map((item, index) => (
+                  <motion.div 
+                    key={index}
+                    className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 hover:bg-white/80 transition-all duration-300"
+                    variants={fadeInUp}
+                    whileHover={{ scale: 1.02, y: -5 }}
+                  >
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                        <item.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <strong className="text-gray-800 text-lg">{item.label}:</strong>
+                    </div>
+                    <p className="text-gray-700 ml-14">{item.value}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
+              <motion.div 
+                className="text-orange-900 font-bold mt-8 text-3xl text-right flex items-center justify-end gap-3"
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6, duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <DollarSign className="w-8 h-8 text-green-600" />
+                Estimated Cost: {itinerary.trip_overview.estimated_total_cost}
+              </motion.div>
+            </div>
+          </motion.section>
         )}
 
-        {/* Daily Itinerary */}
+        {/* Enhanced Daily Itinerary */}
         {itinerary.daily_itinerary && (
-          <section>
-            <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="map" className="text-4xl text-orange-500"/> Daily Itinerary</h3>
-            <div className="space-y-8">
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <motion.h3 
+              className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                <MapPin className="text-2xl text-white" />
+              </div>
+              Daily Itinerary
+            </motion.h3>
+            <div className="space-y-12">
               {itinerary.daily_itinerary.map((day: any, idx: number) => (
-                <div key={idx} className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl">
-                  <div className="bg-orange-400 text-white p-4">
-                    <h4 className="font-bold text-xl">{`Day ${idx + 1}: ${day.date}`}</h4>
-                    <p className="text-sm opacity-90">{day.theme}</p>
+                <motion.div 
+                  key={idx} 
+                  className="bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-500 hover:shadow-3xl border border-gray-100"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1, duration: 0.6 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white p-6 relative overflow-hidden">
+                    {/* Background pattern */}
+                    <div className="absolute inset-0 bg-black/10">
+                      <div className="absolute inset-0" style={{
+                        backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)`,
+                      }} />
+                    </div>
+                    
+                    <div className="relative z-10">
+                      <h4 className="font-bold text-3xl mb-2">{`Day ${idx + 1}: ${day.date}`}</h4>
+                      <p className="text-xl opacity-90">{day.theme}</p>
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <h5 className="font-bold text-xl text-gray-700 mb-4">Activities</h5>
-                    <div className="space-y-6">
+                  
+                  <div className="p-8">
+                    <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
+                      <Camera className="w-7 h-7 text-orange-500" />
+                      Activities
+                    </h5>
+                    <div className="space-y-8">
                         {day.activities.map((activity: any, actIdx: number) => (
-                          <div key={actIdx} className="flex gap-4 items-start">
+                          <motion.div 
+                            key={actIdx} 
+                            className="flex gap-6 items-start group"
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ delay: actIdx * 0.1, duration: 0.5 }}
+                            viewport={{ once: true }}
+                          >
                             <div className="flex flex-col items-center flex-shrink-0">
-                                <div className="bg-orange-100 text-orange-700 rounded-full h-12 w-12 flex items-center justify-center">
-                                    <Icon name={activity.icon || "place"} />
-                                </div>
-                                {actIdx < day.activities.length - 1 && <div className="w-px h-full bg-gray-200 mt-2"></div>}
+                                <motion.div 
+                                  className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl h-16 w-16 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
+                                  whileHover={{ scale: 1.1, rotate: 5 }}
+                                >
+                                    <MapPin className="w-7 h-7" />
+                                </motion.div>
+                                {actIdx < day.activities.length - 1 && (
+                                  <div className="w-1 h-20 bg-gradient-to-b from-orange-300 to-red-300 mt-4 rounded-full" />
+                                )}
                             </div>
-                            <div className="w-full">
-                              <p className="text-sm font-semibold text-gray-500">{activity.time}</p>
-                              <p className="font-bold text-lg text-gray-800">{activity.activity}</p>
-                              <div className="text-sm text-gray-600 flex items-center gap-1"><Icon name="location_on" className="text-sm"/> {activity.location}</div>
+                            <div className="w-full bg-gray-50 rounded-2xl p-6 group-hover:bg-gray-100 transition-all duration-300">
+                              <div className="flex items-center gap-3 mb-3">
+                                <Clock className="w-5 h-5 text-orange-500" />
+                                <p className="text-base font-bold text-orange-600">{activity.time}</p>
+                              </div>
+                              <p className="font-bold text-2xl text-gray-800 mb-2">{activity.activity}</p>
+                              <div className="text-lg text-gray-600 flex items-center gap-2 mb-4">
+                                <MapPin className="w-5 h-5 text-blue-500" />
+                                {activity.location}
+                              </div>
                               
                               {/* Activity Tags */}
                               {activity.tags && activity.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 my-2">
+                                <div className="flex flex-wrap gap-2 my-4">
                                   {activity.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
                                     <TagBadge key={tagIndex} tag={tag} type="activity" />
                                   ))}
                                   {activity.tags.length > 3 && (
-                                    <span className="text-xs text-gray-500">+{activity.tags.length - 3} more</span>
+                                    <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">+{activity.tags.length - 3} more</span>
                                   )}
                                 </div>
                               )}
                               
-                              <p className="text-gray-700 my-2">{activity.description}</p>
-                              <div className="mt-2 bg-amber-50 p-3 rounded-lg border border-amber-200">
-                                <p className="font-bold text-sm text-amber-800 mb-1">Local Guide Tip:</p>
-                                <p className="text-base text-amber-700 italic">"{activity.local_guide_tip}"</p>
-                              </div>
+                              <p className="text-gray-700 my-4 text-lg leading-relaxed">{activity.description}</p>
+                              
+                              <motion.div 
+                                className="mt-4 bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400"
+                                whileHover={{ x: 5 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                  <Star className="w-5 h-5" />
+                                  Local Guide Tip:
+                                </p>
+                                <p className="text-lg text-amber-700 italic">"{activity.local_guide_tip}"</p>
+                              </motion.div>
+                              
                                {activity.image_url && (
-                                <div className="mt-4 rounded-xl overflow-hidden shadow-md">
-                                    <img src={activity.image_url} alt={activity.activity} className="w-full h-56 object-cover transition-transform duration-300 hover:scale-105" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                                </div>
+                                <motion.div 
+                                  className="mt-6 rounded-2xl overflow-hidden shadow-lg"
+                                  whileHover={{ scale: 1.02 }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                    <img 
+                                      src={activity.image_url} 
+                                      alt={activity.activity} 
+                                      className="w-full h-64 object-cover transition-transform duration-500 hover:scale-110" 
+                                      onError={(e) => (e.currentTarget.style.display = 'none')} 
+                                    />
+                                </motion.div>
                                )}
-                               <div className="mt-4 flex items-center gap-4">
-                                   <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="text-sm text-white bg-blue-500 hover:bg-blue-600 font-semibold inline-flex items-center gap-2 py-2 px-3 rounded-lg transition-colors">
-                                       <Icon name="map"/> Google Maps
-                                   </a>
+                               
+                               <div className="mt-6 flex items-center gap-4">
+                                   <Button variant="primary" size="default" asChild>
+                                     <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                         <MapPin className="w-4 h-4" /> Google Maps
+                                     </a>
+                                   </Button>
                                    {activity.booking_link && (
-                                        <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="text-sm text-white bg-red-500 hover:bg-red-600 font-semibold inline-flex items-center gap-2 py-2 px-3 rounded-lg transition-colors">
-                                            <Icon name="restaurant_menu"/> View on Zomato
-                                        </a>
+                                        <Button variant="outline" size="default" asChild>
+                                          <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                              <Utensils className="w-4 h-4" /> View on Zomato
+                                          </a>
+                                        </Button>
                                    )}
                                </div>
                             </div>
-                          </div>
+                          </motion.div>
                         ))}
                     </div>
+                    
+                    {/* Enhanced Meals Section */}
                     {day.meals && (
-                        <div className="mt-8 pt-6 border-t border-gray-200">
-                             <h5 className="font-bold text-xl text-gray-700 mb-4">Meal Recommendations</h5>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {Object.entries(day.meals).map(([mealType, meal]: [string, any]) => (
-                                    <div key={mealType} className="bg-gray-50 rounded-xl p-4 shadow-md">
-                                        <p className="font-bold text-gray-800 capitalize">{mealType}</p>
-                                        <img src={meal.image_url} alt={meal.dish} className="w-full h-40 object-cover rounded-lg my-2"/>
-                                        <p className="text-gray-800 font-semibold text-lg">{meal.dish}</p>
-                                        <p className="text-sm text-gray-600">{meal.restaurant}</p>
-                                        
-                                        {/* Meal Tags */}
-                                        {meal.tags && meal.tags.length > 0 && (
-                                          <div className="flex flex-wrap gap-1 my-2">
-                                            {meal.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
-                                              <TagBadge key={tagIndex} tag={tag} type="food" />
-                                            ))}
-                                            {meal.tags.length > 3 && (
-                                              <span className="text-xs text-gray-500">+{meal.tags.length - 3} more</span>
+                        <motion.div 
+                          className="mt-12 pt-8 border-t border-gray-200"
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3, duration: 0.5 }}
+                          viewport={{ once: true }}
+                        >
+                             <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
+                               <Utensils className="w-7 h-7 text-orange-500" />
+                               Meal Recommendations
+                             </h5>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {Object.entries(day.meals).map(([mealType, meal]: [string, any]) => {
+                                    // Add null safety check
+                                    if (!meal) return null;
+                                    
+                                    return (
+                                        <motion.div 
+                                          key={mealType} 
+                                          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
+                                          whileHover={{ scale: 1.02, y: -5 }}
+                                        >
+                                            <p className="font-bold text-gray-800 capitalize text-xl mb-3">{mealType}</p>
+                                            {meal.image_url && (
+                                                <motion.img 
+                                                  src={meal.image_url} 
+                                                  alt={meal.dish || 'Meal'} 
+                                                  className="w-full h-48 object-cover rounded-2xl my-4 shadow-md"
+                                                  whileHover={{ scale: 1.05 }}
+                                                  transition={{ duration: 0.3 }}
+                                                />
                                             )}
-                                          </div>
-                                        )}
-                                        
-                                        <p className="text-sm text-gray-500 my-2 italic">"{meal.description}"</p>
-                                        <a href={meal.zomato_link} target="_blank" rel="noopener noreferrer" className="text-sm text-red-600 hover:underline font-semibold inline-flex items-center gap-1">
-                                            <Icon name="restaurant_menu"/> View on Zomato
-                                        </a>
-                                    </div>
-                                ))}
+                                            <p className="text-gray-800 font-semibold text-2xl mb-2">{meal.dish || 'Unknown Dish'}</p>
+                                            <p className="text-lg text-gray-600 mb-4">{meal.restaurant || 'Unknown Restaurant'}</p>
+                                            
+                                            {/* Meal Tags */}
+                                            {meal.tags && meal.tags.length > 0 && (
+                                              <div className="flex flex-wrap gap-2 my-4">
+                                                {meal.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                                  <TagBadge key={tagIndex} tag={tag} type="food" />
+                                                ))}
+                                                {meal.tags.length > 3 && (
+                                                  <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">+{meal.tags.length - 3} more</span>
+                                                )}
+                                              </div>
+                                            )}
+                                            
+                                            {meal.description && (
+                                                <p className="text-lg text-gray-500 my-4 italic">"{meal.description}"</p>
+                                            )}
+                                            {meal.zomato_link && (
+                                                <Button variant="outline" size="default" asChild>
+                                                  <a href={meal.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                                      <Utensils className="w-4 h-4" /> View on Zomato
+                                                  </a>
+                                                </Button>
+                                            )}
+                                        </motion.div>
+                                    );
+                                })}
                              </div>
-                        </div>
+                        </motion.div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </section>
+          </motion.section>
         )}
         
-        {/* Hidden Gems Section */}
+        {/* Enhanced Hidden Gems Section */}
         {itinerary.hidden_gems && (
-            <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="diamond" className="text-4xl text-orange-500"/> Hidden Gems</h3>
+            <motion.section
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+                <motion.h3 
+                  className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Gem className="text-2xl text-white" />
+                  </div>
+                  Hidden Gems
+                </motion.h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {itinerary.hidden_gems.map((gem: any, i: number) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                            <h4 className="font-bold text-xl text-gray-800 mb-2">{gem.name}</h4>
-                            <p className="text-gray-700 mb-3">{gem.description}</p>
-                            <p className="text-sm text-orange-800 bg-orange-100 p-2 rounded-lg italic"><strong>Why it's special:</strong> {gem.why_special}</p>
-                            <a href={gem.search_link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline font-semibold mt-4 inline-flex items-center gap-1">
-                                <Icon name="map"/> Find on Map
-                            </a>
-                        </div>
+                        <motion.div 
+                          key={i} 
+                          className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group relative overflow-hidden"
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1, duration: 0.6 }}
+                          viewport={{ once: true }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          {/* Background gradient on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                                <Gem className="w-6 h-6 text-white" />
+                              </div>
+                              <h4 className="font-bold text-2xl text-gray-800">{gem.name}</h4>
+                            </div>
+                            <p className="text-gray-700 mb-6 text-lg leading-relaxed">{gem.description}</p>
+                            <motion.div 
+                              className="text-lg text-purple-800 bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-2xl italic border-l-4 border-purple-400 mb-6"
+                              whileHover={{ x: 5 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <strong className="flex items-center gap-2 mb-2">
+                                <Star className="w-5 h-5" />
+                                Why it's special:
+                              </strong> 
+                              {gem.why_special}
+                            </motion.div>
+                            <Button variant="outline" size="default" asChild>
+                              <a href={gem.search_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                  <MapPin className="w-4 h-4" /> Find on Map
+                              </a>
+                            </Button>
+                          </div>
+                        </motion.div>
                     ))}
                 </div>
-            </section>
+            </motion.section>
         )}
 
         {/* Other Sections in a Grid */}
