@@ -106,7 +106,8 @@ const mockItineraryData = {
         description: "Romantic boat ride along the Seine",
         why_local_loves_it: "Best time to see Paris illuminated",
         estimated_cost: "$25-35",
-        booking_link: "https://example.com/cruise"
+        booking_link: "https://example.com/cruise",
+        tags: ["Nature", "Photography", "Family-Friendly", "Budget"]
       }
     ],
     hyperlocal_food_guide: [
