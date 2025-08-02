@@ -403,14 +403,15 @@ interface FullItinerary {
     updated_at: string;
 }
 
-const ItineraryDetails = () => {
-  const [itinerary, setItinerary] = useState<FullItinerary | null>(null);
+export default function ItineraryDetailPage() {
+  const [itinerary, setItinerary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeDay, setActiveDay] = useState(0);
   const [activeSection, setActiveSection] = useState("overview");
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const params = useParams();
   const itineraryId = params.id as string;
@@ -418,14 +419,23 @@ const ItineraryDetails = () => {
   // Scroll-based animations
   const { scrollY } = useScroll();
   const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"]
-  });
+  
+  // Only initialize useScroll with target after component is mounted
+  const { scrollYProgress } = useScroll(
+    isMounted && heroRef.current ? {
+      target: heroRef,
+      offset: ["start start", "end start"]
+    } : {}
+  );
 
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3]);
   const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
+
+  // Set mounted state after hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const sections = [
     { id: "overview", label: "Overview", icon: Info },
@@ -679,7 +689,7 @@ const ItineraryDetails = () => {
         {/* Parallax Background */}
         <motion.div 
           className="absolute inset-0"
-          style={{ scale: heroScale, opacity: heroOpacity, y: heroY }}
+          style={isMounted ? { scale: heroScale, opacity: heroOpacity, y: heroY } : {}}
         >
           <Image
             src={hero_image_url || `https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2000&q=80`}
@@ -1665,6 +1675,4 @@ const ItineraryDetails = () => {
       </motion.footer>
     </motion.div>
   );
-};
-
-export default ItineraryDetails;
+}
