@@ -188,7 +188,14 @@ async def signup(user: UserIn):
             raise HTTPException(status_code=400, detail="Email already registered")
         hashed_password = get_password_hash(user.password)
         await users_collection.insert_one({
-            "name": user.name, "dob": user.dob, "email": user.email, "hashed_password": hashed_password
+            "name": user.name, 
+            "dob": user.dob, 
+            "email": user.email, 
+            "hashed_password": hashed_password,
+            "subscription_status": "free",  # free, premium
+            "itineraries_created": 0,
+            "free_itinerary_used": False,
+            "created_at": datetime.datetime.now(datetime.timezone.utc)
         })
         return {"email": user.email}
     except HTTPException:
@@ -530,7 +537,7 @@ Generate a complete travel plan in JSON format. Every field must be filled with 
 
 **REQUIRED JSON STRUCTURE:**
 {{
-  "hero_image_url": "A stunning, high-quality direct image URL for the destination (e.g., 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1600&h=900&fit=crop' or use Picsum for reliable placeholder: 'https://picsum.photos/1600/900').",
+  "hero_image_url": "A stunning, high-quality direct image URL for the destination (e.g., 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1600&h=900&fit=crop').",
   "destination_name": "{destination}",
   "personalized_title": "Create a catchy, personalized title like '{user_name}'s Unforgettable Goa Getaway'.",
   "journey_details": {{
