@@ -8,9 +8,61 @@ import 'react-date-range/dist/theme/default.css';
 import { addDays, format } from 'date-fns';
 import SubscriptionPopup from './SubscriptionPopup';
 import { TagBadge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  MapPin, Clock, Calendar, Users, DollarSign, 
+  Star, Camera, Coffee, Mountain, Heart,
+  ExternalLink, Navigation, Eye, Bookmark,
+  Wifi, Utensils, BedDouble, Gem, Bus, Plane
+} from "lucide-react";
 
 // --- Configuration ---
 const API_BASE_URL = "http://localhost:8000"; // Your backend URL
+
+// Enhanced Animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 60 },
+  animate: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+// Enhanced Button component
+const Button = ({ children, onClick, variant = "default", size = "default", className = "", ...props }: any) => {
+  const baseClasses = "inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 transform-gpu";
+  const variants: Record<string, string> = {
+    default: "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    outline: "border-2 border-gray-300 bg-white/80 backdrop-blur-sm hover:bg-gray-50 shadow-md hover:shadow-xl hover:border-gray-400 hover:-translate-y-0.5",
+    primary: "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    glass: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 shadow-lg hover:shadow-2xl"
+  };
+  const sizes: Record<string, string> = {
+    default: "h-11 px-6 py-2",
+    sm: "h-9 px-4 text-xs",
+    lg: "h-14 px-10 text-base font-semibold"
+  };
+  
+  return (
+    <motion.button 
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className={`${baseClasses} ${variants[variant] || variants.default} ${sizes[size] || sizes.default} ${className}`}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </motion.button>
+  );
+};
 
 // Dynamic conversation system - now LLM handles all interactions
 const systemPrompt = `You are "The Modern Chanakya" - an enthusiastic, knowledgeable Indian travel planning assistant who specializes EXCLUSIVELY in Indian destinations and experiences. You are passionate about Incredible India and help fellow Indians and visitors explore the beauty, culture, and diversity of our motherland.
@@ -598,15 +650,92 @@ export default function PreferencesPage() {
     }
 
     return (
-      <div className="space-y-12 p-4 md:p-0">
-        {/* Hero Section */}
-        <section className="relative rounded-2xl overflow-hidden shadow-2xl h-80">
-            <img src={itinerary.hero_image_url} alt={itinerary.destination_name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-            <h2 className="absolute bottom-8 left-8 text-5xl font-extrabold text-white drop-shadow-lg">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="space-y-12 p-4 md:p-0"
+      >
+        {/* Enhanced Hero Section */}
+        <motion.section 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative rounded-3xl overflow-hidden shadow-2xl h-96 group"
+        >
+          <motion.img 
+            src={itinerary.hero_image_url} 
+            alt={itinerary.destination_name} 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.2 }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          
+          {/* Floating elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                className={`absolute w-4 h-4 rounded-full opacity-30 ${
+                  i % 3 === 0 ? 'bg-orange-400' : i % 3 === 1 ? 'bg-blue-400' : 'bg-purple-400'
+                }`}
+                style={{
+                  left: `${15 + i * 15}%`,
+                  top: `${25 + (i % 2) * 30}%`,
+                }}
+                animate={{
+                  y: [0, -30, 0],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 4 + i * 0.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.4
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            >
+              <motion.h2 
+                className="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-2xl"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+              >
                 {itinerary.personalized_title || `Your Trip to ${itinerary.destination_name}`}
-            </h2>
-        </section>
+              </motion.h2>
+              
+              <motion.div 
+                className="flex flex-wrap gap-3 mt-6"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
+                {itinerary.trip_overview && [
+                  { icon: Calendar, label: "Perfect Season" },
+                  { icon: MapPin, label: itinerary.destination_name },
+                  { icon: DollarSign, label: itinerary.trip_overview.estimated_total_cost }
+                ].map((item, index) => (
+                  <motion.div key={index} variants={fadeInUp}>
+                    <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          </div>
+        </motion.section>
 
         {/* Journey Details */}
         {itinerary.journey_details && (
@@ -903,7 +1032,7 @@ export default function PreferencesPage() {
             </section>
             )}
         </div>
-      </div>
+      </motion.div>
     );
   };
 
