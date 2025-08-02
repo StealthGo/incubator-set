@@ -28,13 +28,6 @@ const imageLinks = {
   userRohit: "https://randomuser.me/api/portraits/men/12.jpg",
   userAnanya: "https://randomuser.me/api/portraits/women/21.jpg",
   userSiddharth: "https://randomuser.me/api/portraits/men/34.jpg",
-
-  // Add local/public SVGs if referenced in the future
-  // windowIcon: "/window.svg",
-  // globeIcon: "/globe.svg",
-  // nextIcon: "/next.svg",
-  // vercelIcon: "/vercel.svg",
-  // fileIcon: "/file.svg",
 };
 
 export default imageLinks; 

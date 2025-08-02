@@ -15,6 +15,7 @@ import {
   ZoomIn, ArrowUp, ArrowDown, ArrowRight
 } from "lucide-react";
 import { TagBadge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
 
 // Enhanced Animation variants
 const fadeInUp = {
@@ -446,17 +447,7 @@ export default function ItineraryDetailPage() {
     { id: "practical", label: "Practical Tips", icon: Shield }
   ];
 
-  const formatDate = (dateString: string) => {
-    try {
-        return new Date(dateString).toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric"
-        });
-    } catch {
-        return dateString;
-    }
-  };
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -1112,7 +1103,7 @@ export default function ItineraryDetailPage() {
                         transition={{ delay: 0.2 }}
                       >
                         <h3 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">{day.theme}</h3>
-                        <p className="text-lg text-gray-600">{formatDate(day.date)}</p>
+                        <p className="text-lg text-gray-600">{formatDate(day.date, 'long')}</p>
                       </motion.div>
                       
                       {/* Interactive Timeline */}
