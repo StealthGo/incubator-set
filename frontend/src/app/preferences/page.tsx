@@ -224,6 +224,11 @@ export default function PreferencesPage() {
   const [conversationComplete, setConversationComplete] = useState(false);
   const [currentQuestionType, setCurrentQuestionType] = useState("destination");
 
+  // Check if user is locked due to subscription limits
+  const isUserLocked = () => {
+    return user?.subscription_status === "free" && user?.free_itinerary_used === true;
+  };
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
