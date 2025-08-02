@@ -126,11 +126,56 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 };
 
 
+// Loading Component
+const LoadingSpinner = () => (
+    <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-white z-50 flex items-center justify-center"
+    >
+        <div className="text-center">
+            <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"
+            />
+            <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-lg font-medium text-gray-700"
+            >
+                Loading your travel experience...
+            </motion.p>
+        </div>
+    </motion.div>
+);
+
 export default function Home() {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // Simulate loading time for smooth entry
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans text-gray-800 antialiased relative overflow-x-hidden flex flex-col">
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="min-h-screen bg-gray-50 font-sans text-gray-800 antialiased relative overflow-x-hidden flex flex-col"
+        >
             {/* 3D Animated Background */}
             <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20">
                 <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
@@ -183,9 +228,29 @@ export default function Home() {
                         Discover, plan, and experience travel like never before – all with a desi touch.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
-                        <button onClick={() => router.push("/preferences")}
-                            className="px-8 py-3.5 rounded-full bg-amber-500 text-white font-semibold shadow-sm hover:bg-amber-600 transition-all text-base">Start Your Yatra</button>
-                        <button className="px-8 py-3.5 rounded-full bg-gray-200 text-gray-800 font-semibold shadow-sm hover:bg-gray-300 transition-all text-base">See How It Works</button>
+                        <motion.button 
+                            onClick={() => router.push("/preferences")}
+                            whileHover={{ 
+                                scale: 1.05, 
+                                boxShadow: "0 20px 25px -5px rgba(251, 191, 36, 0.3)" 
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="px-8 py-3.5 rounded-full bg-amber-500 text-white font-semibold shadow-lg hover:bg-amber-600 transition-colors text-base"
+                        >
+                            Start Your Yatra
+                        </motion.button>
+                        <motion.button 
+                            whileHover={{ 
+                                scale: 1.05, 
+                                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" 
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="px-8 py-3.5 rounded-full bg-gray-200 text-gray-800 font-semibold shadow-lg hover:bg-gray-300 transition-colors text-base"
+                        >
+                            See How It Works
+                        </motion.button>
                     </div>
                     {/* Stats */}
                     <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col sm:flex-row gap-8 justify-center items-center w-full">
@@ -205,7 +270,14 @@ export default function Home() {
                 </motion.section>
 
                 {/* How it Works Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="w-full py-24 bg-white">
+                <motion.section 
+                    initial="initial" 
+                    whileInView="animate" 
+                    viewport={{ once: true, amount: 0.2 }} 
+                    variants={fadeInUp} 
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="w-full py-24 bg-white"
+                >
                     <div className="max-w-6xl mx-auto px-6">
                         <h2 className="text-5xl font-extrabold text-gray-900 text-center mb-16">How it Works</h2>
                         <div className="flex flex-col md:flex-row items-center justify-center w-full gap-16">
@@ -500,6 +572,6 @@ export default function Home() {
                     </div>
                 </div>
             </footer>
-        </div>
+        </motion.div>
     );
 }

@@ -15,22 +15,6 @@ import {
 } from "lucide-react";
 import { TagBadge } from "@/components/ui/badge";
 
-// Animation variants
-const fadeInUp = {
-  initial: { opacity: 0, y: 60 },
-  animate: { opacity: 1, y: 0 }
-};
-
-const staggerContainer = {
-  initial: {},
-  animate: {
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
-
 // Enhanced Button component with animations
 const Button = ({ children, onClick, variant = "default", size = "default", className = "", asChild, ...props }: any) => {
   const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 transform hover:scale-105 active:scale-95";
@@ -98,7 +82,7 @@ const Badge = ({ children, variant = "default", className = "", ...props }: any)
   );
 };
 
-// Full itinerary interface
+// The full itinerary interface
 interface FullItinerary {
     itinerary_id: string;
     user_info: { email: string; name: string };
@@ -120,6 +104,27 @@ interface FullItinerary {
     created_at: string;
     updated_at: string;
 }
+
+// Animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 60 },
+  animate: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const slideInLeft = {
+  initial: { opacity: 0, x: -60 },
+  animate: { opacity: 1, x: 0 }
+};
 
 const ItineraryDetails = () => {
   const [itinerary, setItinerary] = useState<FullItinerary | null>(null);
@@ -174,6 +179,18 @@ const ItineraryDetails = () => {
 
     fetchItinerary();
   }, [itineraryId, router]);
+
+  const formatDate = (dateString: string) => {
+    try {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        });
+    } catch {
+        return dateString;
+    }
+  };
 
   if (loading) {
     return (
@@ -478,14 +495,14 @@ const ItineraryDetails = () => {
                   <motion.div
                     key={index}
                     variants={fadeInUp}
-                    className="bg-gradient-to-br from-blue-50 to-purple-100 p-6 rounded-2xl border border-blue-200"
+                    className={`bg-gradient-to-br from-${stat.color}-50 to-${stat.color}-100 p-6 rounded-2xl border border-${stat.color}-200`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                        <p className="text-2xl font-bold text-blue-700 mt-1">{stat.value}</p>
+                        <p className={`text-2xl font-bold text-${stat.color}-700 mt-1`}>{stat.value}</p>
                       </div>
-                      <stat.icon className="w-8 h-8 text-blue-500" />
+                      <stat.icon className={`w-8 h-8 text-${stat.color}-500`} />
                     </div>
                   </motion.div>
                 ))}
@@ -623,7 +640,12 @@ const ItineraryDetails = () => {
                     >
                       <div className="text-center">
                         <h3 className="text-2xl font-bold text-gray-900">{day.theme}</h3>
-                        <p className="text-gray-600 mt-2">{formatDate(day.date)}</p>
+                        <p className="text-gray-600 mt-2">{new Date(day.date).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</p>
                       </div>
                       
                       {/* Activities Timeline */}
@@ -768,424 +790,503 @@ const ItineraryDetails = () => {
             </motion.div>
           )}
 
-          {activeSection === "accommodation" && (
-            <motion.div
-              key="accommodation"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-            >
-              <Card className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <BedDouble className="w-7 h-7 mr-3 text-blue-500" />
-                  Accommodation Suggestions
-                </h2>
-                
-                <motion.div
-                  variants={staggerContainer}
-                  initial="initial"
-                  animate="animate"
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-                >
-                  {accommodation_suggestions.map((accommodation, index) => (
-                    <motion.div
-                      key={index}
-                      variants={fadeInUp}
-                      className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6 hover:shadow-lg transition-shadow"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <BedDouble className="w-6 h-6 text-blue-600" />
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-900">{accommodation.name}</h3>
-                            <Badge variant="outline" className="mt-1">{accommodation.type}</Badge>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-blue-600">{accommodation.estimated_cost}</p>
-                          <p className="text-xs text-gray-500">per night</p>
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-700 mb-4 leading-relaxed">{accommodation.description}</p>
-                      
+          {/* Add other sections here... */}
+        </AnimatePresence>
+      </main>
+        <div className="space-y-8">
+         
+          {/* Trip Overview */}
+          <Card className="bg-white border border-gray-200 p-6">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+              <Info className="w-6 h-6 mr-3 text-blue-500" />
+              Trip Overview
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="font-medium text-gray-900 mb-4">Trip Details</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Destination:</span>
+                    <span className="font-medium">{trip_parameters.destination}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Dates:</span>
+                    <span className="font-medium">{trip_parameters.dates}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Travelers:</span>
+                    <span className="font-medium">{trip_parameters.travelers}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Interests:</span>
+                    <span className="font-medium">{trip_parameters.interests}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Budget:</span>
+                    <span className="font-medium">{trip_parameters.budget}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Pace:</span>
+                    <span className="font-medium">{trip_parameters.pace}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900 mb-4">Destination Insights</h3>
+                <p className="text-gray-700 mb-4">{trip_overview.destination_insights}</p>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3">
+                    <CloudSun className="w-4 h-4 text-blue-500 mt-1" />
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">Weather:</span>
+                      <p className="text-sm text-gray-600">{trip_overview.weather_during_visit}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Globe className="w-4 h-4 text-green-500 mt-1" />
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">Cultural Context:</span>
+                      <p className="text-sm text-gray-600">{trip_overview.cultural_context}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Local Customs */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="font-medium text-gray-900 mb-3">Local Customs to Know</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {trip_overview.local_customs_to_know.map((custom, index) => (
+                  <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-sm text-gray-700">{custom}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Total Cost */}
+            <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+              <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
+                <DollarSign className="w-5 h-5 text-blue-600" />
+                <span className="font-semibold text-blue-900">
+                  Total Estimated Cost: {trip_overview.estimated_total_cost}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Journey Details */}
+          <Card className="bg-white border border-gray-200 p-6">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+              <Plane className="w-6 h-6 mr-3 text-blue-500" />
+              {journey_details.title}
+            </h2>
+            <div className="space-y-4">
+              {journey_details.options.map((option, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium text-gray-900">{option.mode}</h3>
+                    <span className="text-sm text-gray-500">{option.duration}</span>
+                  </div>
+                  <p className="text-gray-700 mb-2">{option.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-green-600">{option.estimated_cost}</span>
+                    {option.booking_link && (
+                      <Button asChild size="sm" variant="outline">
+                        <a href={option.booking_link} target="_blank" rel="noopener noreferrer">
+                          Book Now
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Accommodation */}
+          <Card className="bg-white border border-gray-200 p-6">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+              <BedDouble className="w-6 h-6 mr-3 text-blue-500" />
+              Accommodation Suggestions
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {accommodation_suggestions.map((hotel, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="text-2xl">{hotel.icon}</div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900">{hotel.name}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{hotel.type}</p>
+                      <p className="text-gray-700 mb-3">{hotel.description}</p>
                       <div className="flex justify-between items-center">
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Details
-                        </Button>
-                        {accommodation.booking_link && (
-                          <Button size="sm" variant="primary">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            <a href={accommodation.booking_link} target="_blank" rel="noopener noreferrer">
+                        <span className="font-medium text-green-600">{hotel.estimated_cost}</span>
+                        {hotel.booking_link && (
+                          <Button asChild size="sm" variant="outline">
+                            <a href={hotel.booking_link} target="_blank" rel="noopener noreferrer">
                               Book Now
                             </a>
                           </Button>
                         )}
                       </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-
-                {/* Journey Details */}
-                <div className="mt-12 pt-8 border-t border-gray-200">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <Plane className="w-6 h-6 mr-3 text-green-500" />
-                    {journey_details.title}
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {journey_details.options.map((option, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <Bus className="w-5 h-5 text-blue-500" />
-                          <h4 className="font-semibold text-gray-900">{option.mode}</h4>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-3">{option.description}</p>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Duration:</span>
-                            <span className="font-medium">{option.duration}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">Cost:</span>
-                            <span className="font-medium text-green-600">{option.estimated_cost}</span>
-                          </div>
-                        </div>
-                        {option.booking_link && (
-                          <Button size="sm" variant="outline" className="w-full mt-4">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            <a href={option.booking_link} target="_blank" rel="noopener noreferrer">
-                              Book Transport
-                            </a>
-                          </Button>
-                        )}
-                      </motion.div>
-                    ))}
+                    </div>
                   </div>
                 </div>
-              </Card>
-            </motion.div>
-          )}
+              ))}
+            </div>
+          </Card>
 
-          {activeSection === "experiences" && (
-            <motion.div
-              key="experiences"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-            >
-              {/* Signature Experiences */}
-              <Card className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Star className="w-7 h-7 mr-3 text-yellow-500" />
-                  Signature Experiences
-                </h2>
-                
-                <motion.div
-                  variants={staggerContainer}
-                  initial="initial"
-                  animate="animate"
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+          {/* Daily Itinerary */}
+          <Card className="bg-white border border-gray-200 p-6">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+              <Calendar className="w-6 h-6 mr-3 text-blue-500" />
+              Daily Itinerary
+            </h2>
+            
+            {/* Day Tabs */}
+            <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
+              {daily_itinerary.map((day, index) => (
+                <Button
+                  key={index}
+                  onClick={() => setActiveDay(index)}
+                  variant={activeDay === index ? "default" : "outline"}
+                  size="sm"
+                  className={activeDay === index ? 'bg-blue-600 text-white' : ''}
                 >
-                  {signature_experiences.map((experience, index) => (
-                    <motion.div
-                      key={index}
-                      variants={fadeInUp}
-                      className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 hover:shadow-lg transition-shadow"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-xl font-bold text-gray-900">{experience.name}</h3>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-yellow-600">{experience.estimated_cost}</p>
+                  Day {index + 1}
+                </Button>
+              ))}
+            </div>
+
+            {/* Active Day Content */}
+            <div className="space-y-6">
+              {daily_itinerary.map((day, index) => index === activeDay && (
+                <div key={index}>
+                  <div className="mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900">{day.theme}</h3>
+                    <p className="text-gray-600">{formatDate(day.date)}</p>
+                  </div>
+                  
+                  {/* Activities */}
+                  <div className="space-y-4">
+                    {day.activities.map((activity, actIndex) => (
+                      <div key={actIndex} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex gap-4">
+                          <div className="text-center font-medium text-blue-600 min-w-[60px] pt-1">
+                            {activity.time}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900 mb-1">{activity.activity}</h4>
+                            <p className="text-sm text-gray-600 mb-2 flex items-center">
+                              <MapPin className="w-4 h-4 mr-1" />
+                              {activity.location}
+                            </p>
+                            
+                            {/* Activity Tags */}
+                            {activity.tags && activity.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {activity.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                  <TagBadge key={tagIndex} tag={tag} type="activity" />
+                                ))}
+                                {activity.tags.length > 3 && (
+                                  <span className="text-xs text-gray-500">+{activity.tags.length - 3} more</span>
+                                )}
+                              </div>
+                            )}
+                            
+                            <p className="text-gray-700 mb-3">{activity.description}</p>
+                            
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
+                              <p className="text-sm text-yellow-800">
+                                <strong>💡 Local Tip:</strong> {activity.local_guide_tip}
+                              </p>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                              {activity.Maps_link && (
+                                <Button asChild size="sm" variant="outline" className="text-xs">
+                                  <a href={activity.Maps_link} target="_blank" rel="noopener noreferrer">
+                                    <Navigation className="w-3 h-3 mr-1" /> Maps
+                                  </a>
+                                </Button>
+                              )}
+                              {activity.booking_link && (
+                                <Button asChild size="sm" variant="outline" className="text-xs">
+                                 <a href={activity.booking_link} target="_blank" rel="noopener noreferrer">
+                                  <Award className="w-3 h-3 mr-1" /> Book
+                                 </a>
+                                </Button>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                  
+                  {/* Meals for the day */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                      <h5 className="font-medium text-orange-900 mb-2 flex items-center">
+                        <Utensils className="w-4 h-4 mr-2" />
+                        Lunch
+                      </h5>
+                      <p className="font-medium">{day.meals.lunch.dish}</p>
+                      <p className="text-sm text-gray-600">{day.meals.lunch.restaurant}</p>
                       
-                      <p className="text-gray-700 mb-4">{experience.description}</p>
-                      
-                      <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
-                        <p className="text-sm text-yellow-800">
-                          <strong>💛 Why locals love it:</strong> {experience.why_local_loves_it}
-                        </p>
-                      </div>
-
-                      {experience.tags && experience.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {experience.tags.map((tag: string, tagIndex: number) => (
-                            <TagBadge key={tagIndex} tag={tag} type="activity" />
+                      {/* Lunch Tags */}
+                      {day.meals.lunch.tags && day.meals.lunch.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {day.meals.lunch.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                            <TagBadge key={tagIndex} tag={tag} type="food" />
                           ))}
+                          {day.meals.lunch.tags.length > 3 && (
+                            <span className="text-xs text-gray-500">+{day.meals.lunch.tags.length - 3} more</span>
+                          )}
                         </div>
                       )}
                       
-                      {experience.booking_link && (
-                        <Button size="sm" variant="primary">
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          <a href={experience.booking_link} target="_blank" rel="noopener noreferrer">
+                      <p className="text-xs text-gray-500 mt-1">{day.meals.lunch.description}</p>
+                      {day.meals.lunch.zomato_link && (
+                        <Button asChild size="sm" variant="outline" className="mt-2 text-xs">
+                          <a href={day.meals.lunch.zomato_link} target="_blank" rel="noopener noreferrer">
+                            View Menu
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <h5 className="font-medium text-purple-900 mb-2 flex items-center">
+                        <Utensils className="w-4 h-4 mr-2" />
+                        Dinner
+                      </h5>
+                      <p className="font-medium">{day.meals.dinner.dish}</p>
+                      <p className="text-sm text-gray-600">{day.meals.dinner.restaurant}</p>
+                      
+                      {/* Dinner Tags */}
+                      {day.meals.dinner.tags && day.meals.dinner.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {day.meals.dinner.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                            <TagBadge key={tagIndex} tag={tag} type="food" />
+                          ))}
+                          {day.meals.dinner.tags.length > 3 && (
+                            <span className="text-xs text-gray-500">+{day.meals.dinner.tags.length - 3} more</span>
+                          )}
+                        </div>
+                      )}
+                      
+                      <p className="text-xs text-gray-500 mt-1">{day.meals.dinner.description}</p>
+                      {day.meals.dinner.zomato_link && (
+                        <Button asChild size="sm" variant="outline" className="mt-2 text-xs">
+                          <a href={day.meals.dinner.zomato_link} target="_blank" rel="noopener noreferrer">
+                            View Menu
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Hidden Gems & Signature Experiences */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card className="bg-white border border-gray-200 p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                <Gem className="w-6 h-6 mr-3 text-yellow-500" />
+                Hidden Gems
+              </h2>
+              <div className="space-y-4">
+                {hidden_gems.map((gem, index) => (
+                  <div key={index} className="border-l-4 border-yellow-400 pl-4 py-2">
+                    <h3 className="font-medium text-gray-900">{gem.name}</h3>
+                    <p className="text-sm text-gray-700 mb-1">{gem.description}</p>
+                    <p className="text-sm text-yellow-700 italic">{gem.why_special}</p>
+                    {gem.search_link && (
+                      <Button asChild size="sm" variant="outline" className="mt-2 text-xs">
+                        <a href={gem.search_link} target="_blank" rel="noopener noreferrer">
+                          Learn More
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="bg-white border border-gray-200 p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                <Star className="w-6 h-6 mr-3 text-green-500" />
+                Signature Experiences
+              </h2>
+              <div className="space-y-4">
+                {signature_experiences.map((exp, index) => (
+                  <div key={index} className="border-l-4 border-green-400 pl-4 py-2">
+                    <h3 className="font-medium text-gray-900">{exp.name}</h3>
+                    
+                    {/* Experience Tags */}
+                    {exp.tags && exp.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 my-2">
+                        {exp.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="activity" />
+                        ))}
+                        {exp.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{exp.tags.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="text-sm text-gray-700 mb-1">{exp.description}</p>
+                    <p className="text-sm text-green-700 italic mb-1">{exp.why_local_loves_it}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">Cost: {exp.estimated_cost}</span>
+                      {exp.booking_link && (
+                        <Button asChild size="sm" variant="outline" className="text-xs">
+                          <a href={exp.booking_link} target="_blank" rel="noopener noreferrer">
                             Book Experience
                           </a>
                         </Button>
                       )}
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </Card>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
 
-              {/* Hidden Gems */}
-              <Card className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Gem className="w-7 h-7 mr-3 text-purple-500" />
-                  Hidden Gems
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {hidden_gems.map((gem, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-6 hover:shadow-md transition-shadow"
-                    >
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">{gem.name}</h3>
-                      <p className="text-sm text-gray-700 mb-3">{gem.description}</p>
-                      
-                      <div className="bg-purple-100 border border-purple-300 rounded-lg p-3 mb-4">
-                        <p className="text-xs text-purple-800">
-                          <strong>✨ Why it's special:</strong> {gem.why_special}
-                        </p>
+          {/* Food Guide & Shopping */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card className="bg-white border border-gray-200 p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                <Coffee className="w-6 h-6 mr-3 text-orange-500" />
+                Hyperlocal Food Guide
+              </h2>
+              <div className="space-y-4">
+                {hyperlocal_food_guide.map((food, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900">{food.dish}</h3>
+                    
+                    {/* Food Tags */}
+                    {food.tags && food.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 my-2">
+                        {food.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="food" />
+                        ))}
+                        {food.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{food.tags.length - 4} more</span>
+                        )}
                       </div>
-                      
-                      <Button size="sm" variant="outline" className="w-full">
-                        <Navigation className="w-4 h-4 mr-2" />
-                        <a href={gem.search_link} target="_blank" rel="noopener noreferrer">
-                          Find Location
-                        </a>
-                      </Button>
-                    </motion.div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Shopping Guide */}
-              <Card className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Gem className="w-7 h-7 mr-3 text-green-500" />
-                  Shopping Insider Guide
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {shopping_insider_guide.map((item, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6"
-                    >
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">{item.item}</h3>
-                      <p className="text-sm text-green-700 font-medium mb-2">{item.where_to_buy}</p>
-                      
-                      <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-4">
-                        <p className="text-xs text-green-800">
-                          <strong>💡 Local tip:</strong> {item.local_tip}
-                        </p>
-                      </div>
-                      
-                      <Button size="sm" variant="outline" className="border-green-300 text-green-700 hover:bg-green-100">
-                        <Navigation className="w-4 h-4 mr-2" />
-                        <a href={item.search_link} target="_blank" rel="noopener noreferrer">
-                          Find Shops
-                        </a>
-                      </Button>
-                    </motion.div>
-                  ))}
-                </div>
-              </Card>
-            </motion.div>
-          )}
-
-          {activeSection === "food" && (
-            <motion.div
-              key="food"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-            >
-              <Card className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Coffee className="w-7 h-7 mr-3 text-orange-500" />
-                  Hyperlocal Food Guide
-                </h2>
-                
-                <motion.div
-                  variants={staggerContainer}
-                  initial="initial"
-                  animate="animate"
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-                >
-                  {hyperlocal_food_guide.map((food, index) => (
-                    <motion.div
-                      key={index}
-                      variants={fadeInUp}
-                      className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-6 hover:shadow-lg transition-shadow"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-xl font-bold text-gray-900">{food.dish}</h3>
-                        <Coffee className="w-6 h-6 text-orange-500" />
-                      </div>
-                      
-                      <p className="text-gray-700 mb-4">{food.description}</p>
-                      
-                      <div className="space-y-3 mb-4">
-                        <div className="bg-orange-100 border border-orange-300 rounded-lg p-3">
-                          <p className="text-sm text-orange-800">
-                            <strong>📍 Where to find:</strong> {food.where_to_find}
-                          </p>
-                        </div>
-                        
-                        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3">
-                          <p className="text-sm text-yellow-800">
-                            <strong>💡 Local tip:</strong> {food.local_tip}
-                          </p>
-                        </div>
-                      </div>
-
-                      {food.tags && food.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {food.tags.map((tag: string, tagIndex: number) => (
-                            <TagBadge key={tagIndex} tag={tag} type="food" />
-                          ))}
-                        </div>
-                      )}
-                      
-                      <Button size="sm" variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
-                        <Navigation className="w-4 h-4 mr-2" />
+                    )}
+                    
+                    <p className="text-sm text-gray-700 mb-2">{food.description}</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      <strong>Where to find:</strong> {food.where_to_find}
+                    </p>
+                    <p className="text-sm text-orange-700">
+                      <strong>💡 Local tip:</strong> {food.local_tip}
+                    </p>
+                    {food.search_link && (
+                      <Button asChild size="sm" variant="outline" className="mt-2 text-xs">
                         <a href={food.search_link} target="_blank" rel="noopener noreferrer">
-                          Find Restaurants
+                          Find Places
                         </a>
                       </Button>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </Card>
-            </motion.div>
-          )}
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
 
-          {activeSection === "practical" && (
-            <motion.div
-              key="practical"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-            >
-              <Card className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Shield className="w-7 h-7 mr-3 text-green-500" />
-                  Practical Local Wisdom
-                </h2>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Safety Tips */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <ShieldCheck className="w-6 h-6 text-green-600" />
-                      <h3 className="text-xl font-bold text-gray-900">Safety Tips</h3>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">{practical_local_wisdom.safety_tips}</p>
-                  </motion.div>
+            <Card className="bg-white border border-gray-200 p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+                <BookOpen className="w-6 h-6 mr-3 text-purple-500" />
+                Shopping Insider Guide
+              </h2>
+              <div className="space-y-4">
+                {shopping_insider_guide.map((item, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900">{item.item}</h3>
+                    <p className="text-sm text-gray-600 mb-1">
+                      <strong>Where to buy:</strong> {item.where_to_buy}
+                    </p>
+                    <p className="text-sm text-purple-700">
+                      <strong>💡 Local tip:</strong> {item.local_tip}
+                    </p>
+                    {item.search_link && (
+                      <Button asChild size="sm" variant="outline" className="mt-2 text-xs">
+                        <a href={item.search_link} target="_blank" rel="noopener noreferrer">
+                          Find Stores
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
 
-                  {/* Health & Wellness */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-6"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <Heart className="w-6 h-6 text-blue-600" />
-                      <h3 className="text-xl font-bold text-gray-900">Health & Wellness</h3>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">{practical_local_wisdom.health_and_wellness}</p>
-                  </motion.div>
-
-                  {/* Connectivity */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-6"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <Wifi className="w-6 h-6 text-purple-600" />
-                      <h3 className="text-xl font-bold text-gray-900">Connectivity</h3>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">{practical_local_wisdom.connectivity}</p>
-                  </motion.div>
-
-                  {/* Transport */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 rounded-2xl p-6"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <Bus className="w-6 h-6 text-orange-600" />
-                      <h3 className="text-xl font-bold text-gray-900">Transport</h3>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">{practical_local_wisdom.transport}</p>
-                  </motion.div>
-                </div>
-
-                {/* Quick Tips Grid */}
-                <div className="mt-12 pt-8 border-t border-gray-200">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Quick Reference</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[
-                      { icon: Smartphone, label: "Emergency", value: "Local emergency services" },
-                      { icon: Globe, label: "Language", value: "Local language tips" },
-                      { icon: DollarSign, label: "Currency", value: "Payment methods" },
-                      { icon: Clock, label: "Timezone", value: "Local time zone" }
-                    ].map((item, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-white border border-gray-200 rounded-xl p-4 text-center hover:shadow-md transition-shadow"
-                      >
-                        <item.icon className="w-6 h-6 mx-auto mb-2 text-blue-500" />
-                        <p className="font-medium text-gray-900 text-sm">{item.label}</p>
-                        <p className="text-xs text-gray-500">{item.value}</p>
-                      </motion.div>
-                    ))}
+          {/* Practical Local Wisdom */}
+          <Card className="bg-white border border-gray-200 p-6">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center">
+              <Shield className="w-6 h-6 mr-3 text-blue-500" />
+              Practical Local Wisdom
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="w-5 h-5 text-green-500 mt-1" />
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-2">Safety Tips</h3>
+                    <p className="text-sm text-gray-700">{practical_local_wisdom.safety_tips}</p>
                   </div>
                 </div>
-              </Card>
-            </motion.div>
+                <div className="flex items-start gap-3">
+                  <Heart className="w-5 h-5 text-red-500 mt-1" />
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-2">Health & Wellness</h3>
+                    <p className="text-sm text-gray-700">{practical_local_wisdom.health_and_wellness}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Smartphone className="w-5 h-5 text-blue-500 mt-1" />
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-2">Connectivity</h3>
+                    <p className="text-sm text-gray-700">{practical_local_wisdom.connectivity}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Bus className="w-5 h-5 text-purple-500 mt-1" />
+                  <div>
+                    <h3 className="font-medium text-gray-900 mb-2">Transport</h3>
+                    <p className="text-sm text-gray-700">{practical_local_wisdom.transport}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* User Info */}
+          <Card className="bg-white border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="font-semibold text-blue-600">{user_info.name[0].toUpperCase()}</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Created by {user_info.name}</p>
+                  <p className="text-sm text-gray-500">{user_info.email}</p>
+                </div>
+              </div>
+              <div className="text-right text-sm text-gray-500">
+                <p>ID: {itinerary_id}</p>
+                <p>Updated: {formatDate(updated_at)}</p>
+              </div>
+            </div>
           )}
-          
         </AnimatePresence>
       </main>
 
@@ -1211,7 +1312,7 @@ const ItineraryDetails = () => {
               </div>
               <div className="text-right text-sm text-gray-500">
                 <p>Itinerary ID: {itinerary_id}</p>
-                <p>Last updated: {formatDate(updated_at)}</p>
+                <p>Last updated: {new Date(updated_at).toLocaleDateString()}</p>
               </div>
             </div>
           </Card>
