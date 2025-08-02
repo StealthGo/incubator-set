@@ -188,7 +188,7 @@ export default function ItineraryPage() {
           return;
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/itinerary/${params.id}`, {
+        const response = await fetch(`/api/itinerary/${params.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -425,7 +425,7 @@ export default function ItineraryPage() {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Local Customs to Know</h4>
                 <ul className="space-y-2">
-                  {itinerary.trip_overview.local_customs_to_know.map((custom, index) => (
+                  {itinerary.trip_overview.local_customs_to_know && itinerary.trip_overview.local_customs_to_know.length > 0 && itinerary.trip_overview.local_customs_to_know.map((custom, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2.5 flex-shrink-0" />
                       <span className="text-gray-700">{custom}</span>
@@ -442,7 +442,7 @@ export default function ItineraryPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Day-by-Day Itinerary</h2>
           
           <div className="space-y-8">
-            {itinerary.daily_itinerary.map((day, dayIndex) => (
+            {itinerary.daily_itinerary && itinerary.daily_itinerary.length > 0 && itinerary.daily_itinerary.map((day, dayIndex) => (
               <motion.div key={day.date} variants={fadeInUp}>
                 <Card className="border-gray-100">
                   <CardHeader className="border-b border-gray-50">
@@ -462,7 +462,7 @@ export default function ItineraryPage() {
                   <CardContent className="pt-6">
                     <div className="space-y-6">
                       {/* Activities */}
-                      {day.activities.map((activity, activityIndex) => (
+                      {day.activities && day.activities.length > 0 && day.activities.map((activity, activityIndex) => (
                         <div key={activityIndex} className="flex gap-4">
                           <div className="flex-shrink-0">
                             <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
@@ -500,7 +500,7 @@ export default function ItineraryPage() {
                             <p className="text-gray-700 mb-2">{activity.description}</p>
                             <p className="text-sm text-blue-600 mb-3 italic">💡 {activity.local_guide_tip}</p>
                             
-                            {activity.tags && (
+                            {activity.tags && activity.tags.length > 0 && (
                               <div className="flex flex-wrap gap-2">
                                 {activity.tags.map((tag, tagIndex) => (
                                   <TagBadge key={tagIndex} tag={tag} type="activity" />
@@ -521,7 +521,7 @@ export default function ItineraryPage() {
                             <p className="text-xs text-gray-600">{day.meals.lunch.restaurant}</p>
                             <p className="text-xs text-gray-700 mt-1">{day.meals.lunch.description}</p>
                             <div className="flex flex-wrap gap-1 mt-2">
-                              {day.meals.lunch.tags.slice(0, 3).map((tag, index) => (
+                              {day.meals.lunch.tags && day.meals.lunch.tags.length > 0 && day.meals.lunch.tags.slice(0, 3).map((tag, index) => (
                                 <span key={index} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
                                   {tag}
                                 </span>
@@ -534,7 +534,7 @@ export default function ItineraryPage() {
                             <p className="text-xs text-gray-600">{day.meals.dinner.restaurant}</p>
                             <p className="text-xs text-gray-700 mt-1">{day.meals.dinner.description}</p>
                             <div className="flex flex-wrap gap-1 mt-2">
-                              {day.meals.dinner.tags.slice(0, 3).map((tag, index) => (
+                              {day.meals.dinner.tags && day.meals.dinner.tags.length > 0 && day.meals.dinner.tags.slice(0, 3).map((tag, index) => (
                                 <span key={index} className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
                                   {tag}
                                 </span>
@@ -556,7 +556,7 @@ export default function ItineraryPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Accommodation Suggestions</h2>
           
           <div className="grid gap-6 md:grid-cols-2">
-            {itinerary.accommodation_suggestions.map((hotel, index) => (
+            {itinerary.accommodation_suggestions && itinerary.accommodation_suggestions.length > 0 && itinerary.accommodation_suggestions.map((hotel, index) => (
               <Card key={index} className="border-gray-100">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -592,7 +592,7 @@ export default function ItineraryPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Hidden Gems</h2>
           
           <div className="grid gap-6 md:grid-cols-2">
-            {itinerary.hidden_gems.map((gem, index) => (
+            {itinerary.hidden_gems && itinerary.hidden_gems.length > 0 && itinerary.hidden_gems.map((gem, index) => (
               <Card key={index} className="border-gray-100">
                 <CardContent className="pt-6">
                   <h3 className="font-semibold text-gray-900 mb-2">{gem.name}</h3>
@@ -617,7 +617,7 @@ export default function ItineraryPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Signature Experiences</h2>
           
           <div className="grid gap-6">
-            {itinerary.signature_experiences.map((experience, index) => (
+            {itinerary.signature_experiences && itinerary.signature_experiences.length > 0 && itinerary.signature_experiences.map((experience, index) => (
               <Card key={index} className="border-gray-100">
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start mb-4">
@@ -626,7 +626,7 @@ export default function ItineraryPage() {
                       <p className="text-gray-700 text-sm mb-2">{experience.description}</p>
                       <p className="text-green-600 text-sm italic mb-3">💚 {experience.why_local_loves_it}</p>
                       <div className="flex flex-wrap gap-2">
-                        {experience.tags.slice(0, 4).map((tag, tagIndex) => (
+                        {experience.tags && experience.tags.length > 0 && experience.tags.slice(0, 4).map((tag, tagIndex) => (
                           <TagBadge key={tagIndex} tag={tag} type="experience" />
                         ))}
                       </div>
@@ -654,7 +654,7 @@ export default function ItineraryPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Hyperlocal Food Guide</h2>
           
           <div className="grid gap-4">
-            {itinerary.hyperlocal_food_guide.map((food, index) => (
+            {itinerary.hyperlocal_food_guide && itinerary.hyperlocal_food_guide.length > 0 && itinerary.hyperlocal_food_guide.map((food, index) => (
               <Card key={index} className="border-gray-100">
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start">
@@ -664,7 +664,7 @@ export default function ItineraryPage() {
                       <p className="text-gray-600 text-sm mb-1">📍 {food.where_to_find}</p>
                       <p className="text-orange-600 text-sm italic">🍴 {food.local_tip}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {food.tags.slice(0, 3).map((tag, tagIndex) => (
+                        {food.tags && food.tags.length > 0 && food.tags.slice(0, 3).map((tag, tagIndex) => (
                           <span key={tagIndex} className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
                             {tag}
                           </span>
@@ -691,7 +691,7 @@ export default function ItineraryPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Shopping Insider Guide</h2>
           
           <div className="grid gap-4 md:grid-cols-2">
-            {itinerary.shopping_insider_guide.map((shopping, index) => (
+            {itinerary.shopping_insider_guide && itinerary.shopping_insider_guide.length > 0 && itinerary.shopping_insider_guide.map((shopping, index) => (
               <Card key={index} className="border-gray-100">
                 <CardContent className="pt-6">
                   <h3 className="font-semibold text-gray-900 mb-2">{shopping.item}</h3>
