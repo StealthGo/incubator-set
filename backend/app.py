@@ -234,7 +234,10 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return {
         "name": current_user.get("name", ""),
         "email": current_user.get("email", ""),
-        "dob": current_user.get("dob", "")
+        "dob": current_user.get("dob", ""),
+        "subscription_status": current_user.get("subscription_status", "free"),
+        "itineraries_created": current_user.get("itineraries_created", 0),
+        "free_itinerary_used": current_user.get("free_itinerary_used", False)
     }
 
 @app.get("/api/my-itineraries")
