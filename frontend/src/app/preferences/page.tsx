@@ -8,50 +8,109 @@ import 'react-date-range/dist/theme/default.css';
 import { addDays, format } from 'date-fns';
 import SubscriptionPopup from './SubscriptionPopup';
 import { TagBadge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  MapPin, Clock, Calendar, Users, DollarSign, 
+  Star, Camera, Coffee, Mountain, Heart,
+  ExternalLink, Navigation, Eye, Bookmark,
+  Wifi, Utensils, BedDouble, Gem, Bus, Plane
+} from "lucide-react";
 
 // --- Configuration ---
 const API_BASE_URL = "http://localhost:8000"; // Your backend URL
 
+// Enhanced Animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 60 },
+  animate: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+// Enhanced Button component
+const Button = ({ children, onClick, variant = "default", size = "default", className = "", ...props }: any) => {
+  const baseClasses = "inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 transform-gpu";
+  const variants: Record<string, string> = {
+    default: "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    outline: "border-2 border-gray-300 bg-white/80 backdrop-blur-sm hover:bg-gray-50 shadow-md hover:shadow-xl hover:border-gray-400 hover:-translate-y-0.5",
+    primary: "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    glass: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 shadow-lg hover:shadow-2xl"
+  };
+  const sizes: Record<string, string> = {
+    default: "h-11 px-6 py-2",
+    sm: "h-9 px-4 text-xs",
+    lg: "h-14 px-10 text-base font-semibold"
+  };
+  
+  return (
+    <motion.button 
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className={`${baseClasses} ${variants[variant] || variants.default} ${sizes[size] || sizes.default} ${className}`}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </motion.button>
+  );
+};
+
 // Dynamic conversation system - now LLM handles all interactions
-const systemPrompt = `You are an enthusiastic, friendly travel planning assistant named "The Modern Chanakya". Your goal is to have a natural conversation with users to gather all the information needed to create their perfect itinerary.
+const systemPrompt = `You are "The Modern Chanakya" - an enthusiastic, knowledgeable Indian travel planning assistant who specializes EXCLUSIVELY in Indian destinations and experiences. You are passionate about Incredible India and help fellow Indians and visitors explore the beauty, culture, and diversity of our motherland.
+
+FOCUS: INDIA ONLY - You only plan trips within India. If someone asks about international destinations, politely redirect them to explore India's incredible diversity instead.
 
 CONVERSATION FLOW:
-1. Start with a warm, personalized greeting asking about their destination
-2. Naturally follow up based on their responses to gather:
-   - Destination (where they want to go)
-   - Dates (when they're traveling) 
-   - Travelers (who's going - solo, couple, family, friends, etc.)
-   - Interests (what they want to do - adventure, culture, food, relaxation, etc.)
-   - Budget (budget-friendly, mid-range, luxury)
-   - Pace (relaxed, balanced, action-packed)
-   - Special preferences (dietary needs, accessibility, must-see items, etc.)
+1. Start with a warm, desi greeting asking which part of Bharat they want to explore
+2. Naturally follow up to gather:
+   - Indian Destination (which state/city/region of India)
+   - Travel Dates (considering Indian seasons, festivals, weather)
+   - Travelers (solo yatra, family trip, friends ka gang, honeymoon, etc.)
+   - Interests (spiritual journey, adventure, food tour, heritage, beaches, mountains, wildlife, festivals, etc.)
+   - Budget (budget travel, middle-class comfort, luxury experience)
+   - Travel Style (relaxed darshan, balanced exploration, action-packed adventure)
+   - Special Indian Preferences (vegetarian food, Ayurveda, yoga, local festivals, etc.)
 
-PERSONALITY:
-- Be enthusiastic and use emojis naturally
-- Ask follow-up questions that show you're listening
-- Reference their previous answers to create connection
-- Make them excited about their trip
-- Be conversational, not robotic
-- Use phrases like "That sounds amazing!", "I'm getting excited just thinking about it!", etc.
+PERSONALITY & LANGUAGE:
+- Use a mix of English and Hindi naturally (like "Kahan jaana hai?", "That sounds kamaal!", "Wah, amazing choice!")
+- Be enthusiastic about Indian culture, food, traditions
+- Reference Indian contexts (monsoon season, festival times, local customs)
+- Use phrases like "Bahut badhiya!", "Incredible choice!", "You'll love the local mithai there!"
+- Show deep knowledge of Indian geography, culture, and travel
+
+INDIAN CONTEXT EXPERTISE:
+- Know about Indian seasons (summer, monsoon, winter, post-monsoon)
+- Understand Indian festivals and their travel impact
+- Be aware of Indian travel patterns (hill stations in summer, Goa in winter, etc.)
+- Suggest authentic Indian experiences (local markets, street food, cultural shows, temples, etc.)
+- Consider Indian travel preferences (family-friendly, vegetarian options, clean accommodations)
 
 RULES:
-- Only ask ONE question at a time
-- Keep responses concise but enthusiastic  
-- Always acknowledge their previous answer before asking the next question
-- Don't rush - let the conversation flow naturally
-- When you have gathered all essential information, enthusiastically summarize what you understand and ask if they're ready to generate their itinerary
-- If they say something unclear, ask for clarification in a friendly way
+- ONLY suggest destinations within India
+- Ask ONE question at a time in a conversational, friendly manner
+- Always acknowledge their previous answer before asking the next
+- When you have enough info, enthusiastically summarize and ask if they're ready for their "perfect Bharat yatra itinerary"
+- If they mention international travel, redirect: "Arre yaar, why go abroad when our own India has so much to offer! Tell me what kind of experience you want - I'll show you amazing places right here in our beautiful country!"
 
 Current conversation context will be provided. Respond as the next message in the conversation.`;
 
 // Quick replies for different conversation stages
 const smartQuickReplies: Record<string, string[]> = {
-  destination: ["🇮🇳 India", "🏔️ Mountains", "🏖️ Beach Paradise", "🏛️ Historic Cities", "🌸 Japan", "🗼 Europe"],
-  dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "🎯 Specific Season"],
-  travelers: ["✈️ Just me", "👫 My partner", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends group", "👥 Big group (5+)"],
-  interests: ["🎿 Adventure", "🍜 Food & Culture", "🎭 Arts & History", "🌿 Nature", "🧘‍♀️ Wellness", "🌃 Nightlife"],
-  budget: ["💸 Budget-friendly", "💰 Mid-range", "💎 Luxury", "🎯 Best value"],
-  pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Action-packed"],
+  destination: ["�️ Himachal Pradesh", "�️ Goa", "🕌 Rajasthan", "� Kerala", "🏛️ Delhi NCR", "� Andaman"],
+  dates: ["📅 Pick Dates", "🤷‍♀️ Flexible hai", "🌞 Next Month", "🎯 Festival Season", "❄️ Winter", "🌸 Summer"],
+  travelers: ["✈️ Solo yatra", "👫 Partner ke saath", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends ka group", "👥 Big family (5+)", "💏 Honeymoon"],
+  interests: ["🙏 Spiritual journey", "� Food & Culture", "�️ Heritage sites", "🌿 Nature & Wildlife", "🧘‍♀️ Yoga & Wellness", "� Festivals"],
+  budget: ["💸 Budget travel", "💰 Middle-class comfort", "💎 Luxury experience", "🎯 Best value", "👨‍👩‍👧‍👦 Family budget", "🎓 Student budget"],
+  pace: ["🐌 Relaxed darshan", "⚖️ Balanced exploration", "🏃‍♂️ Adventure packed", "🧘‍♀️ Peaceful & slow", "📸 Photo-focused", "🎒 Backpacker style"],
 };
 
 // --- Helper Functions & Components ---
@@ -198,7 +257,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
 
 export default function PreferencesPage() {
   const [messages, setMessages] = useState([
-    { sender: "system", text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" },
+    { sender: "system", text: "Namaste! � Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" },
   ]);
   const [input, setInput] = useState("");
   const [itinerary, setItinerary] = useState<Record<string, any> | null>(null);
@@ -224,6 +283,18 @@ export default function PreferencesPage() {
   const [conversationComplete, setConversationComplete] = useState(false);
   const [currentQuestionType, setCurrentQuestionType] = useState("destination");
 
+  // Helper function to clear conversation data
+  const clearConversationData = () => {
+    localStorage.removeItem("currentItinerary");
+    localStorage.removeItem("conversationMessages");
+    localStorage.removeItem("conversationComplete");
+    setItinerary(null);
+    setMessages([{ sender: 'system', text: "Namaste! 🙏 Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]);
+    setConversationComplete(false);
+    setCurrentQuestionType("destination");
+    setShowOptions(false);
+  };
+
   // Check if user is locked due to subscription limits
   const isUserLocked = () => {
     return user?.subscription_status === "free" && user?.free_itinerary_used === true;
@@ -232,6 +303,71 @@ export default function PreferencesPage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Persist itinerary and conversation state to localStorage
+  useEffect(() => {
+    if (itinerary) {
+      localStorage.setItem("currentItinerary", JSON.stringify(itinerary));
+    }
+  }, [itinerary]);
+
+  useEffect(() => {
+    if (messages.length > 1) { // More than just the initial greeting
+      localStorage.setItem("conversationMessages", JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem("conversationComplete", JSON.stringify(conversationComplete));
+  }, [conversationComplete]);
+
+  // Clear localStorage if user becomes locked
+  useEffect(() => {
+    if (isUserLocked()) {
+      localStorage.removeItem("currentItinerary");
+      localStorage.removeItem("conversationMessages");
+      localStorage.removeItem("conversationComplete");
+    }
+  }, [user?.free_itinerary_used, user?.subscription_status]);
+
+  // Restore itinerary and conversation state from localStorage on component mount
+  useEffect(() => {
+    // Only restore data if user is logged in
+    if (!isLoggedIn) return;
+    
+    const savedItinerary = localStorage.getItem("currentItinerary");
+    const savedMessages = localStorage.getItem("conversationMessages");
+    const savedConversationComplete = localStorage.getItem("conversationComplete");
+
+    if (savedItinerary) {
+      try {
+        const parsedItinerary = JSON.parse(savedItinerary);
+        setItinerary(parsedItinerary);
+      } catch (error) {
+        console.error("Error parsing saved itinerary:", error);
+      }
+    }
+
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        if (Array.isArray(parsedMessages) && parsedMessages.length > 1) {
+          setMessages(parsedMessages);
+        }
+      } catch (error) {
+        console.error("Error parsing saved messages:", error);
+      }
+    }
+
+    if (savedConversationComplete) {
+      try {
+        const parsedComplete = JSON.parse(savedConversationComplete);
+        setConversationComplete(parsedComplete);
+      } catch (error) {
+        console.error("Error parsing conversation state:", error);
+      }
+    }
+  }, [isLoggedIn]); // Depend on isLoggedIn instead of running on every mount
 
   // Check if user is logged in on component mount
   useEffect(() => {
@@ -373,18 +509,21 @@ export default function PreferencesPage() {
     }
   };
 
-  // Determine current question type for quick replies
+  // Determine current question type for quick replies based on conversation flow
   const getCurrentQuestionType = () => {
-    const lastMessage = messages[messages.length - 1]?.text.toLowerCase() || "";
+    const userMessages = messages.filter(msg => msg.sender === "user");
+    const conversationStep = userMessages.length;
     
-    if (lastMessage.includes("where") && lastMessage.includes("go")) return "destination";
-    if (lastMessage.includes("when") || lastMessage.includes("date")) return "dates";
-    if (lastMessage.includes("who") || lastMessage.includes("travel")) return "travelers";
-    if (lastMessage.includes("interest") || lastMessage.includes("want to do")) return "interests";
-    if (lastMessage.includes("budget") || lastMessage.includes("cost")) return "budget";
-    if (lastMessage.includes("pace") || lastMessage.includes("rhythm")) return "pace";
-    
-    return "destination";
+    // Follow the sequence: destination → dates → travelers → interests → budget → pace
+    switch (conversationStep) {
+      case 0: return "destination";  // First question about destination
+      case 1: return "dates";       // Second question about dates
+      case 2: return "travelers";   // Third question about travelers
+      case 3: return "interests";   // Fourth question about interests
+      case 4: return "budget";      // Fifth question about budget
+      case 5: return "pace";        // Sixth question about pace
+      default: return "destination"; // Default fallback
+    }
   };
 
   const handleGenerate = async (followUpPrompt?: string) => {
@@ -497,53 +636,172 @@ export default function PreferencesPage() {
       return (
         <div className="text-gray-400 text-center mt-16 p-4">
           <Icon name="explore" className="text-5xl mb-4" />
-          <div className="text-lg font-medium mb-2">Your Detailed Itinerary Will Appear Here</div>
-          <div className="text-sm">Complete the chat to get a comprehensive travel plan with:</div>
+          <div className="text-lg font-medium mb-2">Your Detailed Indian Itinerary Will Appear Here</div>
+          <div className="text-sm">Complete the chat to get a comprehensive Bharat travel plan with:</div>
           <div className="text-sm mt-2 space-y-1 text-left inline-block">
-            <div><Icon name="map" className="text-sm mr-2 text-orange-500"/>Day-by-day detailed schedule</div>
-            <div><Icon name="restaurant" className="text-sm mr-2 text-orange-500"/>Local food recommendations</div>
-            <div><Icon name="star" className="text-sm mr-2 text-orange-500"/>Signature experiences</div>
-            <div><Icon name="shopping_cart" className="text-sm mr-2 text-orange-500"/>Shopping guides & insider tips</div>
-            <div><Icon name="account_balance_wallet" className="text-sm mr-2 text-orange-500"/>Budget breakdown & practical wisdom</div>
+            <div><Icon name="map" className="text-sm mr-2 text-orange-500"/>Day-by-day detailed Indian schedule</div>
+            <div><Icon name="restaurant" className="text-sm mr-2 text-orange-500"/>Authentic local food recommendations</div>
+            <div><Icon name="star" className="text-sm mr-2 text-orange-500"/>Cultural experiences & festivals</div>
+            <div><Icon name="shopping_cart" className="text-sm mr-2 text-orange-500"/>Local markets & handicraft guides</div>
+            <div><Icon name="account_balance_wallet" className="text-sm mr-2 text-orange-500"/>Budget breakdown in Indian rupees</div>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-12 p-4 md:p-0">
-        {/* Hero Section */}
-        <section className="relative rounded-2xl overflow-hidden shadow-2xl h-80">
-            <img src={itinerary.hero_image_url} alt={itinerary.destination_name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-            <h2 className="absolute bottom-8 left-8 text-5xl font-extrabold text-white drop-shadow-lg">
-                {itinerary.personalized_title || `Your Trip to ${itinerary.destination_name}`}
-            </h2>
-        </section>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="space-y-12 p-4 md:p-0"
+      >
+        {/* Enhanced Hero Section */}
+        <motion.section 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative rounded-3xl overflow-hidden shadow-2xl h-96 group"
+        >
+          <motion.img 
+            src={itinerary.hero_image_url} 
+            alt={itinerary.destination_name} 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 1.2 }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          
+          {/* Floating elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                className={`absolute w-4 h-4 rounded-full opacity-30 ${
+                  i % 3 === 0 ? 'bg-orange-400' : i % 3 === 1 ? 'bg-blue-400' : 'bg-purple-400'
+                }`}
+                style={{
+                  left: `${15 + i * 15}%`,
+                  top: `${25 + (i % 2) * 30}%`,
+                }}
+                animate={{
+                  y: [0, -30, 0],
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 4 + i * 0.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.4
+                }}
+              />
+            ))}
+          </div>
 
-        {/* Journey Details */}
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            >
+              <motion.h2 
+                className="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-2xl"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8 }}
+              >
+                {itinerary.personalized_title || `Your Trip to ${itinerary.destination_name}`}
+              </motion.h2>
+              
+              <motion.div 
+                className="flex flex-wrap gap-3 mt-6"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
+                {itinerary.trip_overview && [
+                  { icon: Calendar, label: "Perfect Season" },
+                  { icon: MapPin, label: itinerary.destination_name },
+                  { icon: DollarSign, label: itinerary.trip_overview.estimated_total_cost }
+                ].map((item, index) => (
+                  <motion.div key={index} variants={fadeInUp}>
+                    <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Enhanced Journey Details */}
         {itinerary.journey_details && (
-            <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="luggage" className="text-4xl text-orange-500"/> {itinerary.journey_details.title}</h3>
+            <motion.section
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+                <motion.h3 
+                  className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                    <Bus className="text-2xl text-white" />
+                  </div>
+                  {itinerary.journey_details.title}
+                </motion.h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {itinerary.journey_details.options.map((opt: any, i: number) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                            <div className="flex items-center gap-4 mb-3">
-                                <Icon name={opt.icon} className="text-3xl text-orange-600"/>
-                                <h4 className="font-bold text-xl text-gray-800">{opt.mode}</h4>
+                        <motion.div 
+                          key={i} 
+                          className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group overflow-hidden relative"
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1, duration: 0.6 }}
+                          viewport={{ once: true }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          {/* Background gradient on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                  {opt.icon === 'flight' && <Plane className="text-2xl text-white" />}
+                                  {opt.icon === 'train' && <Bus className="text-2xl text-white" />}
+                                  {opt.icon === 'bus' && <Bus className="text-2xl text-white" />}
+                                  {opt.icon === 'car' && <Navigation className="text-2xl text-white" />}
+                                </div>
+                                <h4 className="font-bold text-2xl text-gray-800">{opt.mode}</h4>
                             </div>
-                            <p className="text-gray-700 mb-2">{opt.description}</p>
-                            <p className="text-sm text-gray-600 mb-4"><strong>Duration:</strong> {opt.duration}</p>
+                            <p className="text-gray-700 mb-4 text-lg leading-relaxed">{opt.description}</p>
+                            <p className="text-base text-gray-600 mb-6 flex items-center gap-2">
+                              <Clock className="w-5 h-5 text-orange-500" />
+                              <strong>Duration:</strong> {opt.duration}
+                            </p>
                             <div className="flex justify-between items-center">
-                                <p className="text-gray-800 font-semibold text-lg">{opt.estimated_cost}</p>
-                                <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
-                                    <Icon name="confirmation_number" /> Book Now
-                                </a>
+                                <p className="text-gray-800 font-bold text-2xl flex items-center gap-2">
+                                  <DollarSign className="w-6 h-6 text-green-500" />
+                                  {opt.estimated_cost}
+                                </p>
+                                <Button variant="primary" size="default" asChild>
+                                  <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <ExternalLink className="w-4 h-4" /> Book Now
+                                  </a>
+                                </Button>
                             </div>
-                        </div>
+                          </div>
+                        </motion.div>
                     ))}
                 </div>
-            </section>
+            </motion.section>
         )}
         
         {/* Accommodation Suggestions */}
@@ -816,7 +1074,7 @@ export default function PreferencesPage() {
             </section>
             )}
         </div>
-      </div>
+      </motion.div>
     );
   };
 
@@ -838,8 +1096,13 @@ export default function PreferencesPage() {
               setShowSubscriptionPopup(true);
               return;
             }
+            // Clear localStorage for fresh start
+            localStorage.removeItem("currentItinerary");
+            localStorage.removeItem("conversationMessages");
+            localStorage.removeItem("conversationComplete");
+            
             setItinerary(null); 
-            setMessages([{ sender: 'system', text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" }]); 
+            setMessages([{ sender: 'system', text: "Namaste! � Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]); 
             setConversationComplete(false);
             setCurrentQuestionType("destination");
             setShowOptions(false);
@@ -867,6 +1130,7 @@ export default function PreferencesPage() {
               {/* Sign Out Button */}
               <button onClick={() => { 
                 localStorage.removeItem("token");
+                clearConversationData();
                 setUser(null);
                 setIsLoggedIn(false);
                 setShowSignInModal(true);
@@ -893,15 +1157,15 @@ export default function PreferencesPage() {
                 <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border border-orange-200 rounded-2xl p-6 mb-4">
                   <div className="text-center">
                     <Icon name="travel_explore" className="text-4xl text-orange-500 mb-3" />
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Welcome to The Modern Chanakya!</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">Namaste! Welcome to The Modern Chanakya!</h3>
                     <p className="text-gray-700 mb-4">
-                      Ready to plan your perfect trip? Sign in to start creating personalized itineraries with our AI travel expert.
+                      Ready to explore Incredible India? Sign in to start creating personalized Indian travel itineraries with our desi AI travel expert - from Kashmir to Kanyakumari!
                     </p>
                     <button 
                       onClick={() => setShowSignInModal(true)}
                       className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-all shadow-lg"
                     >
-                      🚀 Sign In to Start Planning
+                      🇮🇳 Start Your Bharat Yatra
                     </button>
                   </div>
                 </div>
@@ -955,7 +1219,7 @@ export default function PreferencesPage() {
                   !isLoggedIn 
                     ? "Please sign in to start planning your trip..." 
                     : isUserLocked()
-                      ? "🔒 Upgrade to premium to create more itineraries..."
+                      ? "🔒 Upgrade kar ke aur Indian adventures explore karo..."
                     : isConversing
                       ? "I'm thinking of the perfect response..."
                     : conversationComplete
@@ -1038,15 +1302,15 @@ export default function PreferencesPage() {
             {isUserLocked() && (
               <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-6 text-center">
                 <div className="text-4xl mb-3">🔒</div>
-                <h3 className="text-xl font-bold text-orange-800 mb-2">You've used your free itinerary!</h3>
+                <h3 className="text-xl font-bold text-orange-800 mb-2">Aapka free Indian itinerary complete ho gaya!</h3>
                 <p className="text-gray-700 mb-4">
-                  Upgrade to premium to create unlimited personalized itineraries with advanced AI features.
+                  Upgrade to premium to create unlimited personalized Indian travel itineraries with advanced AI features for exploring incredible Bharat.
                 </p>
                 <button 
                   onClick={() => setShowSubscriptionPopup(true)}
                   className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105 shadow-lg"
                 >
-                  🚀 Upgrade to Premium
+                  🇮🇳 Upgrade for More Bharat Adventures
                 </button>
               </div>
             )}
@@ -1080,7 +1344,7 @@ export default function PreferencesPage() {
           onClose={() => setShowSignInModal(false)} 
           onSuccess={() => {
             // Start the conversation after successful sign in
-            setMessages([{ sender: 'system', text: "Hey there! 👋 I'm thrilled to help you plan an amazing trip! Where would you love to go for your next adventure?" }]);
+            setMessages([{ sender: 'system', text: "Namaste! � Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]);
             setConversationComplete(false);
             setCurrentQuestionType("destination");
             setShowOptions(false);
