@@ -850,9 +850,11 @@ const ItineraryDetails = () => {
               className="w-full justify-between text-gray-800"
             >
               <div className="flex items-center gap-2">
-                {sections.find(s => s.id === activeSection)?.icon && (
-                  <sections.find(s => s.id === activeSection).icon className="w-4 h-4" />
-                )}
+                {(() => {
+                  const currentSection = sections.find(s => s.id === activeSection);
+                  const IconComponent = currentSection?.icon;
+                  return IconComponent ? <IconComponent className="w-4 h-4" /> : null;
+                })()}
                 {sections.find(s => s.id === activeSection)?.label}
               </div>
               <ChevronDown className={`w-4 h-4 transition-transform ${showMobileMenu ? 'rotate-180' : ''}`} />
