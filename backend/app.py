@@ -480,6 +480,16 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 @app.post("/api/generate-itinerary")
 async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends(get_current_user)):
     user_name = current_user.get("name", "Traveler")
+    user_email = current_user.get("email")
+    subscription_status = current_user.get("subscription_status", "free")
+    free_itinerary_used = current_user.get("free_itinerary_used", False)
+    
+    # Check subscription limits
+    if subscription_status == "free" and free_itinerary_used:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You have already used your free itinerary. Please upgrade to continue creating itineraries."
+        )
 
     # Extract answers based on the sequence of system questions
     # The frontend asks questions in a specific order
@@ -685,6 +695,23 @@ Generate a complete travel plan in JSON format. Every field must be filled with 
             
             # Add the ID to the response
             itinerary_data["itinerary_id"] = itinerary_id
+            
+            # Update user's subscription status if they used their free itinerary
+            if subscription_status == "free":
+                await users_collection.update_one(
+                    {"email": user_email},
+                    {
+                        "$set": {"free_itinerary_used": True},
+                        "$inc": {"itineraries_created": 1}
+                    }
+                )
+            else:
+                # For premium users, just increment the counter
+                await users_collection.update_one(
+                    {"email": user_email},
+                    {"$inc": {"itineraries_created": 1}}
+                )
+                
         except asyncio.CancelledError:
             # Handle cancellation gracefully
             raise HTTPException(

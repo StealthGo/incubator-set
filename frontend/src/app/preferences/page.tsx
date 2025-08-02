@@ -211,7 +211,13 @@ export default function PreferencesPage() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ 
+    name: string; 
+    email: string; 
+    subscription_status?: string;
+    free_itinerary_used?: boolean;
+    itineraries_created?: number;
+  } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   // Store conversation state
@@ -408,6 +414,17 @@ export default function PreferencesPage() {
           setIsGenerating(false);
           return;
         }
+        if (res.status === 403) {
+          // Subscription limit reached
+          const errorData = await res.json();
+          setMessages((msgs) => [
+            ...msgs,
+            { sender: "llm", text: errorData.detail || "You have reached your free itinerary limit. Please upgrade to continue creating itineraries." },
+          ]);
+          setIsGenerating(false);
+          setShowSubscriptionPopup(true);
+          return;
+        }
         if (res.status === 429) {
           // Quota exceeded
           setMessages((msgs) => [
@@ -427,17 +444,13 @@ export default function PreferencesPage() {
         { sender: "llm", text: data.llm_message || "Your itinerary is ready! Check it out on the right." },
       ]);
       
-      // Show subscription popup after itinerary is generated (only if not shown before or cooldown expired)
-      const hasSeenSubscriptionPopup = localStorage.getItem('hasSeenSubscriptionPopup');
-      const cooldownExpiry = localStorage.getItem('subscriptionPopupCooldown');
-      const now = new Date();
-      const isCooldownActive = cooldownExpiry && new Date(cooldownExpiry) > now;
-      
-      if (!hasSeenSubscriptionPopup && !isCooldownActive) {
+      // Show subscription popup for free users after first itinerary
+      if (user?.subscription_status === "free" || !user?.subscription_status) {
         setTimeout(() => {
           setShowSubscriptionPopup(true);
-          localStorage.setItem('hasSeenSubscriptionPopup', 'true');
-        }, 2000); // Show popup after 2 seconds
+          // Update user state to reflect they've used their free itinerary
+          setUser(prev => prev ? { ...prev, free_itinerary_used: true } : null);
+        }, 3000); // Show popup after 3 seconds to let them see the itinerary
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
