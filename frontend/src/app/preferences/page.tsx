@@ -54,11 +54,11 @@ Current conversation context will be provided. Respond as the next message in th
 // Quick replies for different conversation stages
 const smartQuickReplies: Record<string, string[]> = {
   destination: ["�️ Himachal Pradesh", "�️ Goa", "🕌 Rajasthan", "� Kerala", "🏛️ Delhi NCR", "� Andaman"],
-  dates: ["📅 Pick Dates", "🤷‍♀️ Flexible hai", "🌞 Next Month", "🎯 Festival Season"],
-  travelers: ["✈️ Solo yatra", "👫 Partner ke saath", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends ka group", "👥 Big family (5+)"],
+  dates: ["📅 Pick Dates", "🤷‍♀️ Flexible hai", "🌞 Next Month", "🎯 Festival Season", "❄️ Winter", "🌸 Summer"],
+  travelers: ["✈️ Solo yatra", "👫 Partner ke saath", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends ka group", "👥 Big family (5+)", "💏 Honeymoon"],
   interests: ["🙏 Spiritual journey", "� Food & Culture", "�️ Heritage sites", "🌿 Nature & Wildlife", "🧘‍♀️ Yoga & Wellness", "� Festivals"],
-  budget: ["💸 Budget travel", "💰 Middle-class comfort", "💎 Luxury experience", "🎯 Best value for money"],
-  pace: ["🐌 Relaxed darshan", "⚖️ Balanced exploration", "🏃‍♂️ Adventure packed"],
+  budget: ["💸 Budget travel", "💰 Middle-class comfort", "💎 Luxury experience", "🎯 Best value", "👨‍👩‍👧‍👦 Family budget", "🎓 Student budget"],
+  pace: ["🐌 Relaxed darshan", "⚖️ Balanced exploration", "🏃‍♂️ Adventure packed", "🧘‍♀️ Peaceful & slow", "📸 Photo-focused", "🎒 Backpacker style"],
 };
 
 // --- Helper Functions & Components ---
