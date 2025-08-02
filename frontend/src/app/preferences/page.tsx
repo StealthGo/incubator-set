@@ -737,29 +737,71 @@ export default function PreferencesPage() {
           </div>
         </motion.section>
 
-        {/* Journey Details */}
+        {/* Enhanced Journey Details */}
         {itinerary.journey_details && (
-            <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="luggage" className="text-4xl text-orange-500"/> {itinerary.journey_details.title}</h3>
+            <motion.section
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+                <motion.h3 
+                  className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                    <Bus className="text-2xl text-white" />
+                  </div>
+                  {itinerary.journey_details.title}
+                </motion.h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {itinerary.journey_details.options.map((opt: any, i: number) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                            <div className="flex items-center gap-4 mb-3">
-                                <Icon name={opt.icon} className="text-3xl text-orange-600"/>
-                                <h4 className="font-bold text-xl text-gray-800">{opt.mode}</h4>
+                        <motion.div 
+                          key={i} 
+                          className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group overflow-hidden relative"
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1, duration: 0.6 }}
+                          viewport={{ once: true }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          {/* Background gradient on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+                                  {opt.icon === 'flight' && <Plane className="text-2xl text-white" />}
+                                  {opt.icon === 'train' && <Bus className="text-2xl text-white" />}
+                                  {opt.icon === 'bus' && <Bus className="text-2xl text-white" />}
+                                  {opt.icon === 'car' && <Navigation className="text-2xl text-white" />}
+                                </div>
+                                <h4 className="font-bold text-2xl text-gray-800">{opt.mode}</h4>
                             </div>
-                            <p className="text-gray-700 mb-2">{opt.description}</p>
-                            <p className="text-sm text-gray-600 mb-4"><strong>Duration:</strong> {opt.duration}</p>
+                            <p className="text-gray-700 mb-4 text-lg leading-relaxed">{opt.description}</p>
+                            <p className="text-base text-gray-600 mb-6 flex items-center gap-2">
+                              <Clock className="w-5 h-5 text-orange-500" />
+                              <strong>Duration:</strong> {opt.duration}
+                            </p>
                             <div className="flex justify-between items-center">
-                                <p className="text-gray-800 font-semibold text-lg">{opt.estimated_cost}</p>
-                                <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
-                                    <Icon name="confirmation_number" /> Book Now
-                                </a>
+                                <p className="text-gray-800 font-bold text-2xl flex items-center gap-2">
+                                  <DollarSign className="w-6 h-6 text-green-500" />
+                                  {opt.estimated_cost}
+                                </p>
+                                <Button variant="primary" size="default" asChild>
+                                  <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <ExternalLink className="w-4 h-4" /> Book Now
+                                  </a>
+                                </Button>
                             </div>
-                        </div>
+                          </div>
+                        </motion.div>
                     ))}
                 </div>
-            </section>
+            </motion.section>
         )}
         
         {/* Accommodation Suggestions */}
