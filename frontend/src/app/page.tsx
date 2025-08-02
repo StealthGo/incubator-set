@@ -201,7 +201,14 @@ export default function Home() {
                                 <div className="relative w-[380px] h-[380px] ">
                                     <Image src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" width={80} height={80} className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10" unoptimized />
                                     {/* Interest Bubbles */}
-                                    {['🏖️ Beach', '🏛️ History', '🍽️ Dining', '🧖‍♀️ Spa', '🐦 Wildlife', '🚴‍♂️ Cycling'].map((item, i) => (
+                                    {[
+                                        { item: '🏖️ Beach', top: '90%', left: '50%' },
+                                        { item: '🏛️ History', top: '65%', left: '85%' },
+                                        { item: '🍽️ Dining', top: '35%', left: '85%' },
+                                        { item: '🧖‍♀️ Spa', top: '10%', left: '50%' },
+                                        { item: '🐦 Wildlife', top: '35%', left: '15%' },
+                                        { item: '🚴‍♂️ Cycling', top: '65%', left: '15%' }
+                                    ].map((bubble, i) => (
                                         <motion.div
                                             key={i}
                                             className="absolute flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-md border border-gray-100"
@@ -209,12 +216,12 @@ export default function Home() {
                                             whileInView={{ opacity: 1, scale: 1 }}
                                             transition={{ delay: i * 0.1 + 0.2, type: 'spring', stiffness: 100 }}
                                             style={{
-                                                top: `${50 + 40 * Math.sin(i * (Math.PI / 3))}%`,
-                                                left: `${50 + 40 * Math.cos(i * (Math.PI / 3))}%`,
+                                                top: bubble.top,
+                                                left: bubble.left,
                                                 transform: 'translate(-50%, -50%)',
                                             }}
                                         >
-                                            <span className="text-sm font-medium text-gray-700">{item}</span>
+                                            <span className="text-sm font-medium text-gray-700">{bubble.item}</span>
                                         </motion.div>
                                     ))}
                                 </div>
