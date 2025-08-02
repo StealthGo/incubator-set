@@ -896,9 +896,9 @@ export default function PreferencesPage() {
                 </div>
               </div>
             )}
-            {!itinerary && !showOptions && quickReplies[currentQuestionKey]?.length > 0 && (
+            {!itinerary && !showOptions && !conversationComplete && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
-                {quickReplies[currentQuestionKey].map((option) => (
+                {smartQuickReplies[getCurrentQuestionType()].map((option: string) => (
                   <button 
                     key={option} 
                     type="button" 
