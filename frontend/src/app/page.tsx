@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,28 +56,45 @@ const imageLinks = {
 };
 
 
-// Animation Variants
+// Simple and clean animations
 const fadeInUp = {
-    initial: { opacity: 0, y: 40 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] } },
+    initial: { opacity: 0, y: 60 },
+    animate: { opacity: 1, y: 0 }
+};
+
+const slideInLeft = {
+    initial: { opacity: 0, x: -60 },
+    animate: { opacity: 1, x: 0 }
+};
+
+const slideInRight = {
+    initial: { opacity: 0, x: 60 },
+    animate: { opacity: 1, x: 0 }
 };
 
 const staggerContainer = {
+    initial: {},
     animate: {
         transition: {
             staggerChildren: 0.1,
+            delayChildren: 0.2,
         },
     },
 };
 
-const cardHover = {
-    scale: 1.03,
-    transition: { duration: 0.3 }
+const scaleIn = {
+    initial: { opacity: 0, scale: 0.8 },
+    animate: { opacity: 1, scale: 1 }
 };
 
+// TypeScript interface for Accordion props
+interface AccordionProps {
+    question: string;
+    answer: string;
+}
 
 // FAQ Component
-const Accordion = ({ question, answer }) => {
+const Accordion = ({ question, answer }: AccordionProps) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <motion.div
@@ -259,7 +276,13 @@ export default function Home() {
                                 { img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", title: "Rann of Kutch", desc: "Experience the Rann Utsav" },
                                 { img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80", title: "Meghalaya", desc: "Chase waterfalls in the clouds" },
                             ].map(card => (
-                                <motion.div key={card.title} variants={fadeInUp} whileHover={cardHover} className="relative rounded-2xl overflow-hidden group h-80">
+                                <motion.div 
+                                    key={card.title} 
+                                    variants={fadeInUp} 
+                                    whileHover={{ scale: 1.05, y: -8 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="relative rounded-2xl overflow-hidden group h-80"
+                                >
                                     <Image src={card.img} alt={card.title} layout="fill" className="object-cover transition-transform duration-500 group-hover:scale-110" unoptimized />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                     <div className="absolute bottom-0 left-0 p-5 text-white">
@@ -284,7 +307,14 @@ export default function Home() {
                                 { href: "/itineraries/goa-party-relax", img: imageLinks.goa, title: "Goa: Party & Relax", desc: "A 4-day itinerary for the best of Goa: beaches, nightlife, and hidden gems for relaxation and fun.", userImg: imageLinks.userRahul, userName: "Rahul", views: "6.7k", likes: 120 },
                                 { href: "/itineraries/varanasi-spiritual", img: imageLinks.varanasi, title: "Varanasi: Spiritual Journey", desc: "Experience the Ganga Aarti, explore ancient temples, and soak in the spiritual vibe of Varanasi in 3 days.", userImg: imageLinks.userMeera, userName: "Meera", views: "5.2k", likes: 98 },
                             ].map(card => (
-                                <motion.a key={card.title} href={card.href} variants={fadeInUp} whileHover={cardHover} className="rounded-2xl overflow-hidden bg-white flex flex-col border border-gray-200/80 group">
+                                <motion.a 
+                                    key={card.title} 
+                                    href={card.href} 
+                                    variants={fadeInUp} 
+                                    whileHover={{ scale: 1.05, y: -8 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="rounded-2xl overflow-hidden bg-white flex flex-col border border-gray-200/80 group"
+                                >
                                     <div className="h-56 overflow-hidden">
                                         <Image src={card.img} alt={card.title} width={600} height={224} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" unoptimized />
                                     </div>
