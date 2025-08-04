@@ -193,8 +193,10 @@ async def signup(user: UserIn):
             "email": user.email, 
             "hashed_password": hashed_password,
             "subscription_status": "free",  # free, premium
+            "has_premium_subscription": False,  # Boolean for premium subscription access
             "itineraries_created": 0,
             "free_itinerary_used": False,
+            "chat_messages_used": 0,  # Track chat usage for free users
             "created_at": datetime.datetime.now(datetime.timezone.utc)
         })
         return {"email": user.email}
@@ -236,8 +238,104 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "email": current_user.get("email", ""),
         "dob": current_user.get("dob", ""),
         "subscription_status": current_user.get("subscription_status", "free"),
+        "has_premium_subscription": current_user.get("has_premium_subscription", False),
         "itineraries_created": current_user.get("itineraries_created", 0),
-        "free_itinerary_used": current_user.get("free_itinerary_used", False)
+        "free_itinerary_used": current_user.get("free_itinerary_used", False),
+        "chat_messages_used": current_user.get("chat_messages_used", 0)
+    }
+
+@app.post("/api/upgrade-subscription")
+async def upgrade_subscription(current_user: dict = Depends(get_current_user)):
+    """Upgrade user to premium subscription"""
+    try:
+        # Update user's subscription status
+        await users_collection.update_one(
+            {"email": current_user.get("email")},
+            {
+                "$set": {
+                    "subscription_status": "premium",
+                    "has_premium_subscription": True,
+                    "upgraded_at": datetime.datetime.now(datetime.timezone.utc)
+                }
+            }
+        )
+        
+        return {
+            "message": "Subscription upgraded successfully",
+            "subscription_status": "premium",
+            "has_premium_subscription": True
+        }
+    
+    except Exception as e:
+        print(f"Error upgrading subscription: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upgrade subscription. Please try again."
+        )
+
+@app.post("/api/downgrade-subscription")
+async def downgrade_subscription(current_user: dict = Depends(get_current_user)):
+    """Downgrade user to free subscription (for testing purposes)"""
+    try:
+        # Update user's subscription status
+        await users_collection.update_one(
+            {"email": current_user.get("email")},
+            {
+                "$set": {
+                    "subscription_status": "free",
+                    "has_premium_subscription": False,
+                    "downgraded_at": datetime.datetime.now(datetime.timezone.utc)
+                }
+            }
+        )
+        
+        return {
+            "message": "Subscription downgraded to free",
+            "subscription_status": "free",
+            "has_premium_subscription": False
+        }
+    
+    except Exception as e:
+        print(f"Error downgrading subscription: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to downgrade subscription. Please try again."
+        )
+
+@app.get("/api/subscription-status")
+async def get_subscription_status(current_user: dict = Depends(get_current_user)):
+    """Get detailed subscription status and usage limits"""
+    has_premium_subscription = current_user.get("has_premium_subscription", False)
+    chat_messages_used = current_user.get("chat_messages_used", 0)
+    itineraries_created = current_user.get("itineraries_created", 0)
+    free_itinerary_used = current_user.get("free_itinerary_used", False)
+    
+    # Define limits
+    FREE_CHAT_LIMIT = 20
+    FREE_ITINERARY_LIMIT = 1
+    
+    return {
+        "has_premium_subscription": has_premium_subscription,
+        "subscription_status": current_user.get("subscription_status", "free"),
+        "chat_usage": {
+            "messages_used": chat_messages_used,
+            "limit": FREE_CHAT_LIMIT if not has_premium_subscription else -1,  # -1 means unlimited
+            "remaining": max(0, FREE_CHAT_LIMIT - chat_messages_used) if not has_premium_subscription else -1,
+            "unlimited": has_premium_subscription
+        },
+        "itinerary_usage": {
+            "itineraries_created": itineraries_created,
+            "free_itinerary_used": free_itinerary_used,
+            "limit": FREE_ITINERARY_LIMIT if not has_premium_subscription else -1,
+            "remaining": 0 if (not has_premium_subscription and free_itinerary_used) else (1 if not has_premium_subscription else -1),
+            "unlimited": has_premium_subscription
+        },
+        "benefits": {
+            "unlimited_chat": has_premium_subscription,
+            "unlimited_itineraries": has_premium_subscription,
+            "premium_features": has_premium_subscription,
+            "priority_support": has_premium_subscription
+        }
     }
 
 @app.get("/api/my-itineraries")
@@ -413,8 +511,27 @@ async def chat_conversation(
     request: ChatConversationRequest, 
     current_user: dict = Depends(get_current_user)
 ):
-    """Handle conversational AI for trip planning"""
+    """Handle conversational AI for trip planning with subscription-based limits"""
     try:
+        # Check subscription status and message limits
+        has_premium_subscription = current_user.get("has_premium_subscription", False)
+        chat_messages_used = current_user.get("chat_messages_used", 0)
+        
+        # Define limits for free users (adjust as needed)
+        FREE_CHAT_LIMIT = 20  # Free users can send 20 messages
+        
+        # If user doesn't have premium subscription, check limits
+        if not has_premium_subscription:
+            if chat_messages_used >= FREE_CHAT_LIMIT:
+                return {
+                    "response": "🔒 You've reached your free chat limit! Upgrade to premium for unlimited conversations and premium itinerary features. 💎✨",
+                    "ready_for_itinerary": False,
+                    "subscription_required": True,
+                    "limit_reached": True,
+                    "messages_used": chat_messages_used,
+                    "free_limit": FREE_CHAT_LIMIT
+                }
+        
         # Use Gemini for conversational responses
         client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
         
@@ -434,6 +551,7 @@ CONVERSATION SO FAR:
 {conversation_text}
 
 USER NAME: {request.user_name or current_user.get('name', 'there')}
+USER SUBSCRIPTION: {'Premium ✨' if has_premium_subscription else 'Free (Limited)'}
 
 Based on the conversation above, respond as "The Modern Chanakya" with the next appropriate message. 
 - Be enthusiastic and use emojis naturally
@@ -441,6 +559,7 @@ Based on the conversation above, respond as "The Modern Chanakya" with the next 
 - Reference their previous answers to show you're listening
 - If you have enough information to create an itinerary (destination, rough dates, and some preferences), indicate that you're ready to generate their itinerary
 - Keep responses conversational and friendly
+{'- As a premium user, mention exclusive benefits like unlimited conversations and premium itinerary features' if has_premium_subscription else '- Subtly mention premium benefits if appropriate, but focus on helping them plan their trip'}
 
 IMPORTANT: Respond as if you're continuing this conversation naturally. Do not repeat information already covered.
 """
@@ -457,6 +576,14 @@ IMPORTANT: Respond as if you're continuing this conversation naturally. Do not r
         
         ai_response = response.text.strip()
         
+        # Update message count for free users
+        if not has_premium_subscription:
+            await users_collection.update_one(
+                {"email": current_user.get("email")},
+                {"$inc": {"chat_messages_used": 1}}
+            )
+            chat_messages_used += 1
+        
         # Check if we have enough information to suggest itinerary generation
         conversation_length = len(request.conversation_history)
         has_destination = any("where" in msg.text.lower() for msg in request.conversation_history if msg.sender == "system")
@@ -464,14 +591,21 @@ IMPORTANT: Respond as if you're continuing this conversation naturally. Do not r
         
         return {
             "response": ai_response,
-            "ready_for_itinerary": has_enough_info
+            "ready_for_itinerary": has_enough_info,
+            "subscription_required": False,
+            "limit_reached": False,
+            "messages_used": chat_messages_used if not has_premium_subscription else -1,  # -1 indicates unlimited
+            "free_limit": FREE_CHAT_LIMIT,
+            "has_premium": has_premium_subscription
         }
         
     except Exception as e:
         print(f"Error in chat conversation: {e}")
         return {
             "response": "I'm having a moment of wanderlust distraction! 😅 Could you repeat that? I want to make sure I get every detail right for your perfect trip!",
-            "ready_for_itinerary": False
+            "ready_for_itinerary": False,
+            "subscription_required": False,
+            "limit_reached": False
         }
 
 # Initialize Gemini client
@@ -482,13 +616,14 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
     user_name = current_user.get("name", "Traveler")
     user_email = current_user.get("email")
     subscription_status = current_user.get("subscription_status", "free")
+    has_premium_subscription = current_user.get("has_premium_subscription", False)
     free_itinerary_used = current_user.get("free_itinerary_used", False)
     
-    # Check subscription limits
-    if subscription_status == "free" and free_itinerary_used:
+    # Check subscription limits for itinerary generation
+    if not has_premium_subscription and subscription_status == "free" and free_itinerary_used:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You have already used your free itinerary. Please upgrade to continue creating itineraries."
+            detail="You have already used your free itinerary. Please upgrade to premium for unlimited itinerary generation and enhanced features."
         )
 
     # Extract answers based on the sequence of system questions
@@ -845,7 +980,7 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
             itinerary_data["itinerary_id"] = itinerary_id
             
             # Update user's subscription status if they used their free itinerary
-            if subscription_status == "free":
+            if not has_premium_subscription and subscription_status == "free":
                 await users_collection.update_one(
                     {"email": user_email},
                     {
