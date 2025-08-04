@@ -8,3 +8,5 @@ python-jose[cryptography]
 python-dotenv
 google-genai
 httpx
+razorpay
+stripe

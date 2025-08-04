@@ -1040,12 +1040,571 @@ export default function PreferencesPage() {
                   </div>
                   
                   <div className="p-8">
-                    <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
-                      <Camera className="w-7 h-7 text-orange-500" />
-                      Activities
-                    </h5>
-                    <div className="space-y-8">
-                        {day.activities.map((activity: any, actIdx: number) => (
+                    {/* Breakfast */}
+                    {day.breakfast && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
+                          <Utensils className="w-7 h-7 text-orange-500" />
+                          Breakfast ({day.breakfast.time})
+                        </h5>
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 shadow-lg border border-yellow-200">
+                          <div className="flex items-start gap-6">
+                            {day.breakfast.image_url && (
+                              <motion.img 
+                                src={day.breakfast.image_url} 
+                                alt={day.breakfast.dish} 
+                                className="w-32 h-32 object-cover rounded-2xl shadow-md flex-shrink-0"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.breakfast.dish}</h6>
+                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-blue-500" />
+                                {day.breakfast.restaurant} - {day.breakfast.location}
+                              </p>
+                              
+                              {/* Breakfast Tags */}
+                              {day.breakfast.tags && day.breakfast.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {day.breakfast.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                    <TagBadge key={tagIndex} tag={tag} type="food" />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.breakfast.description}</p>
+                              <p className="text-green-600 font-bold text-xl mb-3">{day.breakfast.estimated_cost}</p>
+                              
+                              {day.breakfast.insider_tip && (
+                                <motion.div 
+                                  className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400 mb-4"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Insider Tip:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{day.breakfast.insider_tip}"</p>
+                                </motion.div>
+                              )}
+                              
+                              <div className="flex gap-3">
+                                {day.breakfast.google_maps_link && (
+                                  <Button variant="primary" size="default" asChild>
+                                    <a href={day.breakfast.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <MapPin className="w-4 h-4" /> Google Maps
+                                    </a>
+                                  </Button>
+                                )}
+                                {day.breakfast.zomato_link && (
+                                  <Button variant="outline" size="default" asChild>
+                                    <a href={day.breakfast.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <Utensils className="w-4 h-4" /> Zomato
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Morning Activities */}
+                    {day.morning_activities && day.morning_activities.length > 0 && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
+                          <Camera className="w-7 h-7 text-orange-500" />
+                          Morning Activities
+                        </h5>
+                        <div className="space-y-8">
+                          {day.morning_activities.map((activity: any, actIdx: number) => (
+                            <motion.div 
+                              key={actIdx} 
+                              className="flex gap-6 items-start group"
+                              initial={{ opacity: 0, x: -30 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              transition={{ delay: actIdx * 0.1, duration: 0.5 }}
+                              viewport={{ once: true }}
+                            >
+                              <div className="flex flex-col items-center flex-shrink-0">
+                                  <motion.div 
+                                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl h-16 w-16 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                  >
+                                      <MapPin className="w-7 h-7" />
+                                  </motion.div>
+                                  {actIdx < day.morning_activities.length - 1 && (
+                                    <div className="w-1 h-20 bg-gradient-to-b from-orange-300 to-red-300 mt-4 rounded-full" />
+                                  )}
+                              </div>
+                              <div className="w-full bg-gray-50 rounded-2xl p-6 group-hover:bg-gray-100 transition-all duration-300">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <Clock className="w-5 h-5 text-orange-500" />
+                                  <p className="text-base font-bold text-orange-600">{activity.time}</p>
+                                </div>
+                                <p className="font-bold text-2xl text-gray-800 mb-2">{activity.activity}</p>
+                                <div className="text-lg text-gray-600 flex items-center gap-2 mb-4">
+                                  <MapPin className="w-5 h-5 text-blue-500" />
+                                  {activity.location}
+                                </div>
+                                
+                                {/* Activity Tags */}
+                                {activity.tags && activity.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 my-4">
+                                    {activity.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                      <TagBadge key={tagIndex} tag={tag} type="activity" />
+                                    ))}
+                                    {activity.tags.length > 3 && (
+                                      <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">+{activity.tags.length - 3} more</span>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                <p className="text-gray-700 my-4 text-lg leading-relaxed">{activity.description}</p>
+                                
+                                <motion.div 
+                                  className="mt-4 bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Local Guide Tip:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{activity.local_guide_tip}"</p>
+                                </motion.div>
+                                
+                                 {activity.image_url && (
+                                  <motion.div 
+                                    className="mt-6 rounded-2xl overflow-hidden shadow-lg"
+                                    whileHover={{ scale: 1.02 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                      <img 
+                                        src={activity.image_url} 
+                                        alt={activity.activity} 
+                                        className="w-full h-64 object-cover transition-transform duration-500 hover:scale-110" 
+                                        onError={(e) => (e.currentTarget.style.display = 'none')} 
+                                      />
+                                  </motion.div>
+                                 )}
+                                 
+                                 <div className="mt-6 flex items-center gap-4">
+                                     <Button variant="primary" size="default" asChild>
+                                       <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                           <MapPin className="w-4 h-4" /> Google Maps
+                                       </a>
+                                     </Button>
+                                     {activity.booking_link && (
+                                          <Button variant="outline" size="default" asChild>
+                                            <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                                <Utensils className="w-4 h-4" /> View on Zomato
+                                            </a>
+                                          </Button>
+                                     )}
+                                 </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Lunch */}
+                    {day.lunch && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
+                          <Utensils className="w-7 h-7 text-orange-500" />
+                          Lunch ({day.lunch.time})
+                        </h5>
+                        <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 shadow-lg border border-green-200">
+                          <div className="flex items-start gap-6">
+                            {day.lunch.image_url && (
+                              <motion.img 
+                                src={day.lunch.image_url} 
+                                alt={day.lunch.dish} 
+                                className="w-32 h-32 object-cover rounded-2xl shadow-md flex-shrink-0"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.lunch.dish}</h6>
+                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-blue-500" />
+                                {day.lunch.restaurant} - {day.lunch.location}
+                              </p>
+                              
+                              {/* Lunch Tags */}
+                              {day.lunch.tags && day.lunch.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {day.lunch.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                    <TagBadge key={tagIndex} tag={tag} type="food" />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.lunch.description}</p>
+                              <p className="text-green-600 font-bold text-xl mb-3">{day.lunch.estimated_cost}</p>
+                              
+                              {day.lunch.insider_tip && (
+                                <motion.div 
+                                  className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400 mb-4"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Insider Tip:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{day.lunch.insider_tip}"</p>
+                                </motion.div>
+                              )}
+                              
+                              <div className="flex gap-3">
+                                {day.lunch.google_maps_link && (
+                                  <Button variant="primary" size="default" asChild>
+                                    <a href={day.lunch.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <MapPin className="w-4 h-4" /> Google Maps
+                                    </a>
+                                  </Button>
+                                )}
+                                {day.lunch.zomato_link && (
+                                  <Button variant="outline" size="default" asChild>
+                                    <a href={day.lunch.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <Utensils className="w-4 h-4" /> Zomato
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Afternoon Activities */}
+                    {day.afternoon_activities && day.afternoon_activities.length > 0 && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
+                          <Camera className="w-7 h-7 text-orange-500" />
+                          Afternoon Activities
+                        </h5>
+                        <div className="space-y-8">
+                          {day.afternoon_activities.map((activity: any, actIdx: number) => (
+                            <motion.div 
+                              key={actIdx} 
+                              className="flex gap-6 items-start group"
+                              initial={{ opacity: 0, x: -30 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              transition={{ delay: actIdx * 0.1, duration: 0.5 }}
+                              viewport={{ once: true }}
+                            >
+                              <div className="flex flex-col items-center flex-shrink-0">
+                                  <motion.div 
+                                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl h-16 w-16 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                  >
+                                      <MapPin className="w-7 h-7" />
+                                  </motion.div>
+                                  {actIdx < day.afternoon_activities.length - 1 && (
+                                    <div className="w-1 h-20 bg-gradient-to-b from-purple-300 to-pink-300 mt-4 rounded-full" />
+                                  )}
+                              </div>
+                              <div className="w-full bg-gray-50 rounded-2xl p-6 group-hover:bg-gray-100 transition-all duration-300">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <Clock className="w-5 h-5 text-purple-500" />
+                                  <p className="text-base font-bold text-purple-600">{activity.time}</p>
+                                </div>
+                                <p className="font-bold text-2xl text-gray-800 mb-2">{activity.activity}</p>
+                                <div className="text-lg text-gray-600 flex items-center gap-2 mb-4">
+                                  <MapPin className="w-5 h-5 text-blue-500" />
+                                  {activity.location}
+                                </div>
+                                
+                                {/* Activity Tags */}
+                                {activity.tags && activity.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 my-4">
+                                    {activity.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                      <TagBadge key={tagIndex} tag={tag} type="activity" />
+                                    ))}
+                                    {activity.tags.length > 3 && (
+                                      <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">+{activity.tags.length - 3} more</span>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                <p className="text-gray-700 my-4 text-lg leading-relaxed">{activity.description}</p>
+                                
+                                <motion.div 
+                                  className="mt-4 bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Local Guide Tip:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{activity.local_guide_tip}"</p>
+                                </motion.div>
+                                
+                                 {activity.image_url && (
+                                  <motion.div 
+                                    className="mt-6 rounded-2xl overflow-hidden shadow-lg"
+                                    whileHover={{ scale: 1.02 }}
+                                    transition={{ duration: 0.3 }}
+                                  >
+                                      <img 
+                                        src={activity.image_url} 
+                                        alt={activity.activity} 
+                                        className="w-full h-64 object-cover transition-transform duration-500 hover:scale-110" 
+                                        onError={(e) => (e.currentTarget.style.display = 'none')} 
+                                      />
+                                  </motion.div>
+                                 )}
+                                 
+                                 <div className="mt-6 flex items-center gap-4">
+                                     <Button variant="primary" size="default" asChild>
+                                       <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                           <MapPin className="w-4 h-4" /> Google Maps
+                                       </a>
+                                     </Button>
+                                     {activity.booking_link && (
+                                          <Button variant="outline" size="default" asChild>
+                                            <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                                <Utensils className="w-4 h-4" /> View on Zomato
+                                            </a>
+                                          </Button>
+                                     )}
+                                 </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Evening Snacks */}
+                    {day.evening_snacks && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
+                          <Utensils className="w-7 h-7 text-orange-500" />
+                          Evening Snacks ({day.evening_snacks.time})
+                        </h5>
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 shadow-lg border border-purple-200">
+                          <div className="flex items-start gap-6">
+                            {day.evening_snacks.image_url && (
+                              <motion.img 
+                                src={day.evening_snacks.image_url} 
+                                alt={day.evening_snacks.dish} 
+                                className="w-32 h-32 object-cover rounded-2xl shadow-md flex-shrink-0"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.evening_snacks.dish}</h6>
+                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-blue-500" />
+                                {day.evening_snacks.place} - {day.evening_snacks.location}
+                              </p>
+                              
+                              {/* Snacks Tags */}
+                              {day.evening_snacks.tags && day.evening_snacks.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {day.evening_snacks.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                    <TagBadge key={tagIndex} tag={tag} type="food" />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.evening_snacks.description}</p>
+                              <p className="text-green-600 font-bold text-xl mb-3">{day.evening_snacks.estimated_cost}</p>
+                              
+                              {day.evening_snacks.local_experience && (
+                                <motion.div 
+                                  className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400 mb-4"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Local Experience:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{day.evening_snacks.local_experience}"</p>
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Dinner */}
+                    {day.dinner && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
+                          <Utensils className="w-7 h-7 text-orange-500" />
+                          Dinner ({day.dinner.time})
+                        </h5>
+                        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 shadow-lg border border-red-200">
+                          <div className="flex items-start gap-6">
+                            {day.dinner.image_url && (
+                              <motion.img 
+                                src={day.dinner.image_url} 
+                                alt={day.dinner.dish} 
+                                className="w-32 h-32 object-cover rounded-2xl shadow-md flex-shrink-0"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.dinner.dish}</h6>
+                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-blue-500" />
+                                {day.dinner.restaurant} - {day.dinner.location}
+                              </p>
+                              
+                              {/* Dinner Tags */}
+                              {day.dinner.tags && day.dinner.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {day.dinner.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                    <TagBadge key={tagIndex} tag={tag} type="food" />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.dinner.description}</p>
+                              <p className="text-green-600 font-bold text-xl mb-3">{day.dinner.estimated_cost}</p>
+                              
+                              {day.dinner.ambiance && (
+                                <p className="text-gray-600 mb-3 text-lg italic">Ambiance: {day.dinner.ambiance}</p>
+                              )}
+                              
+                              {day.dinner.insider_tip && (
+                                <motion.div 
+                                  className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400 mb-4"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Insider Tip:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{day.dinner.insider_tip}"</p>
+                                </motion.div>
+                              )}
+                              
+                              <div className="flex gap-3">
+                                {day.dinner.google_maps_link && (
+                                  <Button variant="primary" size="default" asChild>
+                                    <a href={day.dinner.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <MapPin className="w-4 h-4" /> Google Maps
+                                    </a>
+                                  </Button>
+                                )}
+                                {day.dinner.zomato_link && (
+                                  <Button variant="outline" size="default" asChild>
+                                    <a href={day.dinner.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <Utensils className="w-4 h-4" /> Zomato
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Day End Summary */}
+                    {day.day_end_summary && (
+                      <motion.div 
+                        className="mt-8 pt-8 border-t border-gray-200"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
+                          <Star className="w-7 h-7 text-orange-500" />
+                          Day Summary
+                        </h5>
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-lg border border-blue-200">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <h6 className="font-bold text-lg text-gray-800 mb-3">Key Experiences</h6>
+                              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                                {day.day_end_summary.key_experiences?.map((exp: string, idx: number) => (
+                                  <li key={idx}>{exp}</li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <h6 className="font-bold text-lg text-gray-800 mb-3">Photo Opportunities</h6>
+                              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                                {day.day_end_summary.photos_to_take?.map((photo: string, idx: number) => (
+                                  <li key={idx}>{photo}</li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="md:col-span-2">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <h6 className="font-bold text-lg text-gray-800">Total Cost</h6>
+                                  <p className="text-2xl font-bold text-green-600">{day.day_end_summary.total_estimated_cost}</p>
+                                </div>
+                                <div className="text-right">
+                                  <h6 className="font-bold text-lg text-gray-800">Energy Level</h6>
+                                  <p className="text-lg text-gray-600">{day.day_end_summary.energy_level}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
                           <motion.div 
                             key={actIdx} 
                             className="flex gap-6 items-start group"
@@ -1133,75 +1692,6 @@ export default function PreferencesPage() {
                                </div>
                             </div>
                           </motion.div>
-                        ))}
-                    </div>
-                    
-                    {/* Enhanced Meals Section */}
-                    {day.meals && (
-                        <motion.div 
-                          className="mt-12 pt-8 border-t border-gray-200"
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3, duration: 0.5 }}
-                          viewport={{ once: true }}
-                        >
-                             <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
-                               <Utensils className="w-7 h-7 text-orange-500" />
-                               Meal Recommendations
-                             </h5>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {Object.entries(day.meals).map(([mealType, meal]: [string, any]) => {
-                                    // Add null safety check
-                                    if (!meal) return null;
-                                    
-                                    return (
-                                        <motion.div 
-                                          key={mealType} 
-                                          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
-                                          whileHover={{ scale: 1.02, y: -5 }}
-                                        >
-                                            <p className="font-bold text-gray-800 capitalize text-xl mb-3">{mealType}</p>
-                                            {meal.image_url && (
-                                                <motion.img 
-                                                  src={meal.image_url} 
-                                                  alt={meal.dish || 'Meal'} 
-                                                  className="w-full h-48 object-cover rounded-2xl my-4 shadow-md"
-                                                  whileHover={{ scale: 1.05 }}
-                                                  transition={{ duration: 0.3 }}
-                                                />
-                                            )}
-                                            <p className="text-gray-800 font-semibold text-2xl mb-2">{meal.dish || 'Unknown Dish'}</p>
-                                            <p className="text-lg text-gray-600 mb-4">{meal.restaurant || 'Unknown Restaurant'}</p>
-                                            
-                                            {/* Meal Tags */}
-                                            {meal.tags && meal.tags.length > 0 && (
-                                              <div className="flex flex-wrap gap-2 my-4">
-                                                {meal.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
-                                                  <TagBadge key={tagIndex} tag={tag} type="food" />
-                                                ))}
-                                                {meal.tags.length > 3 && (
-                                                  <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">+{meal.tags.length - 3} more</span>
-                                                )}
-                                              </div>
-                                            )}
-                                            
-                                            {meal.description && (
-                                                <p className="text-lg text-gray-500 my-4 italic">"{meal.description}"</p>
-                                            )}
-                                            {meal.zomato_link && (
-                                                <Button variant="outline" size="default" asChild>
-                                                  <a href={meal.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                                      <Utensils className="w-4 h-4" /> View on Zomato
-                                                  </a>
-                                                </Button>
-                                            )}
-                                        </motion.div>
-                                    );
-                                })}
-                             </div>
-                        </motion.div>
-                    )}
-                  </div>
                 </motion.div>
               ))}
             </div>
