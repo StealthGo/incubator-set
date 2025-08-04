@@ -17,8 +17,36 @@ import asyncio
 import httpx
 from fastapi import BackgroundTasks
 from contextlib import asynccontextmanager
+import razorpay
+import stripe
+import hmac
+import hashlib
 
 load_dotenv()
+
+# Payment configuration
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+
+# Initialize payment clients (with error handling for missing dependencies)
+razorpay_client = None
+stripe_client = None
+
+try:
+    if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
+        razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+except Exception as e:
+    print(f"Razorpay initialization failed: {e}")
+
+try:
+    if STRIPE_SECRET_KEY:
+        stripe.api_key = STRIPE_SECRET_KEY
+        stripe_client = stripe
+except Exception as e:
+    print(f"Stripe initialization failed: {e}")
 
 # Keep-alive configuration
 RENDER_SERVICE_URL = os.getenv("RENDER_SERVICE_URL", "http://localhost:8000")
@@ -86,6 +114,7 @@ client_mongo = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
 db = client_mongo["user_database"]
 users_collection = db["users"]
 itineraries_collection = db["itineraries"]
+payments_collection = db["payments"]
 
 async def start_database():
     """Connect to MongoDB"""
@@ -130,6 +159,18 @@ class UserOut(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class PaymentRequest(BaseModel):
+    payment_method: str  # "razorpay" or "stripe"
+    plan: str  # "monthly" or "yearly"
+
+class RazorpayPaymentVerification(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+class StripePaymentVerification(BaseModel):
+    session_id: str
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/signin")
 
@@ -337,6 +378,282 @@ async def get_subscription_status(current_user: dict = Depends(get_current_user)
             "priority_support": has_premium_subscription
         }
     }
+
+@app.get("/api/subscription-plans")
+async def get_subscription_plans():
+    """Get available subscription plans with pricing"""
+    return {
+        "plans": [
+            {
+                "id": "monthly",
+                "name": "Premium Monthly",
+                "description": "Unlimited chat conversations and itineraries",
+                "price": {
+                    "inr": 299,
+                    "usd": 3.99
+                },
+                "billing_cycle": "monthly",
+                "features": [
+                    "Unlimited chat conversations",
+                    "Unlimited itinerary generation",
+                    "Premium route optimization",
+                    "Priority customer support",
+                    "Advanced local insights",
+                    "Offline itinerary access"
+                ]
+            },
+            {
+                "id": "yearly",
+                "name": "Premium Yearly",
+                "description": "Best value - Save 30% with annual billing",
+                "price": {
+                    "inr": 2499,
+                    "usd": 29.99
+                },
+                "billing_cycle": "yearly",
+                "savings": "30%",
+                "features": [
+                    "Unlimited chat conversations",
+                    "Unlimited itinerary generation",
+                    "Premium route optimization",
+                    "Priority customer support",
+                    "Advanced local insights",
+                    "Offline itinerary access",
+                    "Early access to new features",
+                    "Exclusive travel community access"
+                ]
+            }
+        ]
+    }
+
+@app.post("/api/create-payment-order")
+async def create_payment_order(
+    request: PaymentRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a payment order for subscription"""
+    try:
+        user_email = current_user.get("email")
+        
+        # Define pricing
+        pricing = {
+            "monthly": {"inr": 299, "usd": 3.99},
+            "yearly": {"inr": 2499, "usd": 29.99}
+        }
+        
+        if request.plan not in pricing:
+            raise HTTPException(status_code=400, detail="Invalid plan selected")
+        
+        plan_details = pricing[request.plan]
+        
+        if request.payment_method == "razorpay":
+            if not razorpay_client:
+                raise HTTPException(status_code=503, detail="Razorpay not configured")
+            
+            # Create Razorpay order
+            order_data = {
+                "amount": plan_details["inr"] * 100,  # Amount in paise
+                "currency": "INR",
+                "receipt": f"receipt_{user_email}_{datetime.datetime.now().timestamp()}",
+                "notes": {
+                    "plan": request.plan,
+                    "user_email": user_email
+                }
+            }
+            
+            order = razorpay_client.order.create(data=order_data)
+            
+            # Store payment record
+            payment_record = {
+                "user_email": user_email,
+                "payment_gateway": "razorpay",
+                "order_id": order["id"],
+                "amount": plan_details["inr"],
+                "currency": "INR",
+                "plan": request.plan,
+                "status": "created",
+                "created_at": datetime.datetime.now(datetime.timezone.utc)
+            }
+            
+            await payments_collection.insert_one(payment_record)
+            
+            return {
+                "payment_gateway": "razorpay",
+                "order_id": order["id"],
+                "amount": plan_details["inr"],
+                "currency": "INR",
+                "key_id": RAZORPAY_KEY_ID,
+                "plan": request.plan
+            }
+        
+        elif request.payment_method == "stripe":
+            if not stripe_client:
+                raise HTTPException(status_code=503, detail="Stripe not configured")
+            
+            # Create Stripe checkout session
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {
+                            'name': f'Premium {request.plan.title()} Plan',
+                            'description': 'Unlimited chat and itineraries for The Modern Chanakya',
+                        },
+                        'unit_amount': int(plan_details["usd"] * 100),  # Amount in cents
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url='http://localhost:3000/subscription/success?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url='http://localhost:3000/subscription/cancel',
+                metadata={
+                    'user_email': user_email,
+                    'plan': request.plan
+                }
+            )
+            
+            # Store payment record
+            payment_record = {
+                "user_email": user_email,
+                "payment_gateway": "stripe",
+                "session_id": session.id,
+                "amount": plan_details["usd"],
+                "currency": "USD",
+                "plan": request.plan,
+                "status": "created",
+                "created_at": datetime.datetime.now(datetime.timezone.utc)
+            }
+            
+            await payments_collection.insert_one(payment_record)
+            
+            return {
+                "payment_gateway": "stripe",
+                "session_id": session.id,
+                "checkout_url": session.url,
+                "plan": request.plan
+            }
+        
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported payment method")
+    
+    except Exception as e:
+        print(f"Error creating payment order: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create payment order: {str(e)}"
+        )
+
+@app.post("/api/verify-payment")
+async def verify_payment(
+    verification_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Verify payment and upgrade subscription"""
+    try:
+        user_email = current_user.get("email")
+        payment_gateway = verification_data.get("payment_gateway")
+        
+        if payment_gateway == "razorpay":
+            # Verify Razorpay payment
+            order_id = verification_data.get("razorpay_order_id")
+            payment_id = verification_data.get("razorpay_payment_id")
+            signature = verification_data.get("razorpay_signature")
+            
+            if not all([order_id, payment_id, signature]):
+                raise HTTPException(status_code=400, detail="Missing payment verification data")
+            
+            # Verify signature
+            generated_signature = hmac.new(
+                RAZORPAY_KEY_SECRET.encode(),
+                f"{order_id}|{payment_id}".encode(),
+                hashlib.sha256
+            ).hexdigest()
+            
+            if not hmac.compare_digest(generated_signature, signature):
+                raise HTTPException(status_code=400, detail="Invalid payment signature")
+            
+            # Update payment record
+            payment_record = await payments_collection.find_one({"order_id": order_id})
+            if not payment_record:
+                raise HTTPException(status_code=404, detail="Payment record not found")
+            
+            await payments_collection.update_one(
+                {"order_id": order_id},
+                {
+                    "$set": {
+                        "payment_id": payment_id,
+                        "signature": signature,
+                        "status": "completed",
+                        "completed_at": datetime.datetime.now(datetime.timezone.utc)
+                    }
+                }
+            )
+        
+        elif payment_gateway == "stripe":
+            # Verify Stripe payment
+            session_id = verification_data.get("session_id")
+            if not session_id:
+                raise HTTPException(status_code=400, detail="Missing session ID")
+            
+            session = stripe.checkout.Session.retrieve(session_id)
+            if session.payment_status != "paid":
+                raise HTTPException(status_code=400, detail="Payment not completed")
+            
+            # Update payment record
+            payment_record = await payments_collection.find_one({"session_id": session_id})
+            if not payment_record:
+                raise HTTPException(status_code=404, detail="Payment record not found")
+            
+            await payments_collection.update_one(
+                {"session_id": session_id},
+                {
+                    "$set": {
+                        "payment_intent_id": session.payment_intent,
+                        "status": "completed",
+                        "completed_at": datetime.datetime.now(datetime.timezone.utc)
+                    }
+                }
+            )
+        
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported payment gateway")
+        
+        # Upgrade user subscription
+        plan = payment_record.get("plan", "monthly")
+        expiry_date = datetime.datetime.now(datetime.timezone.utc)
+        if plan == "monthly":
+            expiry_date += datetime.timedelta(days=30)
+        elif plan == "yearly":
+            expiry_date += datetime.timedelta(days=365)
+        
+        await users_collection.update_one(
+            {"email": user_email},
+            {
+                "$set": {
+                    "subscription_status": "premium",
+                    "has_premium_subscription": True,
+                    "subscription_plan": plan,
+                    "subscription_start_date": datetime.datetime.now(datetime.timezone.utc),
+                    "subscription_expiry_date": expiry_date,
+                    "upgraded_at": datetime.datetime.now(datetime.timezone.utc)
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Payment verified and subscription upgraded successfully!",
+            "plan": plan,
+            "expiry_date": expiry_date.isoformat()
+        }
+    
+    except Exception as e:
+        print(f"Error verifying payment: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Payment verification failed: {str(e)}"
+        )
 
 @app.get("/api/my-itineraries")
 async def get_my_itineraries(current_user: dict = Depends(get_current_user)):
@@ -665,6 +982,13 @@ You are 'The Modern Chanakya', an elite, AI-powered travel strategist based in I
 
 Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVENIENCE. Every field must be filled with rich, detailed, and actionable information that makes travel effortless.
 
+**CRITICAL REQUIREMENTS - NO EXCEPTIONS:**
+1. EVERY DAY must have: breakfast, morning_activities (at least 1), lunch, afternoon_activities (at least 1), evening_snacks, and dinner
+2. ALL meals must be separate objects with complete details - never skip or combine them
+3. Each activity must have complete transport instructions from the previous location
+4. Every location must have exact addresses and Google Maps links
+5. All cost estimates must be in INR with realistic ranges
+
 **IMPORTANT**: You MUST respond ONLY with a valid JSON object. Do NOT include any conversational text, markdown, or any content before or after the JSON.
 
 **ROUTE OPTIMIZATION REQUIREMENTS**:
@@ -707,7 +1031,7 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
     ]
   }},
   "accommodation_suggestions": [
-      {{ "name": "Hotel Name", "type": "Luxury Resort/Boutique/etc.", "icon": "hotel_class/nightlife/etc.", "description": "Compelling 2-line description.", "estimated_cost": "Price per night in INR.", "booking_link": "Direct MakeMyTrip hotel booking URL.", "image_url": "Direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=400&h=300&fit=crop' or 'https://picsum.photos/400/300')." }}
+      {{ "name": "Hotel Name", "type": "Luxury Resort/Boutique/etc.", "icon": "hotel_class", "description": "Compelling 2-line description.", "estimated_cost": "Price per night in INR.", "booking_link": "Direct MakeMyTrip hotel booking URL.", "image_url": "Direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=400&h=300&fit=crop')." }}
   ],
   "trip_overview": {{
     "destination_insights": "A 2-3 line paragraph from a local's perspective.",
@@ -721,7 +1045,7 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
     {{
       "date": "YYYY-MM-DD",
       "day_number": "Day 1",
-      "theme": "A catchy theme for the day (e.g., 'North Goa Vibes & Flea Market Finds').",
+      "theme": "A catchy theme for the day (e.g., 'Delhi's Historic Heart & Culinary Delights').",
       "route_overview": "Brief description of the day's geographical route for optimal navigation.",
       "total_travel_time": "Estimated total travel time between all locations today.",
       "breakfast": {{
@@ -738,10 +1062,10 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
         "insider_tip": "Local tip about timing, ordering, or special preparations",
         "tags": ["Vegetarian", "Vegan", "Non-Vegetarian", "Street Food", "Cafe", "Local Specialty", "Quick Bite", "Traditional", "Budget", "Premium"]
       }},
-      "activities": [
+      "morning_activities": [
         {{
           "time": "09:30 AM - 11:30 AM",
-          "activity": "Activity Name",
+          "activity": "Morning Activity Name",
           "location": "Specific Location with exact address",
           "description": "A detailed, engaging 2-3 line description of the place and what to expect.",
           "duration": "Recommended time to spend here",
@@ -750,11 +1074,11 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
           "local_guide_tip": "A non-empty, genuinely useful insider tip. Make it sound like a real local is talking.",
           "what_to_bring": "Essential items (camera, sunscreen, etc.)",
           "icon": "A relevant Material Icons name (e.g., 'local_cafe', 'storefront').",
-          "image_url": "A direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=800&h=600&fit=crop' for placeholder).",
+          "image_url": "A direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=800&h=600&fit=crop').",
           "google_maps_link": "A direct Google Maps search URL for the exact location.",
           "booking_link": "A Zomato link for restaurants or MMT for activities, if applicable, otherwise null.",
           "how_to_reach": {{
-            "from_previous_location": "Detailed instructions on how to get here from the previous activity/meal",
+            "from_previous_location": "Detailed instructions from breakfast location",
             "transport_mode": "Best transport option (walk/auto/taxi/bus)",
             "travel_time": "Expected travel time",
             "estimated_cost": "Transport cost in INR"
@@ -845,7 +1169,6 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
         "photos_to_take": ["Instagram-worthy spots and moments from today"],
         "energy_level": "How tiring/relaxed this day will be",
         "best_souvenir_opportunities": ["Where to buy memorable items today"]
-      }}
       }}
     }}
   ],
