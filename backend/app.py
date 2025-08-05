@@ -921,11 +921,11 @@ IMPORTANT: Keep responses under 100 words. Be conversational, not formal.
         # More intelligent detection of readiness - look for key info
         has_destination = any(msg.sender == "user" and len(msg.text) > 2 for msg in request.conversation_history)
         has_enough_info = (
-            conversation_length >= 10 or  # After 5 back-and-forth exchanges (10 messages total)
+            conversation_length >= 12 or  # After 6 back-and-forth exchanges (12 messages total)
             "ready to generate" in ai_response.lower() or 
             "work my magic" in ai_response.lower() or
             "create your itinerary" in ai_response.lower() or
-            len(user_messages) >= 5  # User has answered 5 questions
+            len(user_messages) >= 6  # User has answered 6 questions (including food preferences)
         )
         
         return {
