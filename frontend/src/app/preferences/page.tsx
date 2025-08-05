@@ -67,7 +67,7 @@ const Button = ({ children, onClick, variant = "default", size = "default", clas
 // Dynamic conversation system - now LLM handles all interactions
 const systemPrompt = `You are "The Modern Chanakya" - a friendly, knowledgeable Indian travel buddy who helps plan amazing trips within India. You chat like a friend on WhatsApp - casual, quick, and fun!
 
-🎯 YOUR MISSION: Get the essentials in 5-6 quick questions, then create an AMAZING itinerary!
+🎯 YOUR MISSION: Get the essentials in 6-7 quick questions, then create an AMAZING itinerary!
 
 CHAT STYLE:
 - Keep it SHORT and snappy (like WhatsApp messages)
@@ -76,13 +76,14 @@ CHAT STYLE:
 - Be enthusiastic but not overwhelming
 - Ask ONE simple question at a time
 
-QUICK QUESTION FLOW (Max 5-6 questions):
+QUICK QUESTION FLOW (Max 6-7 questions):
 1. "Hey! Kahan jaana hai? Which part of incredible India?" 🇮🇳
 2. "Nice choice! When are you planning to go?" 📅
 3. "Cool! Who's coming along on this adventure?" 👥
-4. "What gets you most excited - food, culture, adventure, nature?" 🎯
-5. "What's your vibe - budget travel, comfortable, or luxury?" 💰
-6. Optional: "Any special requests or pace preference?" (if needed)
+4. "What about food - vegetarian, non-veg, or no restrictions?" 🍛
+5. "What gets you most excited - culture, adventure, nature?" 🎯
+6. "What's your vibe - budget travel, comfortable, or luxury?" 💰
+7. Optional: "Any special requests or pace preference?" (if needed)
 
 Then: "Perfect! Ready to create your dream itinerary? ✨"
 
@@ -90,13 +91,14 @@ IMPORTANT RULES:
 - ONLY India destinations (redirect international requests politely)
 - Keep responses under 50 words
 - Be conversational, not formal
-- After 5 user answers, offer to generate itinerary
+- After 6 user answers, offer to generate itinerary
 - Sound excited but not pushy
 - Use Indian context (monsoon, festivals, etc.)
 
 Example responses:
 "Goa? Fantastic choice! 🏖️ When are you planning this beach escape?"
-"Solo trip? That's so cool! 🎒 What excites you most - beaches, food, or nightlife?"
+"Solo trip? That's so cool! 🎒 What excites you most - beaches, culture, or food tours?"
+"Food tours sound amazing! 🍛 Any dietary preferences - vegetarian, non-veg, or special needs?"
 "Amazing! I've got all I need. Ready to create your perfect Goa itinerary? 🚀"
 
 Current conversation context will be provided. Respond as the next message in the conversation.`;
@@ -105,8 +107,9 @@ Current conversation context will be provided. Respond as the next message in th
 const smartQuickReplies: Record<string, string[]> = {
   destination: ["🏔️ Himachal", "🏖️ Goa", "🕌 Rajasthan", "🌴 Kerala", "🏛️ Agra", "🏝️ Andaman"],
   dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "❄️ Winter Trip", "🌸 Summer", "🎯 Festival Time"],
-  travelers: ["✈️ Solo", "👫 With Partner", "👨‍👩‍👧‍👦 Family", "🎉 Friends", " Honeymoon", "👥 Big Group"],
+  travelers: ["✈️ Solo", "👫 With Partner", "👨‍👩‍👧‍👦 Family", "🎉 Friends", "💕 Honeymoon", "👥 Big Group"],
   interests: ["🍛 Food", "🏛️ Heritage", "🌿 Nature", "🙏 Spiritual", "🧘‍♀️ Wellness", "🎭 Culture"],
+  food_preferences: ["🥗 Vegetarian", "🍖 Non-Vegetarian", "🌱 Vegan", "🍽️ Jain Food", "🌍 Everything", "🚫 Allergies"],
   budget: ["💸 Budget", "💰 Comfortable", "💎 Luxury", "🎯 Best Value", "👨‍👩‍👧‍👦 Family Friendly", "🎓 Student"],
   pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Adventure", "🧘‍♀️ Peaceful", "📸 Photo Tour", "🎒 Backpacker"]
 };
@@ -634,15 +637,16 @@ export default function PreferencesPage() {
     const userMessages = messages.filter(msg => msg.sender === "user");
     const conversationStep = userMessages.length;
     
-    // Follow the sequence: destination → dates → travelers → interests → budget → pace
+    // Follow the sequence: destination → dates → travelers → interests → food_preferences → budget → pace
     switch (conversationStep) {
-      case 0: return "destination";  // First question about destination
-      case 1: return "dates";       // Second question about dates
-      case 2: return "travelers";   // Third question about travelers
-      case 3: return "interests";   // Fourth question about interests
-      case 4: return "budget";      // Fifth question about budget
-      case 5: return "pace";        // Sixth question about pace
-      default: return "destination"; // Default fallback
+      case 0: return "destination";        // First question about destination
+      case 1: return "dates";             // Second question about dates
+      case 2: return "travelers";         // Third question about travelers
+      case 3: return "interests";         // Fourth question about interests
+      case 4: return "food_preferences";  // Fifth question about food preferences
+      case 5: return "budget";            // Sixth question about budget
+      case 6: return "pace";              // Seventh question about pace
+      default: return "destination";      // Default fallback
     }
   };
 
