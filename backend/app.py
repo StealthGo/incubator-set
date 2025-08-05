@@ -736,6 +736,7 @@ async def get_itinerary_details(itinerary_id: str, current_user: dict = Depends(
                 "destination": itinerary.get("destination"),
                 "dates": itinerary.get("dates"),
                 "travelers": itinerary.get("travelers"),
+                "food_preferences": itinerary.get("food_preferences"),
                 "interests": itinerary.get("interests"),
                 "budget": itinerary.get("budget"),
                 "pace": itinerary.get("pace")
@@ -1326,6 +1327,7 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
             "destination": destination,
             "dates": dates,
             "travelers": travelers,
+            "food_preferences": food_preferences,
             "interests": interests,
             "budget": budget,
             "pace": pace,
