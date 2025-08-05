@@ -141,17 +141,24 @@ const ChatBubble = ({ sender, children, timestamp }: { sender: string, children:
       }}
     >
       <div className={`
-        max-w-[85%] sm:max-w-[70%] px-3 py-2 text-[15px] leading-[1.4] 
+        max-w-[85%] sm:max-w-[75%] px-3 py-2.5 text-[14px] leading-[1.4] font-normal
         ${isUser 
-          ? 'bg-orange-500 text-white rounded-[18px] rounded-br-[4px] ml-auto' 
-          : 'bg-white text-gray-800 rounded-[18px] rounded-bl-[4px] shadow-sm border border-gray-100'
+          ? 'bg-[#005c4b] text-white rounded-[18px] rounded-br-[4px] ml-auto shadow-sm' 
+          : 'bg-white text-[#111b21] rounded-[18px] rounded-bl-[4px] shadow-sm border border-gray-100'
         }
         relative group
       `}>
-        <div className="break-words">{children}</div>
+        <div className="break-words font-['Inter','-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','sans-serif']">
+          {children}
+        </div>
         {timestamp && (
-          <div className={`text-[11px] mt-1 ${isUser ? 'text-orange-100' : 'text-gray-400'} text-right`}>
+          <div className={`text-[11px] mt-1.5 ${isUser ? 'text-green-100' : 'text-gray-400'} text-right flex items-center justify-end gap-1`}>
             {timestamp}
+            {isUser && (
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+              </svg>
+            )}
           </div>
         )}
         
@@ -159,7 +166,7 @@ const ChatBubble = ({ sender, children, timestamp }: { sender: string, children:
         <div className={`
           absolute bottom-0 w-0 h-0
           ${isUser 
-            ? 'right-[-8px] border-l-[8px] border-l-orange-500 border-t-[8px] border-t-transparent' 
+            ? 'right-[-8px] border-l-[8px] border-l-[#005c4b] border-t-[8px] border-t-transparent' 
             : 'left-[-8px] border-r-[8px] border-r-white border-t-[8px] border-t-transparent'
           }
         `} />
@@ -1937,16 +1944,21 @@ export default function PreferencesPage() {
   return (
     <div className={`min-h-screen bg-gray-100 font-sans flex flex-col ${showSignInModal || showSubscriptionPopup ? 'overflow-hidden' : ''}`}>
       <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet" />
-      <nav className="sticky top-0 z-20 bg-white/80 backdrop-blur flex items-center justify-between px-6 md:px-12 py-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/")} className="flex items-center gap-2 focus:outline-none">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-              <Icon name="travel_explore" className="text-orange-500" />
+      <nav className="sticky top-0 z-20 bg-white shadow-sm flex items-center justify-between px-6 md:px-12 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.push("/")} className="flex items-center gap-3 focus:outline-none hover:opacity-80 transition-opacity">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#128c7e] to-[#075e54] flex items-center justify-center shadow-sm">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
             </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">The Modern <span className="text-orange-500">Chanakya</span></span>
+            <div className="flex flex-col items-start">
+              <span className="text-lg font-semibold text-gray-900 font-['Inter','sans-serif']">The Modern Chanakya</span>
+              <span className="text-xs text-gray-500 font-['Inter','sans-serif']">Your Indian Travel Expert</span>
+            </div>
           </button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button onClick={() => { 
             if (isUserLocked()) {
               setShowSubscriptionPopup(true);
@@ -2005,22 +2017,36 @@ export default function PreferencesPage() {
 
       <div className="flex flex-col md:flex-row w-full flex-1" style={{ height: 'calc(100vh - 81px)' }}>
         {/* Left: Chat Section - WhatsApp Style */}
-        <section className={`w-full md:w-2/5 flex flex-col bg-gray-50 ${showFullItinerary ? 'hidden md:flex' : ''}`}>
+        <section className={`w-full md:w-2/5 flex flex-col bg-[#efeae2] ${showFullItinerary ? 'hidden md:flex' : ''}`}>
           {/* Chat Header */}
-          <div className="bg-orange-500 text-white px-4 py-3 flex items-center gap-3 shadow-sm">
+          <div className="bg-[#128c7e] text-white px-4 py-3 flex items-center gap-3 shadow-sm">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-lg">🤖</span>
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-[16px]">The Modern Chanakya</h3>
-              <p className="text-[13px] text-orange-100">
-                {isConversing ? 'typing...' : 'Your Indian Travel Expert'}
+              <h3 className="font-medium text-[16px] font-['Inter','sans-serif']">The Modern Chanakya</h3>
+              <p className="text-[13px] text-green-100 font-['Inter','sans-serif']">
+                {isConversing ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></span>
+                    typing...
+                  </span>
+                ) : 'Your Indian Travel Expert'}
               </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
             </div>
           </div>
 
           {/* Chat Messages Container */}
-          <div className="flex-1 overflow-y-auto px-3 py-2" style={{ 
+          <div className="flex-1 overflow-y-auto px-3 py-2 bg-[#e5ddd5] bg-opacity-30" style={{ 
             backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
             backgroundSize: '60px 60px'
           }}>
@@ -2075,7 +2101,7 @@ export default function PreferencesPage() {
           
           {/* Input Area - WhatsApp Style */}
           {isLoggedIn && (
-            <div className="bg-white px-3 py-3 border-t border-gray-200">
+            <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200">
               {/* Quick Replies */}
               {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
                 <motion.div 
@@ -2088,7 +2114,7 @@ export default function PreferencesPage() {
                     <motion.button 
                       key={option} 
                       type="button" 
-                      className="px-3 py-1.5 rounded-full border border-orange-300 bg-orange-50 text-orange-700 text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-1.5 rounded-full border border-[#128c7e] bg-[#dcf8c6] text-[#128c7e] text-sm font-medium hover:bg-[#d1f2ae] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-['Inter','sans-serif']"
                       onClick={() => handleSend(undefined, option)}
                       disabled={isConversing || isUserLocked()}
                       whileHover={{ scale: 1.02 }}
@@ -2136,11 +2162,11 @@ export default function PreferencesPage() {
               )}
 
               {/* Input Box */}
-              <form onSubmit={handleSend} className="flex items-end gap-2">
+              <form onSubmit={handleSend} className="flex items-end gap-3">
                 <div className="flex-1 relative">
                   <input 
                     type="text" 
-                    className="w-full px-4 py-2.5 bg-gray-100 rounded-[25px] border-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-[15px] placeholder-gray-500 resize-none"
+                    className="w-full px-4 py-3 bg-white rounded-[25px] border border-gray-200 focus:outline-none focus:ring-0 focus:border-[#128c7e] text-[15px] placeholder-gray-500 font-['Inter','sans-serif'] shadow-sm"
                     placeholder={
                       isUserLocked()
                         ? "🔒 Upgrade for unlimited chat..."
@@ -2161,10 +2187,10 @@ export default function PreferencesPage() {
                 {/* Send Button */}
                 <motion.button 
                   type="submit" 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-md ${
                     isConversing || isUserLocked() || (!input.trim() && !conversationComplete)
                       ? 'bg-gray-300 cursor-not-allowed' 
-                      : 'bg-orange-500 hover:bg-orange-600 active:scale-95'
+                      : 'bg-[#128c7e] hover:bg-[#075e54] active:scale-95'
                   }`}
                   disabled={isConversing || isUserLocked() || (!input.trim() && !conversationComplete)}
                   whileHover={{ scale: 1.05 }}
@@ -2177,8 +2203,8 @@ export default function PreferencesPage() {
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     />
                   ) : (
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                     </svg>
                   )}
                 </motion.button>
