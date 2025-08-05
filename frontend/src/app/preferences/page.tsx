@@ -13,7 +13,7 @@ import {
   MapPin, Clock, Calendar, Users, DollarSign, 
   Star, Camera, Coffee, Mountain, Heart,
   ExternalLink, Navigation, Eye, Bookmark,
-  Wifi, Utensils, BedDouble, Gem, Bus, Plane
+  Wifi, Utensils, BedDouble, Gem, Bus, Plane, Truck, Globe
 } from "lucide-react";
 
 // --- Configuration ---
@@ -793,7 +793,7 @@ export default function PreferencesPage() {
                                 <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
                                   {opt.icon === 'flight' && <Plane className="text-2xl text-white" />}
                                   {opt.icon === 'train' && <Bus className="text-2xl text-white" />}
-                                  {opt.icon === 'bus' && <Bus className="text-2xl text-white" />}
+                                  {opt.icon === 'bus' && <Truck className="text-2xl text-white" />}
                                   {opt.icon === 'car' && <Navigation className="text-2xl text-white" />}
                                 </div>
                                 <h4 className="font-bold text-2xl text-gray-800">{opt.mode}</h4>
@@ -1205,7 +1205,7 @@ export default function PreferencesPage() {
                                   </motion.div>
                                  )}
                                  
-                                 <div className="mt-6 flex items-center gap-4">
+                                 <div className="mt-6 flex items-center gap-4 flex-wrap">
                                      <Button variant="primary" size="default" asChild>
                                        <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                            <MapPin className="w-4 h-4" /> Google Maps
@@ -1214,9 +1214,36 @@ export default function PreferencesPage() {
                                      {activity.booking_link && (
                                           <Button variant="outline" size="default" asChild>
                                             <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                                <Utensils className="w-4 h-4" /> View on Zomato
+                                                {activity.booking_link.includes('zomato') && <Utensils className="w-4 h-4" />}
+                                                {activity.booking_link.includes('asi') && <Globe className="w-4 h-4" />}
+                                                {activity.booking_link.includes('tourism') && <Globe className="w-4 h-4" />}
+                                                {activity.booking_link.includes('makemytrip') && <ExternalLink className="w-4 h-4" />}
+                                                {!activity.booking_link.includes('zomato') && !activity.booking_link.includes('asi') && !activity.booking_link.includes('tourism') && !activity.booking_link.includes('makemytrip') && <ExternalLink className="w-4 h-4" />}
+                                                {activity.booking_link.includes('zomato') ? 'View on Zomato' : 
+                                                 activity.booking_link.includes('asi') ? 'Book on ASI' :
+                                                 activity.booking_link.includes('tourism') ? 'Official Booking' :
+                                                 activity.booking_link.includes('makemytrip') ? 'Book on MMT' :
+                                                 'Book Tickets'}
                                             </a>
                                           </Button>
+                                     )}
+                                     {activity.official_website && activity.official_website !== activity.booking_link && (
+                                          <Button variant="outline" size="default" asChild>
+                                            <a href={activity.official_website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                                <Globe className="w-4 h-4" /> Official Site
+                                            </a>
+                                          </Button>
+                                     )}
+                                     {activity.booking_priority && (
+                                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                            activity.booking_priority === 'Required' ? 'bg-red-100 text-red-800' :
+                                            activity.booking_priority === 'Recommended' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-gray-100 text-gray-600'
+                                          }`}>
+                                            {activity.booking_priority === 'Required' ? '🎫 Booking Required' :
+                                             activity.booking_priority === 'Recommended' ? '📝 Booking Recommended' :
+                                             '🚶 Walk-in Welcome'}
+                                          </span>
                                      )}
                                  </div>
                               </div>
@@ -1391,7 +1418,7 @@ export default function PreferencesPage() {
                                   </motion.div>
                                  )}
                                  
-                                 <div className="mt-6 flex items-center gap-4">
+                                 <div className="mt-6 flex items-center gap-4 flex-wrap">
                                      <Button variant="primary" size="default" asChild>
                                        <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                            <MapPin className="w-4 h-4" /> Google Maps
@@ -1400,9 +1427,36 @@ export default function PreferencesPage() {
                                      {activity.booking_link && (
                                           <Button variant="outline" size="default" asChild>
                                             <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                                <Utensils className="w-4 h-4" /> View on Zomato
+                                                {activity.booking_link.includes('zomato') && <Utensils className="w-4 h-4" />}
+                                                {activity.booking_link.includes('asi') && <Globe className="w-4 h-4" />}
+                                                {activity.booking_link.includes('tourism') && <Globe className="w-4 h-4" />}
+                                                {activity.booking_link.includes('makemytrip') && <ExternalLink className="w-4 h-4" />}
+                                                {!activity.booking_link.includes('zomato') && !activity.booking_link.includes('asi') && !activity.booking_link.includes('tourism') && !activity.booking_link.includes('makemytrip') && <ExternalLink className="w-4 h-4" />}
+                                                {activity.booking_link.includes('zomato') ? 'View on Zomato' : 
+                                                 activity.booking_link.includes('asi') ? 'Book on ASI' :
+                                                 activity.booking_link.includes('tourism') ? 'Official Booking' :
+                                                 activity.booking_link.includes('makemytrip') ? 'Book on MMT' :
+                                                 'Book Tickets'}
                                             </a>
                                           </Button>
+                                     )}
+                                     {activity.official_website && activity.official_website !== activity.booking_link && (
+                                          <Button variant="outline" size="default" asChild>
+                                            <a href={activity.official_website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                                <Globe className="w-4 h-4" /> Official Site
+                                            </a>
+                                          </Button>
+                                     )}
+                                     {activity.booking_priority && (
+                                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                            activity.booking_priority === 'Required' ? 'bg-red-100 text-red-800' :
+                                            activity.booking_priority === 'Recommended' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-gray-100 text-gray-600'
+                                          }`}>
+                                            {activity.booking_priority === 'Required' ? '🎫 Booking Required' :
+                                             activity.booking_priority === 'Recommended' ? '📝 Booking Recommended' :
+                                             '🚶 Walk-in Welcome'}
+                                          </span>
                                      )}
                                  </div>
                               </div>

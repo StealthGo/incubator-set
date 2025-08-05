@@ -988,6 +988,13 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
 3. Each activity must have complete transport instructions from the previous location
 4. Every location must have exact addresses and Google Maps links
 5. All cost estimates must be in INR with realistic ranges
+6. **BOOKING LINKS PRIORITY**: For monuments and heritage sites, ALWAYS use official government booking links first:
+   - ASI (Archaeological Survey of India) official booking: https://asi.payumoney.com/ or official ASI monument pages
+   - State Tourism Department official websites and booking portals
+   - Official monument/site websites with booking facilities
+   - For restaurants: Use Zomato or official restaurant booking links
+   - For activities without official booking: Use reputable platforms like MakeMyTrip, GetYourGuide, or Thrillophilia
+   - If no online booking available, mention "Book at entry" or "Advance booking not required"
 
 **IMPORTANT**: You MUST respond ONLY with a valid JSON object. Do NOT include any conversational text, markdown, or any content before or after the JSON.
 
@@ -1027,6 +1034,9 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
       }},
       {{
         "mode": "Train", "icon": "train", "description": "Detailed description of the train route, mentioning key stations.", "duration": "Approximate journey time.", "estimated_cost": "Price range in INR.", "booking_link": "A direct MakeMyTrip railways URL."
+      }},
+      {{
+        "mode": "Bus", "icon": "bus", "description": "Detailed description of the bus route, mentioning key stops and bus operators.", "duration": "Approximate journey time.", "estimated_cost": "Price range in INR.", "booking_link": "A direct RedBus or MakeMyTrip bus booking URL."
       }}
     ]
   }},
@@ -1076,7 +1086,9 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
           "icon": "A relevant Material Icons name (e.g., 'local_cafe', 'storefront').",
           "image_url": "A direct image URL (e.g., 'https://images.unsplash.com/photo-ID?w=800&h=600&fit=crop').",
           "google_maps_link": "A direct Google Maps search URL for the exact location.",
-          "booking_link": "A Zomato link for restaurants or MMT for activities, if applicable, otherwise null.",
+          "booking_link": "For monuments/heritage sites: Use official government booking links (ASI, state tourism, official monument websites). For restaurants use Zomato links. For other activities use MakeMyTrip or official activity booking URLs. If no official link available, use relevant booking platform.",
+          "booking_priority": "Specify if booking is 'Required', 'Recommended', or 'Not needed'",
+          "official_website": "Official government or monument website if applicable",
           "how_to_reach": {{
             "from_previous_location": "Detailed instructions from breakfast location",
             "transport_mode": "Best transport option (walk/auto/taxi/bus)",
@@ -1114,11 +1126,15 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
           "location": "Specific Location with exact address",
           "description": "Detailed description optimized for post-lunch timing.",
           "duration": "Recommended time to spend here",
+          "entry_fee": "Entry cost in INR (if applicable)",
           "why_perfect_timing": "Why this timing is ideal (weather, crowds, lighting, etc.)",
           "local_guide_tip": "Insider tip specific to afternoon visits",
           "icon": "Relevant Material Icons name",
           "image_url": "Direct image URL",
           "google_maps_link": "Direct Google Maps search URL",
+          "booking_link": "For monuments/heritage sites: Use official government booking links (ASI, state tourism, official monument websites). For restaurants use Zomato links. For other activities use MakeMyTrip or official activity booking URLs. If no official link available, use relevant booking platform.",
+          "booking_priority": "Specify if booking is 'Required', 'Recommended', or 'Not needed'",
+          "official_website": "Official government or monument website if applicable",
           "how_to_reach": {{
             "from_lunch_location": "Detailed instructions from lunch spot",
             "transport_mode": "Best transport option",
