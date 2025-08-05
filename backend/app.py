@@ -998,7 +998,7 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
 
     # Debug print to see what we extracted
     print(f"Received messages: {[{'sender': m.sender, 'text': m.text} for m in req.messages]}")
-    print(f"Extracted data: destination={destination}, dates={dates}, travelers={travelers}, interests={interests}, budget={budget}, pace={pace}")
+    print(f"Extracted data: destination={destination}, dates={dates}, travelers={travelers}, food_preferences={food_preferences}, interests={interests}, budget={budget}, pace={pace}")
 
     system_prompt_content = f"""
 You are 'The Modern Chanakya', an elite, AI-powered travel strategist based in India. Your tone is sophisticated, knowledgeable, and reassuring. You create hyper-detailed, premium travel itineraries that are so comprehensive and convenient, users would pay for them.
