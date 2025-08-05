@@ -65,69 +65,50 @@ const Button = ({ children, onClick, variant = "default", size = "default", clas
 };
 
 // Dynamic conversation system - now LLM handles all interactions
-const systemPrompt = `You are "The Modern Chanakya" - an enthusiastic, knowledgeable Indian travel planning assistant who specializes EXCLUSIVELY in Indian destinations and experiences. You are passionate about Incredible India and help fellow Indians and visitors explore the beauty, culture, and diversity of our motherland.
+const systemPrompt = `You are "The Modern Chanakya" - a friendly, knowledgeable Indian travel buddy who helps plan amazing trips within India. You chat like a friend on WhatsApp - casual, quick, and fun!
 
-FOCUS: INDIA ONLY - You only plan trips within India. If someone asks about international destinations, politely redirect them to explore India's incredible diversity instead.
+🎯 YOUR MISSION: Get the essentials in 5-6 quick questions, then create an AMAZING itinerary!
 
-CONVERSATION FLOW:
-1. Start with a warm, desi greeting asking which part of Bharat they want to explore
-2. Naturally follow up to gather comprehensive information for creating the MOST CONVENIENT itinerary:
-   - Indian Destination (which state/city/region of India)
-   - Travel Dates (considering Indian seasons, festivals, weather)
-   - Travelers (solo yatra, family trip, friends ka gang, honeymoon, etc.)
-   - Interests (spiritual journey, adventure, food tour, heritage, beaches, mountains, wildlife, festivals, etc.)
-   - Budget (budget travel, middle-class comfort, luxury experience)
-   - Travel Style (relaxed darshan, balanced exploration, action-packed adventure)
-   - Food Preferences (vegetarian/non-vegetarian, spice tolerance, dietary restrictions, must-try local foods)
-   - Transportation Preferences (comfort vs budget, willingness to use local transport, travel time tolerance)
-   - Accommodation Priorities (location convenience, amenities, authentic vs modern experience)
-   - Special Requirements (accessibility needs, health considerations, age-appropriate activities)
-   - Time Constraints (early morning activities okay, late-night preferences, afternoon rest needed)
+CHAT STYLE:
+- Keep it SHORT and snappy (like WhatsApp messages)
+- Use emojis naturally 🚀✨
+- Mix English and Hindi casually ("Kahan jaana hai?", "Sounds amazing yaar!")
+- Be enthusiastic but not overwhelming
+- Ask ONE simple question at a time
 
-PERSONALITY & LANGUAGE:
-- Use a mix of English and Hindi naturally (like "Kahan jaana hai?", "That sounds kamaal!", "Wah, amazing choice!")
-- Be enthusiastic about Indian culture, food, traditions
-- Reference Indian contexts (monsoon season, festival times, local customs)
-- Use phrases like "Bahut badhiya!", "Incredible choice!", "You'll love the local mithai there!"
-- Show deep knowledge of Indian geography, culture, and travel
-- Ask follow-up questions that help optimize convenience (e.g., "Are you okay with early morning temple visits for better darshan?")
+QUICK QUESTION FLOW (Max 5-6 questions):
+1. "Hey! Kahan jaana hai? Which part of incredible India?" 🇮🇳
+2. "Nice choice! When are you planning to go?" 📅
+3. "Cool! Who's coming along on this adventure?" 👥
+4. "What gets you most excited - food, culture, adventure, nature?" 🎯
+5. "What's your vibe - budget travel, comfortable, or luxury?" 💰
+6. Optional: "Any special requests or pace preference?" (if needed)
 
-INDIAN CONTEXT EXPERTISE:
-- Know about Indian seasons (summer, monsoon, winter, post-monsoon)
-- Understand Indian festivals and their travel impact
-- Be aware of Indian travel patterns (hill stations in summer, Goa in winter, etc.)
-- Suggest authentic Indian experiences (local markets, street food, cultural shows, temples, etc.)
-- Consider Indian travel preferences (family-friendly, vegetarian options, clean accommodations)
-- Understand route optimization needs (traffic patterns, proximity of attractions, meal timing)
+Then: "Perfect! Ready to create your dream itinerary? ✨"
 
-CONVENIENCE-FOCUSED QUESTIONS:
-- Ask about preferred meal times and food adventure level
-- Inquire about walking tolerance and transportation comfort
-- Check for any time-sensitive priorities (sunrise/sunset views, specific darshan times)
-- Understand if they prefer organized routes or flexible exploration
-- Ask about shopping interests for route planning
+IMPORTANT RULES:
+- ONLY India destinations (redirect international requests politely)
+- Keep responses under 50 words
+- Be conversational, not formal
+- After 5 user answers, offer to generate itinerary
+- Sound excited but not pushy
+- Use Indian context (monsoon, festivals, etc.)
 
-RULES:
-- ONLY suggest destinations within India
-- Ask ONE question at a time in a conversational, friendly manner
-- Always acknowledge their previous answer before asking the next
-- Focus on gathering information that will help create optimized, convenient itineraries
-- When you have enough comprehensive info, enthusiastically summarize and ask if they're ready for their "perfectly planned, super convenient Bharat yatra itinerary"
-- If they mention international travel, redirect: "Arre yaar, why go abroad when our own India has so much to offer! Tell me what kind of experience you want - I'll show you amazing places right here in our beautiful country!"
+Example responses:
+"Goa? Fantastic choice! 🏖️ When are you planning this beach escape?"
+"Solo trip? That's so cool! 🎒 What excites you most - beaches, food, or nightlife?"
+"Amazing! I've got all I need. Ready to create your perfect Goa itinerary? 🚀"
 
 Current conversation context will be provided. Respond as the next message in the conversation.`;
 
-// Quick replies for different conversation stages
+// Quick replies for different conversation stages - WhatsApp style, short and sweet
 const smartQuickReplies: Record<string, string[]> = {
-  destination: ["🏔️ Himachal Pradesh", "🏖️ Goa", "🕌 Rajasthan", "🌴 Kerala", "🏛️ Delhi NCR", "🏝️ Andaman"],
-  dates: ["📅 Pick Dates", "🤷‍♀️ Flexible hai", "🌞 Next Month", "🎯 Festival Season", "❄️ Winter", "🌸 Summer"],
-  travelers: ["✈️ Solo yatra", "👫 Partner ke saath", "👨‍👩‍👧‍👦 Family trip", "🎉 Friends ka group", "👥 Big family (5+)", "💏 Honeymoon"],
-  interests: ["🙏 Spiritual journey", "🍛 Food & Culture", "🏛️ Heritage sites", "🌿 Nature & Wildlife", "🧘‍♀️ Yoga & Wellness", "🎭 Festivals"],
-  budget: ["💸 Budget travel", "💰 Middle-class comfort", "💎 Luxury experience", "🎯 Best value", "👨‍👩‍👧‍👦 Family budget", "🎓 Student budget"],
-  pace: ["🐌 Relaxed darshan", "⚖️ Balanced exploration", "🏃‍♂️ Adventure packed", "🧘‍♀️ Peaceful & slow", "📸 Photo-focused", "🎒 Backpacker style"],
-  food_preferences: ["🥗 Pure vegetarian", "🍗 Non-vegetarian", "🌶️ Love spicy food", "🥛 Mild flavors", "🍜 Street food explorer", "🍽️ Fine dining"],
-  transport: ["✈️ Comfort priority", "🚂 Love train journeys", "🚗 Road trip vibes", "🚌 Budget transport", "🏍️ Local transport", "🚶‍♂️ Walking friendly"],
-  accommodation: ["🏨 Luxury hotels", "🏠 Homestays", "⭐ 3-star comfort", "🎒 Budget stays", "🏛️ Heritage properties", "🌿 Nature resorts"]
+  destination: ["🏔️ Himachal", "🏖️ Goa", "🕌 Rajasthan", "🌴 Kerala", "🏛️ Agra", "🏝️ Andaman"],
+  dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "❄️ Winter Trip", "🌸 Summer", "🎯 Festival Time"],
+  travelers: ["✈️ Solo", "👫 With Partner", "👨‍👩‍👧‍👦 Family", "🎉 Friends", " Honeymoon", "👥 Big Group"],
+  interests: ["🍛 Food", "🏛️ Heritage", "🌿 Nature", "🙏 Spiritual", "🧘‍♀️ Wellness", "🎭 Culture"],
+  budget: ["💸 Budget", "💰 Comfortable", "💎 Luxury", "🎯 Best Value", "👨‍👩‍👧‍👦 Family Friendly", "🎓 Student"],
+  pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Adventure", "🧘‍♀️ Peaceful", "📸 Photo Tour", "🎒 Backpacker"]
 };
 
 // --- Helper Functions & Components ---
@@ -144,20 +125,85 @@ const Icon = ({ name, className }: { name: string, className?: string }) => (
   <span className={`material-icons-outlined ${className}`}>{name}</span>
 );
 
-const ChatBubble = ({ sender, children }: { sender: string, children: React.ReactNode }) => {
-  const align = sender === 'user' ? 'justify-end' : 'justify-start';
-  const bubbleColor = sender === 'user'
-    ? 'bg-orange-500 text-white'
-    : 'bg-orange-50 text-orange-900 border border-orange-200';
-  const shape = sender === 'user' ? 'rounded-2xl rounded-br-none' : 'rounded-2xl rounded-bl-none';
+const ChatBubble = ({ sender, children, timestamp }: { sender: string, children: React.ReactNode, timestamp?: string }) => {
+  const isUser = sender === 'user';
+  
   return (
-    <div className={`flex ${align} w-full mb-1`}>
-      <div className={`px-4 py-2 max-w-xs md:max-w-md text-sm shadow flex items-center ${bubbleColor} ${shape}`}>
-        {children}
+    <motion.div 
+      className={`flex w-full mb-2 ${isUser ? 'justify-end' : 'justify-start'}`}
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 500, 
+        damping: 30,
+        duration: 0.3 
+      }}
+    >
+      <div className={`
+        max-w-[85%] sm:max-w-[70%] px-3 py-2 text-[15px] leading-[1.4] 
+        ${isUser 
+          ? 'bg-orange-500 text-white rounded-[18px] rounded-br-[4px] ml-auto' 
+          : 'bg-white text-gray-800 rounded-[18px] rounded-bl-[4px] shadow-sm border border-gray-100'
+        }
+        relative group
+      `}>
+        <div className="break-words">{children}</div>
+        {timestamp && (
+          <div className={`text-[11px] mt-1 ${isUser ? 'text-orange-100' : 'text-gray-400'} text-right`}>
+            {timestamp}
+          </div>
+        )}
+        
+        {/* WhatsApp-style tail */}
+        <div className={`
+          absolute bottom-0 w-0 h-0
+          ${isUser 
+            ? 'right-[-8px] border-l-[8px] border-l-orange-500 border-t-[8px] border-t-transparent' 
+            : 'left-[-8px] border-r-[8px] border-r-white border-t-[8px] border-t-transparent'
+          }
+        `} />
       </div>
-    </div>
+    </motion.div>
   );
 };
+
+// Enhanced typing indicator with WhatsApp-style animation
+const TypingIndicator = () => (
+  <motion.div 
+    className="flex justify-start w-full mb-2"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.2 }}
+  >
+    <div className="max-w-[85%] sm:max-w-[70%] bg-white rounded-[18px] rounded-bl-[4px] shadow-sm border border-gray-100 px-4 py-3 relative">
+      <div className="flex items-center gap-2">
+        <div className="flex space-x-1">
+          <motion.div 
+            className="w-2 h-2 bg-gray-400 rounded-full"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+          />
+          <motion.div 
+            className="w-2 h-2 bg-gray-400 rounded-full"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+          />
+          <motion.div 
+            className="w-2 h-2 bg-gray-400 rounded-full"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+          />
+        </div>
+        <span className="text-[13px] text-gray-500 font-medium">The Modern Chanakya is typing...</span>
+      </div>
+      
+      {/* WhatsApp-style tail */}
+      <div className="absolute bottom-0 left-[-8px] w-0 h-0 border-r-[8px] border-r-white border-t-[8px] border-t-transparent" />
+    </div>
+  </motion.div>
+);
 
 // --- Authentication Modal ---
 function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void, onSuccess: () => void, onUserUpdate: (user: any) => void }) {
@@ -274,7 +320,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
 
 export default function PreferencesPage() {
   const [messages, setMessages] = useState([
-    { sender: "system", text: "Namaste! � Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" },
+    { sender: "system", text: "Hey! 👋 Ready to explore incredible India? \n\nKahan jaana hai? Where do you want to go? 🇮🇳✨" },
   ]);
   const [input, setInput] = useState("");
   const [itinerary, setItinerary] = useState<Record<string, any> | null>(null);
@@ -306,7 +352,7 @@ export default function PreferencesPage() {
     localStorage.removeItem("conversationMessages");
     localStorage.removeItem("conversationComplete");
     setItinerary(null);
-    setMessages([{ sender: 'system', text: "Namaste! 🙏 Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]);
+    setMessages([{ sender: 'system', text: "Hey! � Ready to explore incredible India? \n\nKahan jaana hai? Where do you want to go? 🇮🇳✨" }]);
     setConversationComplete(false);
     setCurrentQuestionType("destination");
     setShowOptions(false);
@@ -424,6 +470,13 @@ export default function PreferencesPage() {
     checkUserStatus();
   }, []);
 
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   // LLM-powered conversation handler
   const handleSend = async (e?: React.FormEvent, value?: string) => {
     if (e) e.preventDefault();
@@ -480,6 +533,9 @@ export default function PreferencesPage() {
     }
 
     setIsConversing(true);
+    
+    // Add typing indicator immediately
+    setMessages((msgs) => [...msgs, { sender: "system", text: "typing..." }]);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/chat-conversation`, {
@@ -506,24 +562,64 @@ export default function PreferencesPage() {
 
       const data = await response.json();
       
-      // Add LLM response to conversation
-      setMessages((msgs) => [...msgs, { sender: "system", text: data.response }]);
+      // Replace typing indicator with actual response
+      setMessages((msgs) => {
+        const newMsgs = [...msgs];
+        // Remove the typing indicator (last message)
+        newMsgs.pop();
+        // Add the actual response
+        newMsgs.push({ sender: "system", text: data.response });
+        return newMsgs;
+      });
       
-      // Check if conversation is ready for itinerary generation
-      if (data.ready_for_itinerary || data.response.toLowerCase().includes("ready to generate") || data.response.toLowerCase().includes("work my magic")) {
-        setConversationComplete(true);
-        setShowOptions(true);
-      }
+      // Small delay to ensure message is rendered before showing quick replies
+      setTimeout(() => {
+        // Check if conversation is ready for itinerary generation
+        if (data.ready_for_itinerary || data.response.toLowerCase().includes("ready to generate") || data.response.toLowerCase().includes("work my magic") || data.response.toLowerCase().includes("create your itinerary")) {
+          setConversationComplete(true);
+          setShowOptions(true);
+        }
+      }, 100);
 
     } catch (error) {
       console.error("Error getting LLM response:", error);
-      setMessages((msgs) => [...msgs, { 
-        sender: "system", 
-        text: "I'm having trouble responding right now. Could you try again? 😅" 
-      }]);
+      // Replace typing indicator with error message
+      setMessages((msgs) => {
+        const newMsgs = [...msgs];
+        newMsgs.pop(); // Remove typing indicator
+        newMsgs.push({ 
+          sender: "system", 
+          text: "Oops! Network issue ho gaya. Try again? 😅" 
+        });
+        return newMsgs;
+      });
     } finally {
       setIsConversing(false);
     }
+  };
+
+  // Determine if we should show quick replies - only after AI has asked a question
+  const shouldShowQuickReplies = () => {
+    if (!isLoggedIn || conversationComplete || isUserLocked() || isConversing) {
+      return false;
+    }
+    
+    const systemMessages = messages.filter(msg => msg.sender === "system" && msg.text !== "typing...");
+    const userMessages = messages.filter(msg => msg.sender === "user");
+    
+    // Show quick replies only if:
+    // 1. AI has sent at least one message (excluding typing indicator)
+    // 2. AI has responded more recently than user (AI's turn is complete)
+    // 3. We're not at the very start (first message is just greeting)
+    
+    if (systemMessages.length === 1 && userMessages.length === 0) {
+      // This is just the initial greeting, show destination options
+      return true;
+    }
+    
+    // Show replies if AI has responded to the user's last message
+    // (system messages should be greater than or equal to user messages)
+    return systemMessages.length > userMessages.length || systemMessages.length === userMessages.length;
   };
 
   // Determine current question type for quick replies based on conversation flow
@@ -1862,7 +1958,7 @@ export default function PreferencesPage() {
             localStorage.removeItem("conversationComplete");
             
             setItinerary(null); 
-            setMessages([{ sender: 'system', text: "Namaste! � Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]); 
+            setMessages([{ sender: 'system', text: "Hey! 👋 Ready to explore incredible India? \n\nKahan jaana hai? Where do you want to go? 🇮🇳✨" }]); 
             setConversationComplete(false);
             setCurrentQuestionType("destination");
             setShowOptions(false);
@@ -1908,173 +2004,259 @@ export default function PreferencesPage() {
       </nav>
 
       <div className="flex flex-col md:flex-row w-full flex-1" style={{ height: 'calc(100vh - 81px)' }}>
-        {/* Left: Chat Section */}
-        <section className={`w-full md:w-2/5 flex flex-col bg-white p-4 md:p-6 border-r border-gray-200 ${showFullItinerary ? 'hidden md:flex' : ''}`}>
-          <div className="flex-1 flex flex-col justify-end overflow-y-auto hide-scrollbar">
-            <div className="flex flex-col gap-4 mb-4">
-              {/* Show welcome message for non-authenticated users */}
-              {!isLoggedIn && (
-                <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border border-orange-200 rounded-2xl p-6 mb-4">
-                  <div className="text-center">
-                    <Icon name="travel_explore" className="text-4xl text-orange-500 mb-3" />
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Namaste! Welcome to The Modern Chanakya!</h3>
-                    <p className="text-gray-700 mb-4">
-                      Ready to explore Incredible India? Sign in to start creating personalized Indian travel itineraries with our desi AI travel expert - from Kashmir to Kanyakumari!
-                    </p>
-                    <button 
-                      onClick={() => setShowSignInModal(true)}
-                      className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-full hover:bg-orange-600 transition-all shadow-lg"
-                    >
-                      🇮🇳 Start Your Bharat Yatra
-                    </button>
-                  </div>
-                </div>
-              )}
-              
-              {/* Show messages only if logged in */}
-              {isLoggedIn && messages.map((msg, i) => <ChatBubble key={i} sender={msg.sender}>{msg.text}</ChatBubble>)}
-              <div ref={chatEndRef} />
+        {/* Left: Chat Section - WhatsApp Style */}
+        <section className={`w-full md:w-2/5 flex flex-col bg-gray-50 ${showFullItinerary ? 'hidden md:flex' : ''}`}>
+          {/* Chat Header */}
+          <div className="bg-orange-500 text-white px-4 py-3 flex items-center gap-3 shadow-sm">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <span className="text-lg">🤖</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-[16px]">The Modern Chanakya</h3>
+              <p className="text-[13px] text-orange-100">
+                {isConversing ? 'typing...' : 'Your Indian Travel Expert'}
+              </p>
             </div>
           </div>
+
+          {/* Chat Messages Container */}
+          <div className="flex-1 overflow-y-auto px-3 py-2" style={{ 
+            backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
+            backgroundSize: '60px 60px'
+          }}>
+            {/* Welcome message for non-authenticated users */}
+            {!isLoggedIn && (
+              <div className="flex justify-center items-center h-full">
+                <motion.div 
+                  className="bg-white rounded-2xl p-6 shadow-lg max-w-sm text-center mx-4"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="text-4xl mb-3">🇮🇳</div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">Welcome to The Modern Chanakya!</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Sign in to start planning your incredible India journey!
+                  </p>
+                  <button 
+                    onClick={() => setShowSignInModal(true)}
+                    className="px-6 py-2 bg-orange-500 text-white font-medium rounded-full hover:bg-orange-600 transition-colors text-sm"
+                  >
+                    Start Planning
+                  </button>
+                </motion.div>
+              </div>
+            )}
+            
+            {/* Chat Messages */}
+            {isLoggedIn && (
+              <div className="space-y-1 py-2">
+                {messages.map((msg, i) => 
+                  msg.text === "typing..." ? (
+                    <TypingIndicator key={i} />
+                  ) : (
+                    <ChatBubble 
+                      key={i} 
+                      sender={msg.sender}
+                      timestamp={i === messages.length - 1 ? new Date().toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        hour12: true 
+                      }) : undefined}
+                    >
+                      {msg.text}
+                    </ChatBubble>
+                  )
+                )}
+                <div ref={chatEndRef} />
+              </div>
+            )}
+          </div>
           
-          {/* Input Area */}
-          <div className="mt-auto pt-4">
-            {showDatePicker && (
-              <div className="absolute left-1/2 transform -translate-x-1/2 bottom-20 z-30">
-                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2">
-                  <DateRange
-                    editableDateInputs
-                    onChange={handleDateSelect}
-                    moveRangeOnFirstSelection={false}
-                    ranges={[{ startDate: new Date(), endDate: addDays(new Date(), 6), key: 'selection' }]}
-                    minDate={new Date()}
+          {/* Input Area - WhatsApp Style */}
+          {isLoggedIn && (
+            <div className="bg-white px-3 py-3 border-t border-gray-200">
+              {/* Quick Replies */}
+              {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
+                <motion.div 
+                  className="flex flex-wrap gap-2 mb-3"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {smartQuickReplies[getCurrentQuestionType()].map((option: string) => (
+                    <motion.button 
+                      key={option} 
+                      type="button" 
+                      className="px-3 py-1.5 rounded-full border border-orange-300 bg-orange-50 text-orange-700 text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => handleSend(undefined, option)}
+                      disabled={isConversing || isUserLocked()}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2, delay: Math.random() * 0.1 }}
+                    >
+                      {option}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              )}
+
+              {/* Date Picker Modal */}
+              {showDatePicker && (
+                <motion.div 
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <motion.div 
+                    className="bg-white rounded-2xl shadow-2xl p-4 m-4"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    <DateRange
+                      editableDateInputs
+                      onChange={handleDateSelect}
+                      moveRangeOnFirstSelection={false}
+                      ranges={[{ startDate: new Date(), endDate: addDays(new Date(), 6), key: 'selection' }]}
+                      minDate={new Date()}
+                    />
+                    <button 
+                      onClick={() => setShowDatePicker(false)}
+                      className="w-full mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {/* Input Box */}
+              <form onSubmit={handleSend} className="flex items-end gap-2">
+                <div className="flex-1 relative">
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-100 rounded-[25px] border-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-[15px] placeholder-gray-500 resize-none"
+                    placeholder={
+                      isUserLocked()
+                        ? "🔒 Upgrade for unlimited chat..."
+                        : isConversing
+                          ? "Wait for response..."
+                          : conversationComplete
+                            ? "Ready for itinerary! 🎯"
+                            : itinerary 
+                              ? "Want changes? Type here..." 
+                              : "Type a message..."
+                    }
+                    value={input} 
+                    onChange={e => setInput(e.target.value)} 
+                    disabled={isConversing || isUserLocked()}
                   />
                 </div>
-              </div>
-            )}
-            {!itinerary && !showOptions && !conversationComplete && !isUserLocked() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {smartQuickReplies[getCurrentQuestionType()].map((option: string) => (
-                  <button 
-                    key={option} 
-                    type="button" 
-                    className={`px-4 py-1 rounded-full border transition text-sm font-semibold ${
-                      isLoggedIn && !isUserLocked()
-                        ? 'bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200' 
-                        : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
-                    }`} 
-                    onClick={() => handleSend(undefined, option)}
-                    disabled={!isLoggedIn || isUserLocked()}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            )}
-            <form onSubmit={handleSend} className="flex items-center gap-2">
-              <input 
-                type="text" 
-                className="flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:text-gray-400" 
-                placeholder={
-                  !isLoggedIn 
-                    ? "Please sign in to start planning your trip..." 
-                    : isUserLocked()
-                      ? "🔒 Upgrade kar ke aur Indian adventures explore karo..."
-                    : isConversing
-                      ? "I'm thinking of the perfect response..."
-                    : conversationComplete
-                      ? "Ready to generate your itinerary! Hit the button below."
-                    : itinerary 
-                      ? "Any changes? Type here..." 
-                      : "Type your answer..."
-                } 
-                value={input} 
-                onChange={e => setInput(e.target.value)} 
-                disabled={isGenerating || !isLoggedIn || isConversing || isUserLocked()} 
-              />
-              <button 
-                type="submit" 
-                className={`p-2 rounded-full font-semibold shadow transition-all ${
-                  isLoggedIn && !isConversing && !isUserLocked()
-                    ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`} 
-                disabled={isGenerating || !isLoggedIn || isConversing || isUserLocked()}
-              >
-                {isConversing ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                ) : (
-                  <Icon name="send" />
-                )}
-              </button>
-            </form>
-             {showOptions && !isUserLocked() && (
-                <div className="flex gap-4 mt-4">
-                <button 
-                  onClick={handleAskMore} 
-                  className={`px-5 py-2 rounded-full font-semibold shadow transition-all text-sm ${
-                    isLoggedIn 
-                      ? 'bg-gray-200 text-gray-900 hover:bg-gray-300' 
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                
+                {/* Send Button */}
+                <motion.button 
+                  type="submit" 
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    isConversing || isUserLocked() || (!input.trim() && !conversationComplete)
+                      ? 'bg-gray-300 cursor-not-allowed' 
+                      : 'bg-orange-500 hover:bg-orange-600 active:scale-95'
                   }`}
-                  disabled={!isLoggedIn}
+                  disabled={isConversing || isUserLocked() || (!input.trim() && !conversationComplete)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Ask More
-                </button>
-                <button 
-                  onClick={() => handleGenerate()} 
-                  className={`px-5 py-2 rounded-full font-semibold shadow transition-all text-sm ${
-                    isLoggedIn 
-                      ? 'bg-orange-500 text-white hover:bg-orange-600' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`} 
-                  disabled={isGenerating || !isLoggedIn}
-                >
-                  {isGenerating ? "Generating..." : "🚀 Generate My Itinerary"}
-                </button>
-                </div>
-            )}
+                  {isConversing ? (
+                    <motion.div 
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    />
+                  ) : (
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                  )}
+                </motion.button>
+              </form>
 
-            {conversationComplete && !showOptions && !isUserLocked() && (
-              <div className="mt-4">
-                <button 
+              {/* Action Buttons */}
+              {showOptions && !isUserLocked() && (
+                <motion.div 
+                  className="flex gap-2 mt-3"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <button 
+                    onClick={handleAskMore} 
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-medium text-sm hover:bg-gray-200 transition-colors"
+                  >
+                    Ask More
+                  </button>
+                  <button 
+                    onClick={() => handleGenerate()} 
+                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-full font-medium text-sm hover:bg-orange-600 transition-colors"
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? "Creating..." : "🚀 Generate"}
+                  </button>
+                </motion.div>
+              )}
+
+              {conversationComplete && !showOptions && !isUserLocked() && (
+                <motion.button 
                   onClick={() => handleGenerate()} 
-                  className={`w-full px-6 py-3 rounded-full font-bold shadow-lg transition-all text-lg ${
-                    isLoggedIn 
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 transform hover:scale-105' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`} 
-                  disabled={isGenerating || !isLoggedIn}
+                  className="w-full mt-3 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all shadow-lg"
+                  disabled={isGenerating}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
                   {isGenerating ? (
                     <div className="flex items-center justify-center gap-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Creating your perfect itinerary...
+                      <motion.div 
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                      Creating Your Itinerary...
                     </div>
                   ) : (
-                    "🎉 Generate My Perfect Itinerary!"
+                    "✨ Generate My Dream Itinerary"
                   )}
-                </button>
-              </div>
-            )}
+                </motion.button>
+              )}
 
-            {/* Subscription Lock Message */}
-            {isUserLocked() && (
-              <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-6 text-center">
-                <div className="text-4xl mb-3">🔒</div>
-                <h3 className="text-xl font-bold text-orange-800 mb-2">Aapka free Indian itinerary complete ho gaya!</h3>
-                <p className="text-gray-700 mb-4">
-                  Upgrade to premium to create unlimited personalized Indian travel itineraries with advanced AI features for exploring incredible Bharat.
-                </p>
-                <button 
-                  onClick={() => setShowSubscriptionPopup(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105 shadow-lg"
+              {/* Subscription Lock Message */}
+              {isUserLocked() && (
+                <motion.div 
+                  className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-4 text-center"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  🇮🇳 Upgrade for More Bharat Adventures
-                </button>
-              </div>
-            )}
-          </div>
+                  <div className="text-3xl mb-2">🔒</div>
+                  <h3 className="text-lg font-bold text-orange-800 mb-2">Free chat limit reached!</h3>
+                  <p className="text-gray-700 text-sm mb-3">
+                    Upgrade to premium for unlimited travel planning with advanced AI features.
+                  </p>
+                  <button 
+                    onClick={() => setShowSubscriptionPopup(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all shadow-md text-sm"
+                  >
+                    🇮🇳 Upgrade Now
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          )}
         </section>
 
         {/* Right: Itinerary Output Section */}
@@ -2104,7 +2286,7 @@ export default function PreferencesPage() {
           onClose={() => setShowSignInModal(false)} 
           onSuccess={() => {
             // Start the conversation after successful sign in
-            setMessages([{ sender: 'system', text: "Namaste! � Main hoon The Modern Chanakya, aapka Indian travel expert! Bharat mein kahan jaana hai? From Kashmir ki valleys to Kanyakumari ke beaches - batao kya explore karna hai! 🇮🇳✨" }]);
+            setMessages([{ sender: 'system', text: "Hey! 👋 Ready to explore incredible India? \n\nKahan jaana hai? Where do you want to go? 🇮🇳✨" }]);
             setConversationComplete(false);
             setCurrentQuestionType("destination");
             setShowOptions(false);
