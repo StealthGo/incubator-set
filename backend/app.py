@@ -885,8 +885,8 @@ CONVERSATION FLOW (6-7 questions max):
 1. Destination in India (where in Bharat?)
 2. Travel dates (when?)  
 3. Who's traveling (solo/family/friends?)
-4. Food preferences (vegetarian/non-vegetarian/vegan/jain/any specific dietary needs?)
-5. Main interests (what excites you most?)
+4. Main interests (what excites you most?)
+5. Food preferences (vegetarian/non-vegetarian/vegan/jain/any specific dietary needs?)
 6. Budget range (budget/mid-range/luxury?)
 7. Ready to generate if enough info, otherwise ask about pace/special requirements
 
@@ -968,7 +968,7 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
 
     # Extract answers based on the sequence of system questions
     # The frontend asks questions in a specific order
-    system_questions_order = ["destination", "dates", "travelers", "food_preferences", "interests", "budget", "pace", "aboutYou"]
+    system_questions_order = ["destination", "dates", "travelers", "interests", "food_preferences", "budget", "pace", "aboutYou"]
     
     def extract_answer_by_position(position):
         """Extract user answer at a specific position in the conversation"""
@@ -990,8 +990,8 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
     destination = extract_answer_by_position(0) or extract_answer_by_keywords(["destination", "city", "country", "place", "go to"])
     dates = extract_answer_by_position(1) or extract_answer_by_keywords(["dates", "planning for", "when"])
     travelers = extract_answer_by_position(2) or extract_answer_by_keywords(["travelers", "coming along", "with", "who"])
-    food_preferences = extract_answer_by_position(3) or extract_answer_by_keywords(["vegetarian", "non-vegetarian", "vegan", "jain", "food", "dietary", "eat"])
-    interests = extract_answer_by_position(4) or extract_answer_by_keywords(["interests", "excited about", "like", "enjoy"])
+    interests = extract_answer_by_position(3) or extract_answer_by_keywords(["interests", "excited about", "like", "enjoy"])
+    food_preferences = extract_answer_by_position(4) or extract_answer_by_keywords(["vegetarian", "non-vegetarian", "vegan", "jain", "food", "dietary", "eat"])
     budget = extract_answer_by_position(5) or extract_answer_by_keywords(["budget", "cost", "spend"])
     pace = extract_answer_by_position(6) or extract_answer_by_keywords(["pace", "speed", "relaxed", "packed", "balanced"])
     
@@ -999,7 +999,7 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
 
     # Debug print to see what we extracted
     print(f"Received messages: {[{'sender': m.sender, 'text': m.text} for m in req.messages]}")
-    print(f"Extracted data: destination={destination}, dates={dates}, travelers={travelers}, food_preferences={food_preferences}, interests={interests}, budget={budget}, pace={pace}")
+    print(f"Extracted data: destination={destination}, dates={dates}, travelers={travelers}, interests={interests}, food_preferences={food_preferences}, budget={budget}, pace={pace}")
 
     system_prompt_content = f"""
 You are 'The Modern Chanakya', an elite, AI-powered travel strategist based in India. Your tone is sophisticated, knowledgeable, and reassuring. You create hyper-detailed, premium travel itineraries that are so comprehensive and convenient, users would pay for them.
@@ -1009,10 +1009,11 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
 **CRITICAL REQUIREMENTS - NO EXCEPTIONS:**
 1. EVERY DAY must have: breakfast, morning_activities (at least 1), lunch, afternoon_activities (at least 1), evening_snacks, and dinner
 2. ALL meals must be separate objects with complete details - never skip or combine them
-3. Each activity must have complete transport instructions from the previous location
-4. Every location must have exact addresses and Google Maps links
-5. All cost estimates must be in INR with realistic ranges
-6. **BOOKING LINKS PRIORITY**: For monuments and heritage sites, ALWAYS use official government booking links first:
+3. **FOOD PREFERENCES COMPLIANCE**: Strictly respect the user's food preferences ({food_preferences}). Only suggest restaurants and dishes that match their dietary requirements. Use appropriate tags for each meal.
+4. Each activity must have complete transport instructions from the previous location
+5. Every location must have exact addresses and Google Maps links
+6. All cost estimates must be in INR with realistic ranges
+7. **BOOKING LINKS PRIORITY**: For monuments and heritage sites, ALWAYS use official government booking links first:
    - ASI (Archaeological Survey of India) official booking: https://asi.payumoney.com/ or official ASI monument pages
    - State Tourism Department official websites and booking portals
    - Official monument/site websites with booking facilities
