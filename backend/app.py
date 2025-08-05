@@ -880,13 +880,14 @@ RESPONSE GUIDELINES:
 - Reference their previous answers briefly to show you're listening
 - After 5-6 exchanges, if you have destination + dates + basic preferences, indicate readiness to generate itinerary
 
-CONVERSATION FLOW (5-6 questions max):
+CONVERSATION FLOW (6-7 questions max):
 1. Destination in India (where in Bharat?)
 2. Travel dates (when?)  
 3. Who's traveling (solo/family/friends?)
-4. Main interests (what excites you most?)
-5. Budget range (budget/mid-range/luxury?)
-6. Ready to generate if enough info, otherwise ask about pace/special requirements
+4. Food preferences (vegetarian/non-vegetarian/vegan/jain/any specific dietary needs?)
+5. Main interests (what excites you most?)
+6. Budget range (budget/mid-range/luxury?)
+7. Ready to generate if enough info, otherwise ask about pace/special requirements
 
 Keep it snappy and WhatsApp-friendly! No long paragraphs.
 
@@ -966,7 +967,7 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
 
     # Extract answers based on the sequence of system questions
     # The frontend asks questions in a specific order
-    system_questions_order = ["destination", "dates", "travelers", "interests", "budget", "pace", "aboutYou"]
+    system_questions_order = ["destination", "dates", "travelers", "food_preferences", "interests", "budget", "pace", "aboutYou"]
     
     def extract_answer_by_position(position):
         """Extract user answer at a specific position in the conversation"""
@@ -988,9 +989,10 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
     destination = extract_answer_by_position(0) or extract_answer_by_keywords(["destination", "city", "country", "place", "go to"])
     dates = extract_answer_by_position(1) or extract_answer_by_keywords(["dates", "planning for", "when"])
     travelers = extract_answer_by_position(2) or extract_answer_by_keywords(["travelers", "coming along", "with", "who"])
-    interests = extract_answer_by_position(3) or extract_answer_by_keywords(["interests", "excited about", "like", "enjoy"])
-    budget = extract_answer_by_position(4) or extract_answer_by_keywords(["budget", "cost", "spend"])
-    pace = extract_answer_by_position(5) or extract_answer_by_keywords(["pace", "speed", "relaxed", "packed", "balanced"])
+    food_preferences = extract_answer_by_position(3) or extract_answer_by_keywords(["vegetarian", "non-vegetarian", "vegan", "jain", "food", "dietary", "eat"])
+    interests = extract_answer_by_position(4) or extract_answer_by_keywords(["interests", "excited about", "like", "enjoy"])
+    budget = extract_answer_by_position(5) or extract_answer_by_keywords(["budget", "cost", "spend"])
+    pace = extract_answer_by_position(6) or extract_answer_by_keywords(["pace", "speed", "relaxed", "packed", "balanced"])
     
     current_location = "Raghogarh-Vijaypur, Madhya Pradesh"
 
