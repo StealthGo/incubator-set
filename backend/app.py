@@ -1040,6 +1040,7 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
 - Destination: {destination}
 - Dates: {dates}
 - Travelers: {travelers}
+- Food Preferences: {food_preferences}
 - Interests: {interests}
 - Budget: {budget}
 - Pace: {pace}
