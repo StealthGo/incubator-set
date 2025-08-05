@@ -871,14 +871,26 @@ USER NAME: {request.user_name or current_user.get('name', 'there')}
 USER SUBSCRIPTION: {'Premium ✨' if has_premium_subscription else 'Free (Limited)'}
 
 Based on the conversation above, respond as "The Modern Chanakya" with the next appropriate message. 
-- Be enthusiastic and use emojis naturally
-- Ask ONE follow-up question that builds on what they've shared
-- Reference their previous answers to show you're listening
-- If you have enough information to create an itinerary (destination, rough dates, and some preferences), indicate that you're ready to generate their itinerary
-- Keep responses conversational and friendly
-{'- As a premium user, mention exclusive benefits like unlimited conversations and premium itinerary features' if has_premium_subscription else '- Subtly mention premium benefits if appropriate, but focus on helping them plan their trip'}
 
-IMPORTANT: Respond as if you're continuing this conversation naturally. Do not repeat information already covered.
+RESPONSE GUIDELINES:
+- Keep responses SHORT and conversational (max 2-3 sentences)
+- Ask ONE clear, simple follow-up question
+- Use casual, friendly tone with emojis naturally
+- Be quick and to the point - like WhatsApp chatting
+- Reference their previous answers briefly to show you're listening
+- After 5-6 exchanges, if you have destination + dates + basic preferences, indicate readiness to generate itinerary
+
+CONVERSATION FLOW (5-6 questions max):
+1. Destination in India (where in Bharat?)
+2. Travel dates (when?)  
+3. Who's traveling (solo/family/friends?)
+4. Main interests (what excites you most?)
+5. Budget range (budget/mid-range/luxury?)
+6. Ready to generate if enough info, otherwise ask about pace/special requirements
+
+Keep it snappy and WhatsApp-friendly! No long paragraphs.
+
+IMPORTANT: Keep responses under 100 words. Be conversational, not formal.
 """
 
         # Generate response using Gemini
@@ -886,8 +898,8 @@ IMPORTANT: Respond as if you're continuing this conversation naturally. Do not r
             model='gemini-1.5-flash',
             contents=prompt,
             config=types.GenerateContentConfig(
-                temperature=0.7,
-                max_output_tokens=300,
+                temperature=0.8,
+                max_output_tokens=150,  # Reduced for shorter responses
             )
         )
         
@@ -903,8 +915,17 @@ IMPORTANT: Respond as if you're continuing this conversation naturally. Do not r
         
         # Check if we have enough information to suggest itinerary generation
         conversation_length = len(request.conversation_history)
-        has_destination = any("where" in msg.text.lower() for msg in request.conversation_history if msg.sender == "system")
-        has_enough_info = conversation_length >= 6 or "ready to generate" in ai_response.lower() or "work my magic" in ai_response.lower()
+        user_messages = [msg.text for msg in request.conversation_history if msg.sender == "user"]
+        
+        # More intelligent detection of readiness - look for key info
+        has_destination = any(msg.sender == "user" and len(msg.text) > 2 for msg in request.conversation_history)
+        has_enough_info = (
+            conversation_length >= 10 or  # After 5 back-and-forth exchanges (10 messages total)
+            "ready to generate" in ai_response.lower() or 
+            "work my magic" in ai_response.lower() or
+            "create your itinerary" in ai_response.lower() or
+            len(user_messages) >= 5  # User has answered 5 questions
+        )
         
         return {
             "response": ai_response,
