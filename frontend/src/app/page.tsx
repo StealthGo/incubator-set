@@ -212,59 +212,103 @@ export default function Home() {
             </motion.nav>
 
             {/* Main Content */}
-            <main className="flex-grow pt-24">
+            <main className="flex-grow">
                 {/* Hero Section */}
                 <motion.section
-                    initial="initial"
-                    animate="animate"
-                    variants={fadeInUp}
-                    className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-24 px-6 text-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 1.2 }}
+                    className="relative h-screen flex items-center justify-center overflow-hidden"
                 >
-                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 leading-tight mb-6">
-                        Namaste! <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-400">Welcome to The Modern Chanakya</span>
-                    </h1>
-                    <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Planning a trip? Chalo, let us help you! Get super-personalized, Indian-style travel itineraries delivered instantly.<br />
-                        Discover, plan, and experience travel like never before – all with a desi touch.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
-                        <motion.button 
-                            onClick={() => router.push("/preferences")}
-                            whileHover={{ 
-                                scale: 1.05, 
-                                boxShadow: "0 20px 25px -5px rgba(251, 191, 36, 0.3)" 
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="px-8 py-3.5 rounded-full bg-amber-500 text-white font-semibold shadow-lg hover:bg-amber-600 transition-colors text-base"
-                        >
-                            Start Your Yatra
-                        </motion.button>
-                        <motion.button 
-                            whileHover={{ 
-                                scale: 1.05, 
-                                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" 
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="px-8 py-3.5 rounded-full bg-gray-200 text-gray-800 font-semibold shadow-lg hover:bg-gray-300 transition-colors text-base"
-                        >
-                            See How It Works
-                        </motion.button>
+                    {/* Background Image */}
+                    <div className="absolute inset-0 z-0">
+                        <Image
+                            src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=2000&q=80"
+                            alt="Beautiful Indian Architecture"
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-black/40" />
                     </div>
-                    {/* Stats */}
-                    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col sm:flex-row gap-8 justify-center items-center w-full">
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-gray-700">
-                            <MapPin className="text-amber-500" />
-                            <span className="font-semibold">5,000+ <span className="font-normal text-gray-500">Trips Planned</span></span>
+
+                    {/* Content */}
+                    <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="mb-8"
+                        >
+                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight mb-6">
+                                This is <span className="text-amber-400">Our India</span>
+                                <br />
+                                <span className="text-3xl md:text-4xl lg:text-5xl font-normal">Unveiled.</span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto">
+                                A Journey to the Heart of a Nation Built on Stories
+                            </p>
                         </motion.div>
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-gray-700">
-                            <Users className="text-amber-500" />
-                            <span className="font-semibold">2,000+ <span className="font-normal text-gray-500">Happy Travellers</span></span>
+
+                        {/* Search Bar */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.6 }}
+                            className="max-w-3xl mx-auto mb-8"
+                        >
+                            <div className="relative">
+                                <div className="flex items-center bg-white rounded-full shadow-2xl overflow-hidden">
+                                    <div className="flex items-center pl-6 pr-4 py-4">
+                                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Where to? What's on your mind?"
+                                        className="flex-1 py-4 pr-4 text-lg text-gray-700 bg-transparent border-none outline-none placeholder-gray-500"
+                                    />
+                                    <motion.button
+                                        onClick={() => router.push("/preferences")}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 font-semibold text-lg rounded-full mr-2 hover:shadow-lg transition-all"
+                                    >
+                                        Discover
+                                    </motion.button>
+                                </div>
+                            </div>
                         </motion.div>
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-gray-700">
-                            <Star className="text-amber-500" />
-                            <span className="font-semibold">4.9/5 <span className="font-normal text-gray-500">Avg. Rating</span></span>
+
+                        {/* Subtitle */}
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.8, delay: 0.9 }}
+                            className="text-white/80 text-lg"
+                        >
+                            Press Enter to start your personalized journey with Chanakya
+                        </motion.p>
+                    </div>
+
+                    {/* Scroll Indicator */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 1.2 }}
+                        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+                    >
+                        <motion.div
+                            animate={{ y: [0, 10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="flex flex-col items-center text-white/70"
+                        >
+                            <span className="text-sm mb-2">Scroll to explore</span>
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
                         </motion.div>
                     </motion.div>
                 </motion.section>
