@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { buildApiUrl, API_ENDPOINTS } from '@/lib/api';
 
 function SignInInner({ router }: { router: ReturnType<typeof useRouter> }) {
   const [email, setEmail] = useState("");
@@ -27,7 +28,7 @@ function SignInInner({ router }: { router: ReturnType<typeof useRouter> }) {
       const form = new URLSearchParams();
       form.append("username", email);
       form.append("password", password);
-      const res = await fetch("http://localhost:8000/api/signin", {
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.signin), {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: form.toString(),

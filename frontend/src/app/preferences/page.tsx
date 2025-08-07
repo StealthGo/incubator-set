@@ -15,9 +15,7 @@ import {
   ExternalLink, Navigation, Eye, Bookmark,
   Wifi, Utensils, BedDouble, Gem, Bus, Plane, Truck, Globe
 } from "lucide-react";
-
-// --- Configuration ---
-const API_BASE_URL = "http://localhost:8000"; // Your backend URL
+import { buildApiUrl, API_ENDPOINTS, apiRequest } from '@/lib/api';
 
 // Enhanced Animation variants
 const fadeInUp = {
@@ -67,7 +65,7 @@ const Button = ({ children, onClick, variant = "default", size = "default", clas
 // Dynamic conversation system - now LLM handles all interactions
 const systemPrompt = `You are "The Modern Chanakya" - a friendly, knowledgeable Indian travel buddy who helps plan amazing trips within India. You chat like a friend on WhatsApp - casual, quick, and fun!
 
-🎯 YOUR MISSION: Get the essentials in 5-6 quick questions, then create an AMAZING itinerary!
+🎯 YOUR MISSION: Get the essentials in 6-7 quick questions, then create an AMAZING itinerary!
 
 CHAT STYLE:
 - Keep it SHORT and snappy (like WhatsApp messages)
@@ -76,13 +74,14 @@ CHAT STYLE:
 - Be enthusiastic but not overwhelming
 - Ask ONE simple question at a time
 
-QUICK QUESTION FLOW (Max 5-6 questions):
+QUICK QUESTION FLOW (Max 6-7 questions):
 1. "Hey! Kahan jaana hai? Which part of incredible India?" 🇮🇳
 2. "Nice choice! When are you planning to go?" 📅
 3. "Cool! Who's coming along on this adventure?" 👥
-4. "What gets you most excited - food, culture, adventure, nature?" 🎯
-5. "What's your vibe - budget travel, comfortable, or luxury?" 💰
-6. Optional: "Any special requests or pace preference?" (if needed)
+4. "What about food - vegetarian, non-veg, or no restrictions?" 🍛
+5. "What gets you most excited - culture, adventure, nature?" 🎯
+6. "What's your vibe - budget travel, comfortable, or luxury?" 💰
+7. Optional: "Any special requests or pace preference?" (if needed)
 
 Then: "Perfect! Ready to create your dream itinerary? ✨"
 
@@ -90,13 +89,14 @@ IMPORTANT RULES:
 - ONLY India destinations (redirect international requests politely)
 - Keep responses under 50 words
 - Be conversational, not formal
-- After 5 user answers, offer to generate itinerary
+- After 6 user answers, offer to generate itinerary
 - Sound excited but not pushy
 - Use Indian context (monsoon, festivals, etc.)
 
 Example responses:
 "Goa? Fantastic choice! 🏖️ When are you planning this beach escape?"
-"Solo trip? That's so cool! 🎒 What excites you most - beaches, food, or nightlife?"
+"Solo trip? That's so cool! 🎒 What excites you most - beaches, culture, or food tours?"
+"Food tours sound amazing! 🍛 Any dietary preferences - vegetarian, non-veg, or special needs?"
 "Amazing! I've got all I need. Ready to create your perfect Goa itinerary? 🚀"
 
 Current conversation context will be provided. Respond as the next message in the conversation.`;
@@ -105,8 +105,9 @@ Current conversation context will be provided. Respond as the next message in th
 const smartQuickReplies: Record<string, string[]> = {
   destination: ["🏔️ Himachal", "🏖️ Goa", "🕌 Rajasthan", "🌴 Kerala", "🏛️ Agra", "🏝️ Andaman"],
   dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "❄️ Winter Trip", "🌸 Summer", "🎯 Festival Time"],
-  travelers: ["✈️ Solo", "👫 With Partner", "👨‍👩‍👧‍👦 Family", "🎉 Friends", " Honeymoon", "👥 Big Group"],
+  travelers: ["✈️ Solo", "👫 With Partner", "👨‍👩‍👧‍👦 Family", "🎉 Friends", "💕 Honeymoon", "👥 Big Group"],
   interests: ["🍛 Food", "🏛️ Heritage", "🌿 Nature", "🙏 Spiritual", "🧘‍♀️ Wellness", "🎭 Culture"],
+  food_preferences: ["🥗 Vegetarian", "🍖 Non-Vegetarian", "🌱 Vegan", "🍽️ Jain Food", "🌍 Everything", "🚫 Allergies"],
   budget: ["💸 Budget", "💰 Comfortable", "💎 Luxury", "🎯 Best Value", "👨‍👩‍👧‍👦 Family Friendly", "🎓 Student"],
   pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Adventure", "🧘‍♀️ Peaceful", "📸 Photo Tour", "🎒 Backpacker"]
 };
@@ -130,7 +131,7 @@ const ChatBubble = ({ sender, children, timestamp }: { sender: string, children:
   
   return (
     <motion.div 
-      className={`flex w-full mb-2 ${isUser ? 'justify-end' : 'justify-start'}`}
+      className={`flex w-full mb-3 ${isUser ? 'justify-end' : 'justify-start'}`}
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ 
@@ -141,17 +142,24 @@ const ChatBubble = ({ sender, children, timestamp }: { sender: string, children:
       }}
     >
       <div className={`
-        max-w-[85%] sm:max-w-[70%] px-3 py-2 text-[15px] leading-[1.4] 
+        max-w-[85%] sm:max-w-[75%] px-4 py-3 text-[15px] leading-[1.4] font-normal
         ${isUser 
-          ? 'bg-orange-500 text-white rounded-[18px] rounded-br-[4px] ml-auto' 
-          : 'bg-white text-gray-800 rounded-[18px] rounded-bl-[4px] shadow-sm border border-gray-100'
+          ? 'bg-[#005c4b] text-white rounded-[18px] rounded-br-[4px] ml-auto shadow-sm' 
+          : 'bg-white text-[#1f2937] rounded-[18px] rounded-bl-[4px] shadow-sm border border-gray-100'
         }
-        relative group
+        relative group font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']
       `}>
-        <div className="break-words">{children}</div>
+        <div className="break-words">
+          {children}
+        </div>
         {timestamp && (
-          <div className={`text-[11px] mt-1 ${isUser ? 'text-orange-100' : 'text-gray-400'} text-right`}>
+          <div className={`text-[11px] mt-2 ${isUser ? 'text-green-100' : 'text-gray-400'} text-right flex items-center justify-end gap-1`}>
             {timestamp}
+            {isUser && (
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+              </svg>
+            )}
           </div>
         )}
         
@@ -159,7 +167,7 @@ const ChatBubble = ({ sender, children, timestamp }: { sender: string, children:
         <div className={`
           absolute bottom-0 w-0 h-0
           ${isUser 
-            ? 'right-[-8px] border-l-[8px] border-l-orange-500 border-t-[8px] border-t-transparent' 
+            ? 'right-[-8px] border-l-[8px] border-l-[#005c4b] border-t-[8px] border-t-transparent' 
             : 'left-[-8px] border-r-[8px] border-r-white border-t-[8px] border-t-transparent'
           }
         `} />
@@ -171,7 +179,7 @@ const ChatBubble = ({ sender, children, timestamp }: { sender: string, children:
 // Enhanced typing indicator with WhatsApp-style animation
 const TypingIndicator = () => (
   <motion.div 
-    className="flex justify-start w-full mb-2"
+    className="flex justify-start w-full mb-3"
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -10 }}
@@ -196,7 +204,9 @@ const TypingIndicator = () => (
             transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
           />
         </div>
-        <span className="text-[13px] text-gray-500 font-medium">The Modern Chanakya is typing...</span>
+        <span className="text-[13px] text-gray-500 font-medium font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+          The Modern Chanakya is typing...
+        </span>
       </div>
       
       {/* WhatsApp-style tail */}
@@ -224,7 +234,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
       const form = new URLSearchParams();
       form.append("username", email);
       form.append("password", password);
-      const res = await fetch(`${API_BASE_URL}/api/signin`, {
+      const res = await apiRequest(API_ENDPOINTS.signin, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: form.toString(),
@@ -240,7 +250,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
       
       // Fetch user data after successful login
       try {
-        const userRes = await fetch(`${API_BASE_URL}/api/me`, {
+        const userRes = await apiRequest(API_ENDPOINTS.me, {
           method: "GET",
           headers: { "Authorization": `Bearer ${data.access_token}` },
         });
@@ -267,7 +277,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
     setError("");
     setSignUpSuccess("");
     try {
-      const res = await fetch(`${API_BASE_URL}/api/signup`, {
+      const res = await apiRequest(API_ENDPOINTS.signup, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, dob, email, password }),
@@ -438,7 +448,7 @@ export default function PreferencesPage() {
       const token = localStorage.getItem("token");
       if (token && token.trim() !== "") {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/me`, {
+          const res = await apiRequest(API_ENDPOINTS.me, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
           });
@@ -538,7 +548,7 @@ export default function PreferencesPage() {
     setMessages((msgs) => [...msgs, { sender: "system", text: "typing..." }]);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chat-conversation`, {
+      const response = await apiRequest(API_ENDPOINTS.chatConversation, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -627,15 +637,16 @@ export default function PreferencesPage() {
     const userMessages = messages.filter(msg => msg.sender === "user");
     const conversationStep = userMessages.length;
     
-    // Follow the sequence: destination → dates → travelers → interests → budget → pace
+    // Follow the sequence: destination → dates → travelers → interests → food_preferences → budget → pace
     switch (conversationStep) {
-      case 0: return "destination";  // First question about destination
-      case 1: return "dates";       // Second question about dates
-      case 2: return "travelers";   // Third question about travelers
-      case 3: return "interests";   // Fourth question about interests
-      case 4: return "budget";      // Fifth question about budget
-      case 5: return "pace";        // Sixth question about pace
-      default: return "destination"; // Default fallback
+      case 0: return "destination";        // First question about destination
+      case 1: return "dates";             // Second question about dates
+      case 2: return "travelers";         // Third question about travelers
+      case 3: return "interests";         // Fourth question about interests
+      case 4: return "food_preferences";  // Fifth question about food preferences
+      case 5: return "budget";            // Sixth question about budget
+      case 6: return "pace";              // Seventh question about pace
+      default: return "destination";      // Default fallback
     }
   };
 
@@ -663,7 +674,7 @@ export default function PreferencesPage() {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/generate-itinerary`, {
+      const res = await apiRequest(API_ENDPOINTS.generateItinerary, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(requestBody),
@@ -766,15 +777,15 @@ export default function PreferencesPage() {
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="space-y-12 p-4 md:p-0"
+        transition={{ duration: 0.5 }}
+        className="space-y-8 p-3 md:p-4"
       >
         {/* Enhanced Hero Section */}
         <motion.section 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative rounded-3xl overflow-hidden shadow-2xl h-96 group"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="relative rounded-2xl overflow-hidden shadow-lg h-80 group"
         >
           <motion.img 
             src={itinerary.hero_image_url} 
@@ -819,7 +830,7 @@ export default function PreferencesPage() {
               transition={{ delay: 0.5, duration: 0.8 }}
             >
               <motion.h2 
-                className="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-2xl"
+                className="text-2xl md:text-3xl font-bold text-white mb-3 drop-shadow-2xl font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.8 }}
@@ -828,7 +839,7 @@ export default function PreferencesPage() {
               </motion.h2>
               
               <motion.div 
-                className="flex flex-wrap gap-3 mt-6"
+                className="flex flex-wrap gap-2 mt-4"
                 variants={staggerContainer}
                 initial="initial"
                 animate="animate"
@@ -839,7 +850,7 @@ export default function PreferencesPage() {
                   { icon: DollarSign, label: itinerary.trip_overview.estimated_total_cost }
                 ].map((item, index) => (
                   <motion.div key={index} variants={fadeInUp}>
-                    <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                    <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm px-3 py-2 rounded-full flex items-center gap-2 shadow-lg font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
                       <item.icon className="w-4 h-4" />
                       {item.label}
                     </div>
@@ -859,54 +870,54 @@ export default function PreferencesPage() {
               viewport={{ once: true }}
             >
                 <motion.h3 
-                  className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+                  className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
                   viewport={{ once: true }}
                 >
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                    <Bus className="text-2xl text-white" />
+                  <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                    <Bus className="text-sm text-white" />
                   </div>
                   {itinerary.journey_details.title}
                 </motion.h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {itinerary.journey_details.options.map((opt: any, i: number) => (
                         <motion.div 
                           key={i} 
-                          className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group overflow-hidden relative"
+                          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group overflow-hidden relative"
                           initial={{ opacity: 0, y: 30 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.1, duration: 0.6 }}
                           viewport={{ once: true }}
-                          whileHover={{ scale: 1.02 }}
+                          whileHover={{ scale: 1.01 }}
                         >
                           {/* Background gradient on hover */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           
                           <div className="relative z-10">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
-                                  {opt.icon === 'flight' && <Plane className="text-2xl text-white" />}
-                                  {opt.icon === 'train' && <Bus className="text-2xl text-white" />}
-                                  {opt.icon === 'bus' && <Truck className="text-2xl text-white" />}
-                                  {opt.icon === 'car' && <Navigation className="text-2xl text-white" />}
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-md">
+                                  {opt.icon === 'flight' && <Plane className="text-sm text-white" />}
+                                  {opt.icon === 'train' && <Bus className="text-sm text-white" />}
+                                  {opt.icon === 'bus' && <Truck className="text-sm text-white" />}
+                                  {opt.icon === 'car' && <Navigation className="text-sm text-white" />}
                                 </div>
-                                <h4 className="font-bold text-2xl text-gray-800">{opt.mode}</h4>
+                                <h4 className="font-semibold text-base text-gray-800 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.mode}</h4>
                             </div>
-                            <p className="text-gray-700 mb-4 text-lg leading-relaxed">{opt.description}</p>
-                            <p className="text-base text-gray-600 mb-6 flex items-center gap-2">
-                              <Clock className="w-5 h-5 text-orange-500" />
+                            <p className="text-gray-700 mb-3 text-[15px] leading-relaxed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.description}</p>
+                            <p className="text-sm text-gray-600 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                              <Clock className="w-4 h-4 text-orange-500" />
                               <strong>Duration:</strong> {opt.duration}
                             </p>
                             <div className="flex justify-between items-center">
-                                <p className="text-gray-800 font-bold text-2xl flex items-center gap-2">
-                                  <DollarSign className="w-6 h-6 text-green-500" />
+                                <p className="text-gray-800 font-semibold text-base flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                                  <DollarSign className="w-4 h-4 text-green-500" />
                                   {opt.estimated_cost}
                                 </p>
-                                <Button variant="primary" size="default" asChild>
-                                  <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                      <ExternalLink className="w-4 h-4" /> Book Now
+                                <Button variant="primary" size="sm" asChild>
+                                  <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm">
+                                      <ExternalLink className="w-3 h-3" /> Book Now
                                   </a>
                                 </Button>
                             </div>
@@ -926,59 +937,59 @@ export default function PreferencesPage() {
               viewport={{ once: true }}
             >
                 <motion.h3 
-                  className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+                  className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
                   viewport={{ once: true }}
                 >
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <BedDouble className="text-2xl text-white" />
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <BedDouble className="text-sm text-white" />
                   </div>
                   Accommodation Options
                 </motion.h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {itinerary.accommodation_suggestions.map((opt: any, i: number) => (
                         <motion.div 
                           key={i} 
-                          className="bg-white rounded-3xl shadow-xl border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden group"
+                          className="bg-white rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden group"
                           initial={{ opacity: 0, y: 30 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.1, duration: 0.6 }}
                           viewport={{ once: true }}
-                          whileHover={{ scale: 1.02 }}
+                          whileHover={{ scale: 1.01 }}
                         >
                             <div className="relative overflow-hidden">
                               <motion.img 
                                 src={opt.image_url} 
                                 alt={opt.name} 
-                                className="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110"
+                                className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                                 initial={{ scale: 1.1 }}
                                 whileInView={{ scale: 1 }}
                                 transition={{ duration: 0.8 }}
                                 viewport={{ once: true }}
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </div>
-                            <div className="p-8">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
-                                      <BedDouble className="text-xl text-white" />
+                            <div className="p-6">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                                      <BedDouble className="text-sm text-white" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-2xl text-gray-800">{opt.name}</h4>
-                                        <p className="text-base text-gray-500">{opt.type}</p>
+                                        <h4 className="font-semibold text-base text-gray-800 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.name}</h4>
+                                        <p className="text-sm text-gray-500 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.type}</p>
                                     </div>
                                 </div>
-                                <p className="text-gray-700 mb-6 text-lg leading-relaxed">{opt.description}</p>
+                                <p className="text-gray-700 mb-4 text-[15px] leading-relaxed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.description}</p>
                                 <div className="flex justify-between items-center">
-                                    <p className="text-gray-800 font-bold text-2xl flex items-center gap-2">
-                                      <DollarSign className="w-6 h-6 text-green-500" />
+                                    <p className="text-gray-800 font-semibold text-base flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                                      <DollarSign className="w-4 h-4 text-green-500" />
                                       {opt.estimated_cost}
                                     </p>
-                                    <Button variant="primary" size="default" asChild>
-                                      <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                                          <BedDouble className="w-4 h-4" /> Book on MMT
+                                    <Button variant="primary" size="sm" asChild>
+                                      <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm">
+                                          <BedDouble className="w-3 h-3" /> Book on MMT
                                       </a>
                                     </Button>
                                 </div>
@@ -1027,19 +1038,19 @@ export default function PreferencesPage() {
 
             <div className="relative z-10">
               <motion.h3 
-                className="text-4xl font-bold text-orange-800 mb-6 flex items-center gap-4"
+                className="text-lg font-bold text-orange-800 mb-4 flex items-center gap-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
                 viewport={{ once: true }}
               >
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                  <Eye className="text-2xl text-white" />
+                <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                  <Eye className="w-4 h-4 text-white" />
                 </div>
                 Trip Overview
               </motion.h3>
               <motion.p 
-                className="text-gray-700 mb-8 text-xl leading-relaxed font-medium"
+                className="text-gray-700 mb-6 text-[15px] leading-relaxed font-medium font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
@@ -1048,7 +1059,7 @@ export default function PreferencesPage() {
                 {itinerary.trip_overview.destination_insights}
               </motion.p>
               <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg"
+                className="grid grid-cols-1 md:grid-cols-2 gap-6 text-[15px]"
                 variants={staggerContainer}
                 initial="initial"
                 whileInView="animate"
@@ -1070,20 +1081,20 @@ export default function PreferencesPage() {
                       <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
                         <item.icon className="w-5 h-5 text-white" />
                       </div>
-                      <strong className="text-gray-800 text-lg">{item.label}:</strong>
+                      <strong className="text-gray-800 text-[15px] font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{item.label}:</strong>
                     </div>
-                    <p className="text-gray-700 ml-14">{item.value}</p>
+                    <p className="text-gray-700 ml-14 text-[15px] font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{item.value}</p>
                   </motion.div>
                 ))}
               </motion.div>
               <motion.div 
-                className="text-orange-900 font-bold mt-8 text-3xl text-right flex items-center justify-end gap-3"
+                className="text-orange-900 font-bold mt-6 text-[15px] text-right flex items-center justify-end gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
                 viewport={{ once: true }}
               >
-                <DollarSign className="w-8 h-8 text-green-600" />
+                <DollarSign className="w-4 h-4 text-green-600" />
                 Estimated Cost: {itinerary.trip_overview.estimated_total_cost}
               </motion.div>
             </div>
@@ -1099,14 +1110,14 @@ export default function PreferencesPage() {
             viewport={{ once: true }}
           >
             <motion.h3 
-              className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+              className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                <MapPin className="text-2xl text-white" />
+              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                <MapPin className="w-4 h-4 text-white" />
               </div>
               Daily Itinerary
             </motion.h3>
@@ -1130,8 +1141,8 @@ export default function PreferencesPage() {
                     </div>
                     
                     <div className="relative z-10">
-                      <h4 className="font-bold text-3xl mb-2">{`Day ${idx + 1}: ${day.date}`}</h4>
-                      <p className="text-xl opacity-90">{day.theme}</p>
+                      <h4 className="font-bold text-[15px] mb-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{`Day ${idx + 1}: ${day.date}`}</h4>
+                      <p className="text-[15px] opacity-90 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{day.theme}</p>
                     </div>
                   </div>
                   
@@ -1145,8 +1156,8 @@ export default function PreferencesPage() {
                         transition={{ delay: 0.1, duration: 0.5 }}
                         viewport={{ once: true }}
                       >
-                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
-                          <Utensils className="w-7 h-7 text-orange-500" />
+                        <h5 className="font-bold text-[15px] text-gray-700 mb-3 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                          <Utensils className="w-4 h-4 text-orange-500" />
                           Breakfast ({day.breakfast.time})
                         </h5>
                         <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 shadow-lg border border-yellow-200">
@@ -1161,9 +1172,9 @@ export default function PreferencesPage() {
                               />
                             )}
                             <div className="flex-1">
-                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.breakfast.dish}</h6>
-                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-blue-500" />
+                              <h6 className="font-bold text-[15px] text-gray-800 mb-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{day.breakfast.dish}</h6>
+                              <p className="text-[15px] text-gray-600 mb-2 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                                <MapPin className="w-4 h-4 text-blue-500" />
                                 {day.breakfast.restaurant} - {day.breakfast.location}
                               </p>
                               
@@ -1176,8 +1187,8 @@ export default function PreferencesPage() {
                                 </div>
                               )}
                               
-                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.breakfast.description}</p>
-                              <p className="text-green-600 font-bold text-xl mb-3">{day.breakfast.estimated_cost}</p>
+                              <p className="text-gray-700 mb-3 text-[15px] leading-relaxed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{day.breakfast.description}</p>
+                              <p className="text-green-600 font-bold text-[15px] mb-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{day.breakfast.estimated_cost}</p>
                               
                               {day.breakfast.insider_tip && (
                                 <motion.div 
@@ -1185,11 +1196,11 @@ export default function PreferencesPage() {
                                   whileHover={{ x: 5 }}
                                   transition={{ duration: 0.2 }}
                                 >
-                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
-                                    <Star className="w-5 h-5" />
+                                  <p className="font-bold text-[15px] text-amber-800 mb-2 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                                    <Star className="w-4 h-4" />
                                     Insider Tip:
                                   </p>
-                                  <p className="text-lg text-amber-700 italic">"{day.breakfast.insider_tip}"</p>
+                                  <p className="text-[15px] text-amber-700 italic font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">"{day.breakfast.insider_tip}"</p>
                                 </motion.div>
                               )}
                               
@@ -1224,8 +1235,8 @@ export default function PreferencesPage() {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         viewport={{ once: true }}
                       >
-                        <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
-                          <Camera className="w-7 h-7 text-orange-500" />
+                        <h5 className="font-bold text-[15px] text-gray-700 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                          <Camera className="w-4 h-4 text-orange-500" />
                           Morning Activities
                         </h5>
                         <div className="space-y-8">
@@ -1240,10 +1251,10 @@ export default function PreferencesPage() {
                             >
                               <div className="flex flex-col items-center flex-shrink-0">
                                   <motion.div 
-                                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl h-16 w-16 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
+                                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl h-12 w-12 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
                                     whileHover={{ scale: 1.1, rotate: 5 }}
                                   >
-                                      <MapPin className="w-7 h-7" />
+                                      <MapPin className="w-4 h-4" />
                                   </motion.div>
                                   {actIdx < day.morning_activities.length - 1 && (
                                     <div className="w-1 h-20 bg-gradient-to-b from-orange-300 to-red-300 mt-4 rounded-full" />
@@ -1251,12 +1262,12 @@ export default function PreferencesPage() {
                               </div>
                               <div className="w-full bg-gray-50 rounded-2xl p-6 group-hover:bg-gray-100 transition-all duration-300">
                                 <div className="flex items-center gap-3 mb-3">
-                                  <Clock className="w-5 h-5 text-orange-500" />
-                                  <p className="text-base font-bold text-orange-600">{activity.time}</p>
+                                  <Clock className="w-4 h-4 text-orange-500" />
+                                  <p className="text-[15px] font-bold text-orange-600 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{activity.time}</p>
                                 </div>
-                                <p className="font-bold text-2xl text-gray-800 mb-2">{activity.activity}</p>
-                                <div className="text-lg text-gray-600 flex items-center gap-2 mb-4">
-                                  <MapPin className="w-5 h-5 text-blue-500" />
+                                <p className="font-bold text-[15px] text-gray-800 mb-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{activity.activity}</p>
+                                <div className="text-[15px] text-gray-600 flex items-center gap-2 mb-4 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                                  <MapPin className="w-4 h-4 text-blue-500" />
                                   {activity.location}
                                 </div>
                                 
@@ -1358,8 +1369,8 @@ export default function PreferencesPage() {
                         transition={{ delay: 0.3, duration: 0.5 }}
                         viewport={{ once: true }}
                       >
-                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
-                          <Utensils className="w-7 h-7 text-orange-500" />
+                        <h5 className="font-bold text-[15px] text-gray-700 mb-3 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                          <Utensils className="w-4 h-4 text-orange-500" />
                           Lunch ({day.lunch.time})
                         </h5>
                         <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 shadow-lg border border-green-200">
@@ -1374,9 +1385,9 @@ export default function PreferencesPage() {
                               />
                             )}
                             <div className="flex-1">
-                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.lunch.dish}</h6>
-                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-blue-500" />
+                              <h6 className="font-bold text-[15px] text-gray-800 mb-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{day.lunch.dish}</h6>
+                              <p className="text-[15px] text-gray-600 mb-2 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
+                                <MapPin className="w-4 h-4 text-blue-500" />
                                 {day.lunch.restaurant} - {day.lunch.location}
                               </p>
                               
@@ -1389,8 +1400,8 @@ export default function PreferencesPage() {
                                 </div>
                               )}
                               
-                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.lunch.description}</p>
-                              <p className="text-green-600 font-bold text-xl mb-3">{day.lunch.estimated_cost}</p>
+                              <p className="text-gray-700 mb-3 text-[15px] leading-relaxed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{day.lunch.description}</p>
+                              <p className="text-green-600 font-bold text-[15px] mb-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{day.lunch.estimated_cost}</p>
                               
                               {day.lunch.insider_tip && (
                                 <motion.div 
@@ -1770,14 +1781,14 @@ export default function PreferencesPage() {
               viewport={{ once: true }}
             >
                 <motion.h3 
-                  className="text-4xl font-bold text-gray-800 mb-8 flex items-center gap-4"
+                  className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
                   viewport={{ once: true }}
                 >
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <Gem className="text-2xl text-white" />
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Gem className="w-4 h-4 text-white" />
                   </div>
                   Hidden Gems
                 </motion.h3>
@@ -1800,9 +1811,9 @@ export default function PreferencesPage() {
                               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
                                 <Gem className="w-6 h-6 text-white" />
                               </div>
-                              <h4 className="font-bold text-2xl text-gray-800">{gem.name}</h4>
+                              <h4 className="font-bold text-[15px] text-gray-800 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{gem.name}</h4>
                             </div>
-                            <p className="text-gray-700 mb-6 text-lg leading-relaxed">{gem.description}</p>
+                            <p className="text-gray-700 mb-4 text-[15px] leading-relaxed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{gem.description}</p>
                             <motion.div 
                               className="text-lg text-purple-800 bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-2xl italic border-l-4 border-purple-400 mb-6"
                               whileHover={{ x: 5 }}
@@ -1831,11 +1842,11 @@ export default function PreferencesPage() {
             {/* Signature Experiences */}
             {itinerary.signature_experiences && (
             <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="star" className="text-4xl text-orange-500"/> Signature Experiences</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="star" className="w-4 h-4 text-orange-500"/> Signature Experiences</h3>
                 <div className="space-y-6">
                 {itinerary.signature_experiences.map((exp: any, i: number) => (
                     <div key={i} className="bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl p-6 border border-orange-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                    <div className="font-bold text-lg text-gray-900 mb-2">{exp.name}</div>
+                    <div className="font-bold text-[15px] text-gray-900 mb-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{exp.name}</div>
                     
                     {/* Experience Tags */}
                     {exp.tags && exp.tags.length > 0 && (
@@ -1849,10 +1860,10 @@ export default function PreferencesPage() {
                       </div>
                     )}
                     
-                    <p className="text-gray-700 text-base mb-3">{exp.description}</p>
-                    <div className="text-base text-orange-800 bg-orange-200/50 p-3 rounded-lg italic"><strong>Local's Take:</strong> {exp.why_local_loves_it}</div>
+                    <p className="text-gray-700 text-[15px] mb-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{exp.description}</p>
+                    <div className="text-[15px] text-orange-800 bg-orange-200/50 p-3 rounded-lg italic font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><strong>Local's Take:</strong> {exp.why_local_loves_it}</div>
                     <div className="flex justify-between items-center mt-4">
-                        <p className="text-gray-800 font-semibold text-lg">{exp.estimated_cost}</p>
+                        <p className="text-gray-800 font-semibold text-[15px] font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{exp.estimated_cost}</p>
                         <a href={exp.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
                             <Icon name="confirmation_number"/> Book Experience
                         </a>
@@ -1866,11 +1877,11 @@ export default function PreferencesPage() {
             {/* Hyperlocal Food Guide */}
             {itinerary.hyperlocal_food_guide && (
             <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="restaurant" className="text-4xl text-orange-500"/> Hyperlocal Food Guide</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="restaurant" className="w-4 h-4 text-orange-500"/> Hyperlocal Food Guide</h3>
                 <div className="space-y-6">
                 {itinerary.hyperlocal_food_guide.map((food: any, i: number) => (
                     <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                    <div className="font-bold text-lg text-gray-900 mb-1">{food.dish}</div>
+                    <div className="font-bold text-[15px] text-gray-900 mb-1 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{food.dish}</div>
                     
                     {/* Food Tags */}
                     {food.tags && food.tags.length > 0 && (
@@ -1899,7 +1910,7 @@ export default function PreferencesPage() {
             {/* Shopping Guide */}
             {itinerary.shopping_insider_guide && (
             <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="shopping_cart" className="text-4xl text-orange-500"/> Shopping Insider Guide</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="shopping_cart" className="w-4 h-4 text-orange-500"/> Shopping Insider Guide</h3>
                 <div className="space-y-6">
                 {itinerary.shopping_insider_guide.map((shop: any, i: number) => (
                     <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -1918,7 +1929,7 @@ export default function PreferencesPage() {
             {/* Practical Wisdom */}
             {itinerary.practical_local_wisdom && (
             <section>
-                <h3 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3"><Icon name="lightbulb" className="text-4xl text-orange-500"/> Practical Wisdom</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="lightbulb" className="w-4 h-4 text-orange-500"/> Practical Wisdom</h3>
                 <div className="bg-green-50 rounded-xl p-6 border border-green-200 text-base space-y-4 shadow-lg">
                     {Object.entries(itinerary.practical_local_wisdom).map(([key, value]: [string, any]) => (
                         <div key={key} className="flex items-start">
@@ -1937,16 +1948,21 @@ export default function PreferencesPage() {
   return (
     <div className={`min-h-screen bg-gray-100 font-sans flex flex-col ${showSignInModal || showSubscriptionPopup ? 'overflow-hidden' : ''}`}>
       <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet" />
-      <nav className="sticky top-0 z-20 bg-white/80 backdrop-blur flex items-center justify-between px-6 md:px-12 py-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <button onClick={() => router.push("/")} className="flex items-center gap-2 focus:outline-none">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-              <Icon name="travel_explore" className="text-orange-500" />
+      <nav className="sticky top-0 z-20 bg-white shadow-sm flex items-center justify-between px-4 md:px-6 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.push("/")} className="flex items-center gap-3 focus:outline-none hover:opacity-80 transition-opacity">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#128c7e] to-[#075e54] flex items-center justify-center shadow-sm">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
             </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">The Modern <span className="text-orange-500">Chanakya</span></span>
+            <div className="flex flex-col items-start">
+              <span className="text-base font-semibold text-gray-900 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">The Modern Chanakya</span>
+              <span className="text-xs text-gray-500 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">Your Indian Travel Expert</span>
+            </div>
           </button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button onClick={() => { 
             if (isUserLocked()) {
               setShowSubscriptionPopup(true);
@@ -2005,22 +2021,36 @@ export default function PreferencesPage() {
 
       <div className="flex flex-col md:flex-row w-full flex-1" style={{ height: 'calc(100vh - 81px)' }}>
         {/* Left: Chat Section - WhatsApp Style */}
-        <section className={`w-full md:w-2/5 flex flex-col bg-gray-50 ${showFullItinerary ? 'hidden md:flex' : ''}`}>
+        <section className={`w-full md:w-2/5 flex flex-col bg-[#efeae2] ${showFullItinerary ? 'hidden md:flex' : ''}`}>
           {/* Chat Header */}
-          <div className="bg-orange-500 text-white px-4 py-3 flex items-center gap-3 shadow-sm">
+          <div className="bg-[#128c7e] text-white px-4 py-3 flex items-center gap-3 shadow-sm">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-lg">🤖</span>
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-[16px]">The Modern Chanakya</h3>
-              <p className="text-[13px] text-orange-100">
-                {isConversing ? 'typing...' : 'Your Indian Travel Expert'}
+              <h3 className="font-medium text-[16px] font-['Inter','sans-serif']">The Modern Chanakya</h3>
+              <p className="text-[13px] text-green-100 font-['Inter','sans-serif']">
+                {isConversing ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></span>
+                    typing...
+                  </span>
+                ) : 'Your Indian Travel Expert'}
               </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
             </div>
           </div>
 
           {/* Chat Messages Container */}
-          <div className="flex-1 overflow-y-auto px-3 py-2" style={{ 
+          <div className="flex-1 overflow-y-auto px-3 py-2 bg-[#e5ddd5] bg-opacity-30" style={{ 
             backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
             backgroundSize: '60px 60px'
           }}>
@@ -2075,7 +2105,7 @@ export default function PreferencesPage() {
           
           {/* Input Area - WhatsApp Style */}
           {isLoggedIn && (
-            <div className="bg-white px-3 py-3 border-t border-gray-200">
+            <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200">
               {/* Quick Replies */}
               {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
                 <motion.div 
@@ -2088,7 +2118,7 @@ export default function PreferencesPage() {
                     <motion.button 
                       key={option} 
                       type="button" 
-                      className="px-3 py-1.5 rounded-full border border-orange-300 bg-orange-50 text-orange-700 text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 rounded-full border border-[#128c7e] bg-white text-[#128c7e] text-[15px] font-medium hover:bg-[#f0f9ff] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif'] shadow-sm hover:shadow-md"
                       onClick={() => handleSend(undefined, option)}
                       disabled={isConversing || isUserLocked()}
                       whileHover={{ scale: 1.02 }}
@@ -2136,11 +2166,11 @@ export default function PreferencesPage() {
               )}
 
               {/* Input Box */}
-              <form onSubmit={handleSend} className="flex items-end gap-2">
+              <form onSubmit={handleSend} className="flex items-end gap-3">
                 <div className="flex-1 relative">
                   <input 
                     type="text" 
-                    className="w-full px-4 py-2.5 bg-gray-100 rounded-[25px] border-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-[15px] placeholder-gray-500 resize-none"
+                    className="w-full px-4 py-3 bg-white rounded-[25px] border border-gray-200 focus:outline-none focus:ring-0 focus:border-[#128c7e] text-[15px] placeholder-gray-500 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif'] shadow-sm transition-all duration-200"
                     placeholder={
                       isUserLocked()
                         ? "🔒 Upgrade for unlimited chat..."
@@ -2161,10 +2191,10 @@ export default function PreferencesPage() {
                 {/* Send Button */}
                 <motion.button 
                   type="submit" 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-md ${
                     isConversing || isUserLocked() || (!input.trim() && !conversationComplete)
                       ? 'bg-gray-300 cursor-not-allowed' 
-                      : 'bg-orange-500 hover:bg-orange-600 active:scale-95'
+                      : 'bg-[#128c7e] hover:bg-[#075e54] active:scale-95'
                   }`}
                   disabled={isConversing || isUserLocked() || (!input.trim() && !conversationComplete)}
                   whileHover={{ scale: 1.05 }}
@@ -2177,8 +2207,8 @@ export default function PreferencesPage() {
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     />
                   ) : (
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                     </svg>
                   )}
                 </motion.button>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { buildApiUrl, API_ENDPOINTS } from '@/lib/api';
 import { 
   MapPin, 
   Calendar, 
@@ -68,7 +69,7 @@ export default function Profile() {
 
   const fetchUserData = async (token: string) => {
     try {
-      const res = await fetch("http://localhost:8000/api/me", {
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.me), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -85,7 +86,7 @@ export default function Profile() {
 
   const fetchItineraries = async (token: string) => {
     try {
-      const res = await fetch("http://localhost:8000/api/my-itineraries", {
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.myItineraries), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -107,7 +108,7 @@ export default function Profile() {
 
     setDeleteLoading(itineraryId);
     try {
-      const res = await fetch(`http://localhost:8000/api/itinerary/${itineraryId}`, {
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.getItinerary(itineraryId)), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
