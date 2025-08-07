@@ -88,8 +88,6 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: false,
   },
-  // Output configuration
-  output: 'standalone',
   /* config options here */
 };
 
