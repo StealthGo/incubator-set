@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, conversation, systemPrompt } = await request.json();
+    const { conversation } = await request.json();
+    // Note: message and systemPrompt are included in the request but not used in this mock implementation
 
     // For now, let's create a simple mock response that simulates an LLM
     // In a real implementation, you would integrate with OpenAI, Anthropic, or another LLM provider
