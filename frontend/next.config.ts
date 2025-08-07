@@ -72,6 +72,7 @@ const nextConfig: NextConfig = {
   // Optimize for production
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
+    typedRoutes: false,
   },
   // Enable compression
   compress: true,
