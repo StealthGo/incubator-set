@@ -24,6 +24,7 @@ import {
   Download,
   Edit3
 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 interface User {
   name: string;
@@ -54,18 +55,7 @@ export default function Profile() {
   const [showStats, setShowStats] = useState(false);
   const router = useRouter();
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Unknown";
-    try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-      });
-    } catch {
-      return dateString;
-    }
-  };
+
 
   const fetchUserData = async (token: string) => {
     try {
