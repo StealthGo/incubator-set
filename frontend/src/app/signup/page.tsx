@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { buildApiUrl, API_ENDPOINTS } from '@/lib/api';
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -16,7 +17,7 @@ export default function SignUp() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:8000/api/signup", {
+      const res = await fetch(buildApiUrl(API_ENDPOINTS.signup), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

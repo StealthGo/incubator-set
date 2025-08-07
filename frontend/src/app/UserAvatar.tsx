@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { buildApiUrl, API_ENDPOINTS } from '@/lib/api';
 
 export default function UserAvatar() {
   const [userInitial, setUserInitial] = useState<string | null>(null);
@@ -9,7 +10,7 @@ export default function UserAvatar() {
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (token) {
-      fetch("http://localhost:8000/api/me", {
+      fetch(buildApiUrl(API_ENDPOINTS.me), {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then(async (res) => {

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import Image from "next/image";
+import { buildApiUrl, API_ENDPOINTS } from '@/lib/api';
 import { 
   ArrowLeft, BedDouble, Utensils, Gem, Star, MapPin, 
   Heart, BookOpen, Waves, Sun, ShieldCheck, Wifi, Bus,
@@ -469,7 +470,7 @@ export default function ItineraryDetailPage() {
     const fetchItinerary = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:8000/api/itinerary/${itineraryId}`, {
+        const res = await fetch(buildApiUrl(API_ENDPOINTS.getItinerary(itineraryId)), {
           headers: { Authorization: `Bearer ${token}` },
         });
 

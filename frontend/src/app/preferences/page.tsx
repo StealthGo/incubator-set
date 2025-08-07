@@ -15,9 +15,7 @@ import {
   ExternalLink, Navigation, Eye, Bookmark,
   Wifi, Utensils, BedDouble, Gem, Bus, Plane, Truck, Globe
 } from "lucide-react";
-
-// --- Configuration ---
-const API_BASE_URL = "http://localhost:8000"; // Your backend URL
+import { buildApiUrl, API_ENDPOINTS, apiRequest } from '@/lib/api';
 
 // Enhanced Animation variants
 const fadeInUp = {
@@ -236,7 +234,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
       const form = new URLSearchParams();
       form.append("username", email);
       form.append("password", password);
-      const res = await fetch(`${API_BASE_URL}/api/signin`, {
+      const res = await apiRequest(API_ENDPOINTS.signin, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: form.toString(),
@@ -252,7 +250,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
       
       // Fetch user data after successful login
       try {
-        const userRes = await fetch(`${API_BASE_URL}/api/me`, {
+        const userRes = await apiRequest(API_ENDPOINTS.me, {
           method: "GET",
           headers: { "Authorization": `Bearer ${data.access_token}` },
         });
@@ -279,7 +277,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
     setError("");
     setSignUpSuccess("");
     try {
-      const res = await fetch(`${API_BASE_URL}/api/signup`, {
+      const res = await apiRequest(API_ENDPOINTS.signup, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, dob, email, password }),
@@ -450,7 +448,7 @@ export default function PreferencesPage() {
       const token = localStorage.getItem("token");
       if (token && token.trim() !== "") {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/me`, {
+          const res = await apiRequest(API_ENDPOINTS.me, {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
           });
@@ -550,7 +548,7 @@ export default function PreferencesPage() {
     setMessages((msgs) => [...msgs, { sender: "system", text: "typing..." }]);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/chat-conversation`, {
+      const response = await apiRequest(API_ENDPOINTS.chatConversation, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -676,7 +674,7 @@ export default function PreferencesPage() {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/generate-itinerary`, {
+      const res = await apiRequest(API_ENDPOINTS.generateItinerary, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(requestBody),
