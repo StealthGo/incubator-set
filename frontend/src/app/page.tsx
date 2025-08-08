@@ -244,7 +244,7 @@ interface AccordionProps {
 const SearchInput = () => {
     const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
     const [inputValue, setInputValue] = useState("");
-    
+    const router = useRouter();
     const prompts = [
         "Create a 7-day Paris itinerary",
         "Plan a weekend getaway to Goa", 
@@ -265,14 +265,27 @@ const SearchInput = () => {
         }
     }, [inputValue, prompts.length]);
 
+    const handleSubmit = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const query = inputValue || prompts[currentPromptIndex];
+        if (query) {
+            // Store the query in localStorage to use after sign-in
+            localStorage.setItem('pendingQuery', query);
+            // Redirect to sign-in page
+            router.push('/signin');
+        }
+    };
+
     return (
-        <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={prompts[currentPromptIndex]}
-            className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1"
-        />
+        <form onSubmit={handleSubmit} className="flex-1">
+            <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={prompts[currentPromptIndex]}
+                className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1"
+            />
+        </form>
     );
 };
 
@@ -373,6 +386,17 @@ export default function Home() {
                                     <button 
                                         className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-3.5 transition-all duration-200 hover:scale-105"
                                         aria-label="Search"
+                                        onClick={() => {
+                                            const input = document.querySelector<HTMLInputElement>('input[type="text"]');
+                                            const value = input?.value || "";
+                                            const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
+                                            if (query) {
+                                                // Store the query in localStorage to use after sign-in
+                                                localStorage.setItem('pendingQuery', query);
+                                                // Redirect to sign-in page
+                                                window.location.href = '/signin';
+                                            }
+                                        }}
                                     >
                                         <Send className="w-5 h-5" />
                                     </button>
@@ -386,6 +410,10 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                                onClick={() => {
+                                    localStorage.setItem('pendingQuery', 'Create a new trip');
+                                    router.push('/signin');
+                                }}
                             >
                                 <Globe className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Create a new trip</span>
@@ -395,6 +423,10 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                                onClick={() => {
+                                    localStorage.setItem('pendingQuery', 'Inspire me where to go');
+                                    router.push('/signin');
+                                }}
                             >
                                 <MapPin className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Inspire me</span>
@@ -404,6 +436,10 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                                onClick={() => {
+                                    localStorage.setItem('pendingQuery', 'Plan weekend getaways');
+                                    router.push('/signin');
+                                }}
                             >
                                 <Users className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Weekend getaways</span>
