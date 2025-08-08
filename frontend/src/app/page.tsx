@@ -455,10 +455,7 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
-                                onClick={() => {
-                                    localStorage.setItem('pendingQuery', 'Create a new trip');
-                                    router.push('/signin');
-                                }}
+                                onClick={() => handleQuickAction('Create a new trip')}
                             >
                                 <Globe className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Create a new trip</span>
@@ -468,10 +465,7 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
-                                onClick={() => {
-                                    localStorage.setItem('pendingQuery', 'Inspire me where to go');
-                                    router.push('/signin');
-                                }}
+                                onClick={() => handleQuickAction('Inspire me where to go')}
                             >
                                 <MapPin className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Inspire me</span>
@@ -481,10 +475,7 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
-                                onClick={() => {
-                                    localStorage.setItem('pendingQuery', 'Plan weekend getaways');
-                                    router.push('/signin');
-                                }}
+                                onClick={() => handleQuickAction('Plan weekend getaways')}
                             >
                                 <Users className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Weekend getaways</span>
