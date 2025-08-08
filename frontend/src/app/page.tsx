@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Float, Sphere } from '@react-three/drei';
 import {
     ArrowRight,
     CheckCircle,
@@ -126,48 +124,8 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 };
 
 
-// Loading Component
-const LoadingSpinner = () => (
-    <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-white z-50 flex items-center justify-center"
-    >
-        <div className="text-center">
-            <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"
-            />
-            <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-lg font-medium text-gray-700"
-            >
-                Loading your travel experience...
-            </motion.p>
-        </div>
-    </motion.div>
-);
-
 export default function Home() {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        // Simulate loading time for smooth entry
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 1500);
-
-        return () => clearTimeout(timer);
-    }, []);
-
-    if (isLoading) {
-        return <LoadingSpinner />;
-    }
 
     return (
         <motion.div 
@@ -176,20 +134,6 @@ export default function Home() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="min-h-screen bg-gray-50 font-sans text-gray-800 antialiased relative overflow-x-hidden flex flex-col"
         >
-            {/* 3D Animated Background */}
-            <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20">
-                <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
-                    <ambientLight intensity={1.5} />
-                    <directionalLight position={[10, 10, 5]} intensity={0.5} />
-                    <Float speed={1.5} rotationIntensity={0.8} floatIntensity={1.2}>
-                        <Sphere args={[1.5, 64, 64]}>
-                            <meshStandardMaterial color="#c2995e" wireframe={true} metalness={0.6} roughness={0.4} />
-                        </Sphere>
-                    </Float>
-                    <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.4} />
-                </Canvas>
-            </div>
-
             {/* Navbar */}
             <motion.nav
                 initial={{ y: -100 }}
