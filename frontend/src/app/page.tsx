@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -240,6 +240,42 @@ interface AccordionProps {
     answer: string;
 }
 
+// SearchInput component with rotating prompts
+const SearchInput = () => {
+    const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
+    const [inputValue, setInputValue] = useState("");
+    
+    const prompts = [
+        "Create a 7-day Paris itinerary",
+        "Plan a weekend getaway to Goa", 
+        "Best temples to visit in Varanasi",
+        "Romantic honeymoon in Kerala",
+        "Adventure trip to Leh-Ladakh",
+        "Family vacation in Rajasthan",
+        "Budget backpacking in Himachal",
+        "Luxury stay in Mumbai hotels"
+    ];
+
+    useEffect(() => {
+        if (!inputValue) {
+            const interval = setInterval(() => {
+                setCurrentPromptIndex((prev) => (prev + 1) % prompts.length);
+            }, 3000);
+            return () => clearInterval(interval);
+        }
+    }, [inputValue, prompts.length]);
+
+    return (
+        <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder={prompts[currentPromptIndex]}
+            className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1"
+        />
+    );
+};
+
 // FAQ Component
 const Accordion = ({ question, answer }: AccordionProps) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -297,12 +333,6 @@ export default function Home() {
                     </div>
                     <span className="text-xl font-bold text-gray-900 tracking-tight">The Modern <span className="text-amber-600">Chanakya</span></span>
                 </div>
-                <button
-                    onClick={() => router.push("/preferences")}
-                    className="px-5 py-2.5 rounded-full bg-amber-500 text-white font-semibold shadow-sm hover:bg-amber-600 transition-all text-sm flex items-center gap-2"
-                >
-                    Get Started <ArrowRight size={16} />
-                </button>
             </motion.nav>
 
             {/* Main Content */}
@@ -315,37 +345,72 @@ export default function Home() {
                     className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-24 px-6 text-center"
                 >
                     <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 leading-tight mb-6">
-                        Namaste! <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-amber-400">Welcome to The Modern Chanakya</span>
+                        Your Perfect Itinerary, <span className="text-amber-600">Instantly.</span>
                     </h1>
                     <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Planning a trip? Chalo, let us help you! Get super-personalized, Indian-style travel itineraries delivered instantly.<br />
-                        Discover, plan, and experience travel like never before – all with a desi touch.
+                        AI-powered travel planning that understands your style. Stop searching, start experiencing.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
-                        <motion.button 
-                            onClick={() => router.push("/preferences")}
-                            whileHover={{ 
-                                scale: 1.05, 
-                                boxShadow: "0 20px 25px -5px rgba(251, 191, 36, 0.3)" 
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="px-8 py-3.5 rounded-full bg-amber-500 text-white font-semibold shadow-lg hover:bg-amber-600 transition-colors text-base"
-                        >
-                            Start Your Yatra
-                        </motion.button>
-                        <motion.button 
-                            whileHover={{ 
-                                scale: 1.05, 
-                                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" 
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="px-8 py-3.5 rounded-full bg-gray-200 text-gray-800 font-semibold shadow-lg hover:bg-gray-300 transition-colors text-base"
-                        >
-                            See How It Works
-                        </motion.button>
-                    </div>
+                    
+                    {/* Search Section */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.6 }}
+                        className="w-full max-w-4xl mx-auto mb-12"
+                    >
+                        {/* Main Search Bar */}
+                        <div className="relative mb-8">
+                            {/* Search Input Container */}
+                            <div className="flex items-center bg-white rounded-3xl border-2 border-amber-300/50 p-5">
+                                <SearchInput />
+                                <div className="flex items-center gap-3 ml-4">
+                                    <button 
+                                        aria-label="Voice input"
+                                        className="p-2.5 rounded-full hover:bg-amber-50 transition-colors group"
+                                    >
+                                        <Mic className="w-5 h-5 text-amber-500 group-hover:text-amber-600" />
+                                    </button>
+                                    <button 
+                                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-3.5 transition-all duration-200 hover:scale-105"
+                                        aria-label="Search"
+                                    >
+                                        <Send className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Quick Action Buttons */}
+                        <div className="flex flex-wrap justify-center gap-3">
+                            <motion.button 
+                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                            >
+                                <Globe className="w-4 h-4 text-amber-600" />
+                                <span className="text-sm font-medium">Create a new trip</span>
+                            </motion.button>
+                            
+                            <motion.button 
+                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                            >
+                                <MapPin className="w-4 h-4 text-amber-600" />
+                                <span className="text-sm font-medium">Inspire me</span>
+                            </motion.button>
+                            
+                            <motion.button 
+                                whileHover={{ scale: 1.02, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                            >
+                                <Users className="w-4 h-4 text-amber-600" />
+                                <span className="text-sm font-medium">Weekend getaways</span>
+                            </motion.button>
+                        </div>
+                    </motion.div>
+                    
                     {/* Stats */}
                     <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col sm:flex-row gap-8 justify-center items-center w-full">
                         <motion.div variants={fadeInUp} className="flex items-center gap-3 text-gray-700">
