@@ -205,17 +205,38 @@ const MarqueeTestimonials = () => {
 // Simple and clean animations
 const fadeInUp = {
     initial: { opacity: 0, y: 60 },
-    animate: { opacity: 1, y: 0 }
+    animate: { 
+        opacity: 1, 
+        y: 0,
+        transition: {
+            duration: 0.8,
+            ease: [0.25, 0.1, 0.25, 1]
+        }
+    }
 };
 
 const slideInLeft = {
     initial: { opacity: 0, x: -60 },
-    animate: { opacity: 1, x: 0 }
+    animate: { 
+        opacity: 1, 
+        x: 0,
+        transition: {
+            duration: 0.8,
+            ease: [0.25, 0.1, 0.25, 1]
+        }
+    }
 };
 
 const slideInRight = {
     initial: { opacity: 0, x: 60 },
-    animate: { opacity: 1, x: 0 }
+    animate: { 
+        opacity: 1, 
+        x: 0,
+        transition: {
+            duration: 0.8,
+            ease: [0.25, 0.1, 0.25, 1]
+        }
+    }
 };
 
 const staggerContainer = {
@@ -280,8 +301,8 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="min-h-screen font-sans text-gray-800 antialiased relative overflow-x-hidden flex flex-col"
-            style={{ backgroundColor: '#FCFAF8' }}
+            className="min-h-screen antialiased relative overflow-x-hidden flex flex-col"
+            style={{ backgroundColor: '#FCFAF8', color: '#333333' }}
         >
             {/* Navbar */}
             <motion.nav
@@ -590,7 +611,14 @@ export default function Home() {
                 </motion.section>
 
                 {/* Pro Features Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24 bg-white">
+                <motion.section 
+                    initial="initial" 
+                    whileInView="animate" 
+                    viewport={{ once: true, amount: 0.2 }} 
+                    variants={fadeInUp} 
+                    className="py-24"
+                    style={{ backgroundColor: '#FCFAF8' }}
+                >
                     <div className="max-w-6xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-4">Upgrade Your Yatra with Stealth Pro</h2>
                         <p className="text-gray-600 text-center mb-12 text-lg">Unlock the full power of The Modern Chanakya with Pro features – made for Indian travellers who want more!</p>
@@ -621,7 +649,10 @@ export default function Home() {
             </main>
 
             {/* Footer */}
-            <footer className="w-full bg-white border-t border-gray-200/80 pt-16 pb-8 px-6 md:px-12">
+            <footer 
+                className="w-full border-t border-gray-200/80 pt-16 pb-8 px-6 md:px-12"
+                style={{ backgroundColor: '#FCFAF8' }}
+            >
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
                         <div className="col-span-2 mb-8 md:mb-0">
