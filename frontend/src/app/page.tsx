@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Marquee } from "@/components/magicui/marquee";
 import {
     ArrowRight,
     CheckCircle,
@@ -51,6 +53,152 @@ const imageLinks = {
     lehLadakh: "https://images.unsplash.com/photo-1605275559453-562135c5b927?auto=format&fit=crop&w=600&q=80",
     kolkata: "https://images.unsplash.com/photo-1596708294975-7b08216d0619?auto=format&fit=crop&w=600&q=80",
     spitiValley: "https://images.unsplash.com/photo-1609843997230-b7433435017c?auto=format&fit=crop&w=600&q=80",
+};
+
+// Testimonials data for marquee
+const reviews = [
+    {
+        name: "Nadia",
+        username: "@travel_blogger_nadia",
+        body: "Planning your trip by having all the attractions already plugged into a map makes trip planning so much easier.",
+        img: imageLinks.userNadia,
+    },
+    {
+        name: "Sharon Brewster",
+        username: "@sharon_brewster",
+        body: "Amazing app! Easy to use, love the AI functionality.",
+        img: "https://randomuser.me/api/portraits/women/12.jpg",
+    },
+    {
+        name: "Jayson Oite",
+        username: "@jayson_oite",
+        body: "It seems to be this is my new travel app buddy. Very handy, convenient and very easy to use.",
+        img: imageLinks.userJayson,
+    },
+    {
+        name: "Erica Franco",
+        username: "@erica_franco",
+        body: "Absolutely love this app! It is so helpful when planning my trips. I especially love the optimize route option...",
+        img: imageLinks.userErica,
+    },
+    {
+        name: "Belinda Kohles",
+        username: "@belinda_kohles",
+        body: "I have used several trip planning apps. This one by far is the best. The interaction with google maps makes the planning so much easier...",
+        img: imageLinks.userBelinda,
+    },
+    {
+        name: "Lydia Yang",
+        username: "@lydiascapes",
+        body: "So much easier to visualize and plan a road trip to my favourite rock climbing destinations and explore the area around.",
+        img: "https://randomuser.me/api/portraits/women/15.jpg",
+    },
+    {
+        name: "A. Rosa",
+        username: "@a_rosa",
+        body: "I absolutely love this app!!! I would recommend to anyone who is seriously planning a trip.",
+        img: "https://randomuser.me/api/portraits/women/18.jpg",
+    },
+    {
+        name: "Jorge D.",
+        username: "@jorge_d",
+        body: "It left me speechless that I can add places to my trip and they get automatically populated with a featured pic and description.",
+        img: imageLinks.userJorge,
+    },
+    {
+        name: "Amit Sharma",
+        username: "@amit_travels",
+        body: "Perfect for planning road trips across India. The route optimization saved me hours of planning!",
+        img: imageLinks.userAmit,
+    },
+    {
+        name: "Priya Patel",
+        username: "@priya_explorer",
+        body: "Love how it suggests local experiences and hidden gems. Made my Kerala trip unforgettable!",
+        img: imageLinks.userPriya,
+    },
+    {
+        name: "Rahul Singh",
+        username: "@rahul_wanderer",
+        body: "The desi touch makes all the difference. Finally, a travel app that understands Indian travelers!",
+        img: imageLinks.userRahul,
+    },
+    {
+        name: "Meera Jain",
+        username: "@meera_journeys",
+        body: "From chai stops to temple visits, it plans everything perfectly. Bahut accha app hai!",
+        img: imageLinks.userMeera,
+    },
+];
+
+const firstRow = reviews.slice(0, reviews.length / 2);
+const secondRow = reviews.slice(reviews.length / 2);
+
+// Review card component for marquee
+const ReviewCard = ({
+    img,
+    name,
+    username,
+    body,
+}: {
+    img: string;
+    name: string;
+    username: string;
+    body: string;
+}) => {
+    // Generate a random gradient for the avatar based on the name
+    const gradients = [
+        'bg-gradient-to-br from-green-400 to-blue-600',
+        'bg-gradient-to-br from-purple-400 to-pink-600', 
+        'bg-gradient-to-br from-yellow-400 to-orange-600',
+        'bg-gradient-to-br from-blue-400 to-purple-600',
+        'bg-gradient-to-br from-pink-400 to-red-600',
+        'bg-gradient-to-br from-indigo-400 to-cyan-600',
+        'bg-gradient-to-br from-green-400 to-teal-600',
+        'bg-gradient-to-br from-orange-400 to-red-600'
+    ];
+    
+    const gradientIndex = name.charCodeAt(0) % gradients.length;
+    const selectedGradient = gradients[gradientIndex];
+
+    return (
+        <figure className="relative w-72 cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md">
+            <div className="flex flex-row items-center gap-2 mb-3">
+                <div className={`w-8 h-8 rounded-full ${selectedGradient} flex items-center justify-center text-white text-sm font-semibold`}>
+                    {name.charAt(0)}
+                </div>
+                <div className="flex flex-col">
+                    <figcaption className="text-sm font-semibold text-gray-900">
+                        {name}
+                    </figcaption>
+                    <p className="text-xs text-gray-500">{username}</p>
+                </div>
+            </div>
+            <blockquote className="text-sm text-gray-700 leading-relaxed">
+                {body}
+            </blockquote>
+        </figure>
+    );
+};
+
+// Marquee testimonials component
+const MarqueeTestimonials = () => {
+    return (
+        <div className="relative flex w-full flex-col items-center justify-center overflow-hidden py-8">
+            <Marquee pauseOnHover className="[--duration:30s] [--gap:1.5rem] mb-6" repeat={3}>
+                {firstRow.map((review, index) => (
+                    <ReviewCard key={`first-${review.username}-${index}`} {...review} />
+                ))}
+            </Marquee>
+            <Marquee reverse pauseOnHover className="[--duration:25s] [--gap:1.5rem]" repeat={3}>
+                {secondRow.map((review, index) => (
+                    <ReviewCard key={`second-${review.username}-${index}`} {...review} />
+                ))}
+            </Marquee>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/6 bg-gradient-to-r to-transparent" style={{ background: 'linear-gradient(to right, #FCFAF8, transparent)' }}></div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/6 bg-gradient-to-l to-transparent" style={{ background: 'linear-gradient(to left, #FCFAF8, transparent)' }}></div>
+        </div>
+    );
 };
 
 
@@ -132,7 +280,8 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="min-h-screen bg-gray-50 font-sans text-gray-800 antialiased relative overflow-x-hidden flex flex-col"
+            className="min-h-screen font-sans text-gray-800 antialiased relative overflow-x-hidden flex flex-col"
+            style={{ backgroundColor: '#FCFAF8' }}
         >
             {/* Navbar */}
             <motion.nav
@@ -215,12 +364,13 @@ export default function Home() {
 
                 {/* How it Works Section */}
                 <motion.section 
-                    initial="initial" 
-                    whileInView="animate" 
-                    viewport={{ once: true, amount: 0.2 }} 
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true, amount: 0.2 }}
                     variants={fadeInUp} 
                     transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="w-full py-24 bg-white"
+                    className="w-full py-24"
+                    style={{ backgroundColor: '#FCFAF8' }}
                 >
                     <div className="max-w-6xl mx-auto px-6">
                         <h2 className="text-5xl font-extrabold text-gray-900 text-center mb-16">How it Works</h2>
@@ -312,7 +462,14 @@ export default function Home() {
                 </motion.section>
 
                 {/* Indian Itineraries Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24 bg-white">
+                <motion.section 
+                    initial="initial" 
+                    whileInView="animate" 
+                    viewport={{ once: true, amount: 0.2 }} 
+                    variants={fadeInUp} 
+                    className="py-24"
+                    style={{ backgroundColor: '#FCFAF8' }}
+                >
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-4">Apni Next Indian Adventure Yahin Dhoondo!</h2>
                         <p className="text-gray-600 text-center mb-12 text-lg">Yahan milenge asli travellers ke banaye hue, ready-made itineraries. Bas ek click, aur nikal pado apni dream trip par!</p>
@@ -355,39 +512,19 @@ export default function Home() {
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-4">Travellers kya bol rahe hain?</h2>
                         <p className="text-gray-600 text-center mb-12 text-lg">1 million+ logon ne The Modern Chanakya try kiya hai aur sabko planning ka kaam asaan laga!</p>
-                        <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {[
-                                { img: imageLinks.userNadia, name: "Nadia", handle: "Travel Blogger", review: "Planning your trip by having all the attractions already plugged into a map makes trip planning so much easier." },
-                                { name: "Sharon Brewster", review: "amazing app! easy to use, love the AI functionality." },
-                                { img: imageLinks.userJayson, name: "Jayson Oite", review: "It seems to be this is my new travel app buddy. Very handy, convenient and very easy to use." },
-                                { img: imageLinks.userErica, name: "Erica Franco", review: "Absolutely love this app! It is so helpful when planning my trips. I especially love The optimize route option..." },
-                                { img: imageLinks.userBelinda, name: "Belinda Kohles", review: "I have used several trip planning apps. This one by far is the best. The interaction between google maps makes the planning so much easier..." },
-                                { name: "Lydia Yang", handle: "Founder @LydiaScapes", review: "So much easier to visualize and plan a road trip to my favourite rock climbing destinations and explore the area around." },
-                                { name: "A. Rosa", review: "I absolutely love this app!!! I would recommend to anyone who is seriously planning a trip." },
-                                { img: imageLinks.userJorge, name: "Jorge D.", review: "It left me speechless that I can add places to my trip and they get automatically populated with a featured pic and description." },
-                            ].map((t, i) => (
-                                <motion.div key={i} variants={fadeInUp} className="bg-white rounded-2xl border border-gray-200/80 p-6 flex flex-col gap-3">
-                                    <div className="flex items-center gap-3">
-                                        {t.img ? <Image src={t.img} alt={t.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" unoptimized />
-                                            : <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">{t.name[0]}</div>
-                                        }
-                                        <div>
-                                            <div className="font-bold text-gray-900">{t.name}</div>
-                                            {t.handle && <div className="text-xs text-gray-500">{t.handle}</div>}
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-0.5 text-amber-500">
-                                        {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
-                                    </div>
-                                    <p className="text-gray-700 text-sm leading-relaxed">{t.review}</p>
-                                </motion.div>
-                            ))}
-                        </motion.div>
+                        <MarqueeTestimonials />
                     </div>
                 </motion.section>
 
                 {/* Featured Travel Creators Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24 bg-white">
+                <motion.section 
+                    initial="initial" 
+                    whileInView="animate" 
+                    viewport={{ once: true, amount: 0.2 }} 
+                    variants={fadeInUp} 
+                    className="py-24"
+                    style={{ backgroundColor: '#FCFAF8' }}
+                >
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-4">Featured Travel Creators</h2>
                         <p className="text-gray-600 text-center mb-12 text-lg">Follow these amazing Indian travellers and check out their favourite itineraries!</p>

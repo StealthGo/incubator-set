@@ -13,19 +13,19 @@ async def test_payment_integration():
     """Test the payment integration endpoints"""
     
     async with httpx.AsyncClient() as client:
-        print("💳 Testing Payment Integration\n")
+        print("Testing Payment Integration\n")
         
         # Test health endpoint
         try:
             response = await client.get(f"{API_BASE_URL}/api/health")
             if response.status_code == 200:
-                print("✅ Server is running")
+                print("Server is running")
             else:
-                print("❌ Server not accessible")
+                print("Server not accessible")
                 return
         except Exception as e:
-            print(f"❌ Cannot connect to server: {e}")
-            print("🔧 Make sure to run: uvicorn app:app --reload")
+            print(f"Cannot connect to server: {e}")
+            print("Make sure to run: uvicorn app:app --reload")
             return
         
         # Test subscription plans endpoint
@@ -33,8 +33,8 @@ async def test_payment_integration():
             response = await client.get(f"{API_BASE_URL}/api/subscription-plans")
             if response.status_code == 200:
                 plans = response.json()
-                print("✅ Subscription plans endpoint working")
-                print(f"   📋 Available plans: {len(plans['plans'])}")
+                print("Subscription plans endpoint working")
+                print(f"Available plans: {len(plans['plans'])}")
                 for plan in plans['plans']:
                     print(f"   • {plan['name']}: ₹{plan['price']['inr']} / ${plan['price']['usd']}")
             else:
@@ -43,7 +43,7 @@ async def test_payment_integration():
             print(f"❌ Error testing subscription plans: {e}")
         
         print("\n🎯 Payment Integration Summary:")
-        print("  ✅ Payment dependencies added (razorpay, stripe)")
+        print("Payment dependencies added (razorpay, stripe)")
         print("  ✅ Payment models and validation")
         print("  ✅ Multi-gateway support (Razorpay + Stripe)")
         print("  ✅ Secure payment verification")
