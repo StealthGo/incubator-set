@@ -339,6 +339,26 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 
 export default function Home() {
     const router = useRouter();
+    const [isSignedIn, setIsSignedIn] = useState(false);
+
+    // Check authentication status on component mount
+    useEffect(() => {
+        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        setIsSignedIn(!!token || !!user);
+    }, []);
+
+    const handleQuickAction = (query: string) => {
+        if (isSignedIn) {
+            // User is signed in, redirect directly to chat
+            router.push(`/chat?prompt=${encodeURIComponent(query)}`);
+        } else {
+            // Store the query in localStorage to use after sign-in
+            localStorage.setItem('pendingQuery', query);
+            // Redirect to sign-in page
+            router.push('/signin');
+        }
+    };
 
     return (
         <motion.div 
