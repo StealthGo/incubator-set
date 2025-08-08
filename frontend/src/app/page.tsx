@@ -6,6 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
+import { CardCarousel } from "@/components/ui/card-carousel";
 import {
     ArrowRight,
     CheckCircle,
@@ -205,38 +206,17 @@ const MarqueeTestimonials = () => {
 // Simple and clean animations
 const fadeInUp = {
     initial: { opacity: 0, y: 60 },
-    animate: { 
-        opacity: 1, 
-        y: 0,
-        transition: {
-            duration: 0.8,
-            ease: [0.25, 0.1, 0.25, 1]
-        }
-    }
+    animate: { opacity: 1, y: 0 }
 };
 
 const slideInLeft = {
     initial: { opacity: 0, x: -60 },
-    animate: { 
-        opacity: 1, 
-        x: 0,
-        transition: {
-            duration: 0.8,
-            ease: [0.25, 0.1, 0.25, 1]
-        }
-    }
+    animate: { opacity: 1, x: 0 }
 };
 
 const slideInRight = {
     initial: { opacity: 0, x: 60 },
-    animate: { 
-        opacity: 1, 
-        x: 0,
-        transition: {
-            duration: 0.8,
-            ease: [0.25, 0.1, 0.25, 1]
-        }
-    }
+    animate: { opacity: 1, x: 0 }
 };
 
 const staggerContainer = {
@@ -494,37 +474,58 @@ export default function Home() {
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-4">Apni Next Indian Adventure Yahin Dhoondo!</h2>
                         <p className="text-gray-600 text-center mb-12 text-lg">Yahan milenge asli travellers ke banaye hue, ready-made itineraries. Bas ek click, aur nikal pado apni dream trip par!</p>
-                        <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                            {[
-                                { href: "/itineraries/delhi-agra-golden-triangle", img: imageLinks.delhi, title: "Golden Triangle: Delhi, Agra & Jaipur", desc: "A classic 7-day itinerary covering India's most iconic sights: Taj Mahal, Red Fort, Amber Fort, and more.", userImg: imageLinks.userAmit, userName: "Amit", views: "12.3k", likes: 210 },
-                                { href: "/itineraries/kerala-backwaters", img: imageLinks.kerala, title: "Kerala Backwaters & Beaches", desc: "Relax on a houseboat, explore Alleppey, and unwind on Kerala's stunning beaches in this 5-day trip.", userImg: imageLinks.userPriya, userName: "Priya", views: "8.9k", likes: 175 },
-                                { href: "/itineraries/goa-party-relax", img: imageLinks.goa, title: "Goa: Party & Relax", desc: "A 4-day itinerary for the best of Goa: beaches, nightlife, and hidden gems for relaxation and fun.", userImg: imageLinks.userRahul, userName: "Rahul", views: "6.7k", likes: 120 },
-                                { href: "/itineraries/varanasi-spiritual", img: imageLinks.varanasi, title: "Varanasi: Spiritual Journey", desc: "Experience the Ganga Aarti, explore ancient temples, and soak in the spiritual vibe of Varanasi in 3 days.", userImg: imageLinks.userMeera, userName: "Meera", views: "5.2k", likes: 98 },
-                            ].map(card => (
-                                <motion.a 
-                                    key={card.title} 
-                                    href={card.href} 
-                                    variants={fadeInUp} 
-                                    whileHover={{ scale: 1.05, y: -8 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="rounded-2xl overflow-hidden bg-white flex flex-col border border-gray-200/80 group"
-                                >
-                                    <div className="h-56 overflow-hidden">
-                                        <Image src={card.img} alt={card.title} width={600} height={224} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" unoptimized />
-                                    </div>
-                                    <div className="p-5 flex-1 flex flex-col">
-                                        <h3 className="font-bold text-lg text-gray-900 mb-2 flex-grow">{card.title}</h3>
-                                        <p className="text-gray-600 text-sm mb-4">{card.desc}</p>
-                                        <div className="flex items-center gap-2 mt-auto text-sm text-gray-500">
-                                            <Image src={card.userImg} alt={card.userName} width={28} height={28} className="w-7 h-7 rounded-full object-cover" unoptimized />
-                                            <span className="font-semibold text-gray-800">{card.userName}</span>
-                                            <span className="flex items-center gap-1 ml-auto"><Eye size={14} /> {card.views}</span>
-                                            <span className="flex items-center gap-1"><Heart size={14} /> {card.likes}</span>
-                                        </div>
-                                    </div>
-                                </motion.a>
-                            ))}
-                        </motion.div>
+                        
+                        <CardCarousel
+                            images={[
+                                {
+                                    src: imageLinks.delhi,
+                                    alt: "Golden Triangle: Delhi, Agra & Jaipur",
+                                    title: "Golden Triangle: Delhi, Agra & Jaipur",
+                                    description: "A classic 7-day itinerary covering India's most iconic sights: Taj Mahal, Red Fort, Amber Fort, and more.",
+                                    href: "/itineraries/delhi-agra-golden-triangle",
+                                    userImg: imageLinks.userAmit,
+                                    userName: "Amit",
+                                    views: "12.3k",
+                                    likes: 210
+                                },
+                                {
+                                    src: imageLinks.kerala,
+                                    alt: "Kerala Backwaters & Beaches",
+                                    title: "Kerala Backwaters & Beaches",
+                                    description: "Relax on a houseboat, explore Alleppey, and unwind on Kerala's stunning beaches in this 5-day trip.",
+                                    href: "/itineraries/kerala-backwaters",
+                                    userImg: imageLinks.userPriya,
+                                    userName: "Priya",
+                                    views: "8.9k",
+                                    likes: 175
+                                },
+                                {
+                                    src: imageLinks.goa,
+                                    alt: "Goa: Party & Relax",
+                                    title: "Goa: Party & Relax",
+                                    description: "A 4-day itinerary for the best of Goa: beaches, nightlife, and hidden gems for relaxation and fun.",
+                                    href: "/itineraries/goa-party-relax",
+                                    userImg: imageLinks.userRahul,
+                                    userName: "Rahul",
+                                    views: "6.7k",
+                                    likes: 120
+                                },
+                                {
+                                    src: imageLinks.varanasi,
+                                    alt: "Varanasi: Spiritual Journey",
+                                    title: "Varanasi: Spiritual Journey",
+                                    description: "Experience the Ganga Aarti, explore ancient temples, and soak in the spiritual vibe of Varanasi in 3 days.",
+                                    href: "/itineraries/varanasi-spiritual",
+                                    userImg: imageLinks.userMeera,
+                                    userName: "Meera",
+                                    views: "5.2k",
+                                    likes: 98
+                                }
+                            ]}
+                            autoplayDelay={3000}
+                            showPagination={true}
+                            showNavigation={true}
+                        />
                     </div>
                 </motion.section>
 
