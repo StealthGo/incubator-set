@@ -244,7 +244,17 @@ interface AccordionProps {
 const SearchInput = () => {
     const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
     const [inputValue, setInputValue] = useState("");
+    const [isSignedIn, setIsSignedIn] = useState(false);
     const router = useRouter();
+    
+    // Check authentication status on component mount
+    useEffect(() => {
+        // Check if user is signed in (you can replace this with your actual auth check)
+        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        setIsSignedIn(!!token || !!user);
+    }, []);
+    
     const prompts = [
         "Create a 7-day Paris itinerary",
         "Plan a weekend getaway to Goa", 
@@ -269,10 +279,15 @@ const SearchInput = () => {
         if (e) e.preventDefault();
         const query = inputValue || prompts[currentPromptIndex];
         if (query) {
-            // Store the query in localStorage to use after sign-in
-            localStorage.setItem('pendingQuery', query);
-            // Redirect to sign-in page
-            router.push('/signin');
+            if (isSignedIn) {
+                // User is signed in, redirect directly to chat
+                router.push(`/chat?prompt=${encodeURIComponent(query)}`);
+            } else {
+                // Store the query in localStorage to use after sign-in
+                localStorage.setItem('pendingQuery', query);
+                // Redirect to sign-in page
+                router.push('/signin');
+            }
         }
     };
 
@@ -391,10 +406,20 @@ export default function Home() {
                                             const value = input?.value || "";
                                             const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
                                             if (query) {
-                                                // Store the query in localStorage to use after sign-in
-                                                localStorage.setItem('pendingQuery', query);
-                                                // Redirect to sign-in page
-                                                window.location.href = '/signin';
+                                                // Check if user is signed in
+                                                const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                                                const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+                                                const isSignedIn = !!token || !!user;
+                                                
+                                                if (isSignedIn) {
+                                                    // User is signed in, redirect directly to chat
+                                                    window.location.href = `/chat?prompt=${encodeURIComponent(query)}`;
+                                                } else {
+                                                    // Store the query in localStorage to use after sign-in
+                                                    localStorage.setItem('pendingQuery', query);
+                                                    // Redirect to sign-in page
+                                                    window.location.href = '/signin';
+                                                }
                                             }
                                         }}
                                     >
