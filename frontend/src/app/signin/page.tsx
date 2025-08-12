@@ -43,11 +43,11 @@ function SignInInner({ router }: { router: ReturnType<typeof useRouter> }) {
       }
       const data = await res.json();
       localStorage.setItem("token", data.access_token);
-      // If a pending query exists (from the homepage prompt), send straight to chat
+      // If a pending query exists (from the homepage prompt), send straight to preferences with prompt
       const pending = localStorage.getItem('pendingQuery');
       if (pending) {
         localStorage.removeItem('pendingQuery');
-        router.push(`/chat?prompt=${encodeURIComponent(pending)}`);
+        router.push(`/preferences?prompt=${encodeURIComponent(pending)}`);
       } else {
         router.push("/preferences");
       }

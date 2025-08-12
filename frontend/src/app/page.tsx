@@ -297,9 +297,9 @@ const SearchInput = () => {
             console.log('Form submit auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
             
             if (isAuthenticated) {
-                // User is signed in, redirect directly to chat
-                console.log('Redirecting to chat with query:', query);
-                router.push(`/chat?prompt=${encodeURIComponent(query)}`);
+                // User is signed in, redirect directly to preferences
+                console.log('Redirecting to preferences with query:', query);
+                router.push(`/preferences?prompt=${encodeURIComponent(query)}`);
             } else {
                 // Store the query in localStorage to use after sign-in
                 console.log('Redirecting to signin, storing query:', query);
@@ -386,9 +386,9 @@ export default function Home() {
         console.log('Quick action auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
         
         if (isAuthenticated) {
-            // User is signed in, redirect directly to chat
-            console.log('Redirecting to chat with query:', query);
-            router.push(`/chat?prompt=${encodeURIComponent(query)}`);
+            // User is signed in, redirect directly to preferences
+            console.log('Redirecting to preferences with query:', query);
+            router.push(`/preferences?prompt=${encodeURIComponent(query)}`);
         } else {
             // Store the query in localStorage to use after sign-in
             console.log('Redirecting to signin, storing query:', query);
@@ -457,12 +457,12 @@ export default function Home() {
                     variants={fadeInUp}
                     className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-24 px-6 text-center"
                 >
-                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 leading-tight mb-6">
-                        Your Perfect Itinerary, <span className="text-amber-600">Instantly.</span>
-                    </h1>
-                    <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                        AI-powered travel planning that understands your style. Stop searching, start experiencing.
-                    </p>
+                          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)]">
+                              Curated For You, Crafted by <span className="text-amber-400">India.</span>
+                          </h1>
+                          <p className="text-lg text-white mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
+                                 From hidden tea estates in Assam to secret ghats in Varanasi , let Us craft your perfect journey.
+                          </p>
                     
                     {/* Search Section */}
                     <motion.div 
@@ -502,9 +502,9 @@ export default function Home() {
                                                 console.log('Send button auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
                                                 
                                                 if (isAuthenticated) {
-                                                    // User is signed in, redirect directly to chat
-                                                    console.log('Redirecting to chat with query:', query);
-                                                    window.location.href = `/chat?prompt=${encodeURIComponent(query)}`;
+                                                    // User is signed in, redirect directly to preferences
+                                                    console.log('Redirecting to preferences with query:', query);
+                                                    window.location.href = `/preferences?prompt=${encodeURIComponent(query)}`;
                                                 } else {
                                                     // Store the query in localStorage to use after sign-in
                                                     console.log('Redirecting to signin, storing query:', query);
@@ -557,17 +557,17 @@ export default function Home() {
                     
                     {/* Stats */}
                     <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col sm:flex-row gap-8 justify-center items-center w-full">
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-gray-700">
-                            <MapPin className="text-amber-500" />
-                            <span className="font-semibold">5,000+ <span className="font-normal text-gray-500">Trips Planned</span></span>
+                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
+                            <MapPin className="text-amber-400" />
+                            <span className="font-semibold">5,000+ <span className="font-normal text-white/80">Trips Planned</span></span>
                         </motion.div>
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-gray-700">
-                            <Users className="text-amber-500" />
-                            <span className="font-semibold">2,000+ <span className="font-normal text-gray-500">Happy Travellers</span></span>
+                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
+                            <Users className="text-amber-400" />
+                            <span className="font-semibold">2,000+ <span className="font-normal text-white/80">Happy Travellers</span></span>
                         </motion.div>
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-gray-700">
-                            <Star className="text-amber-500" />
-                            <span className="font-semibold">4.9/5 <span className="font-normal text-gray-500">Avg. Rating</span></span>
+                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
+                            <Star className="text-amber-400" />
+                            <span className="font-semibold">4.9/5 <span className="font-normal text-white/80">Avg. Rating</span></span>
                         </motion.div>
                     </motion.div>
                 </motion.section>

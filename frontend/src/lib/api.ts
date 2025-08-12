@@ -22,7 +22,10 @@ export const API_ENDPOINTS = {
 
 // Helper function to build complete API URLs
 export const buildApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.baseURL}${endpoint}`;
+  // Remove trailing slash from baseURL, ensure endpoint starts with one slash
+  const base = API_CONFIG.baseURL.replace(/\/+$/, '');
+  const path = `/${endpoint.replace(/^\/+/, '')}`;
+  return base + path;
 };
 
 // Fetch wrapper with error handling
