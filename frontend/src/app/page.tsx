@@ -249,10 +249,17 @@ const SearchInput = () => {
     
     // Check authentication status on component mount
     useEffect(() => {
-        // Check if user is signed in (you can replace this with your actual auth check)
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        // Check if user is signed in - using the correct token key from signin
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
         const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-        setIsSignedIn(!!token || !!user);
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+        
+        // Check for any common auth indicators
+        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+        console.log('Auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated });
+        setIsSignedIn(isAuthenticated);
     }, []);
     
     const prompts = [
@@ -279,11 +286,23 @@ const SearchInput = () => {
         if (e) e.preventDefault();
         const query = inputValue || prompts[currentPromptIndex];
         if (query) {
-            if (isSignedIn) {
+            // Re-check authentication status at the time of submission
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+            const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+            const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+            
+            const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+            console.log('Form submit auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
+            
+            if (isAuthenticated) {
                 // User is signed in, redirect directly to chat
+                console.log('Redirecting to chat with query:', query);
                 router.push(`/chat?prompt=${encodeURIComponent(query)}`);
             } else {
                 // Store the query in localStorage to use after sign-in
+                console.log('Redirecting to signin, storing query:', query);
                 localStorage.setItem('pendingQuery', query);
                 // Redirect to sign-in page
                 router.push('/signin');
@@ -343,17 +362,36 @@ export default function Home() {
 
     // Check authentication status on component mount
     useEffect(() => {
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
         const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-        setIsSignedIn(!!token || !!user);
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+        
+        // Check for any common auth indicators
+        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+        console.log('Main component auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated });
+        setIsSignedIn(isAuthenticated);
     }, []);
 
     const handleQuickAction = (query: string) => {
-        if (isSignedIn) {
+        // Re-check authentication status at the time of action
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+        
+        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+        console.log('Quick action auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
+        
+        if (isAuthenticated) {
             // User is signed in, redirect directly to chat
+            console.log('Redirecting to chat with query:', query);
             router.push(`/chat?prompt=${encodeURIComponent(query)}`);
         } else {
             // Store the query in localStorage to use after sign-in
+            console.log('Redirecting to signin, storing query:', query);
             localStorage.setItem('pendingQuery', query);
             // Redirect to sign-in page
             router.push('/signin');
@@ -426,16 +464,23 @@ export default function Home() {
                                             const value = input?.value || "";
                                             const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
                                             if (query) {
-                                                // Check if user is signed in
-                                                const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                                                // Check if user is signed in with correct token key
+                                                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                                                const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
                                                 const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-                                                const isSignedIn = !!token || !!user;
+                                                const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+                                                const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
                                                 
-                                                if (isSignedIn) {
+                                                const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+                                                console.log('Send button auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
+                                                
+                                                if (isAuthenticated) {
                                                     // User is signed in, redirect directly to chat
+                                                    console.log('Redirecting to chat with query:', query);
                                                     window.location.href = `/chat?prompt=${encodeURIComponent(query)}`;
                                                 } else {
                                                     // Store the query in localStorage to use after sign-in
+                                                    console.log('Redirecting to signin, storing query:', query);
                                                     localStorage.setItem('pendingQuery', query);
                                                     // Redirect to sign-in page
                                                     window.location.href = '/signin';
