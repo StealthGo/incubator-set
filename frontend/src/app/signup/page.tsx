@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Globe, Mail, Lock, ArrowRight, Eye, EyeOff, Chrome, Apple } from "lucide-react";
+import { Globe, Mail, Lock, ArrowRight, Eye, EyeOff, Chrome, Apple, User } from "lucide-react";
 import { buildApiUrl, API_ENDPOINTS } from '@/lib/api';
 
 export default function SignUp() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,14 +27,30 @@ export default function SignUp() {
         setLoading(false);
         return;
       }
+      if (!name.trim()) {
+        setError("Name is required");
+        setLoading(false);
+        return;
+      }
       const res = await fetch(buildApiUrl(API_ENDPOINTS.signup), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.detail || "Sign up failed");
+        let errorMsg = "Sign up failed";
+        if (typeof data.detail === "string") {
+          errorMsg = data.detail;
+        } else if (Array.isArray(data.detail)) {
+          // FastAPI validation errors are often arrays
+          errorMsg = data.detail.map((err: any) => err.msg).join(", ");
+        } else if (typeof data.detail === "object" && data.detail?.msg) {
+          errorMsg = data.detail.msg;
+        } else if (typeof data.detail === "object") {
+          errorMsg = JSON.stringify(data.detail);
+        }
+        setError(errorMsg);
         setLoading(false);
         return;
       }
@@ -92,6 +109,18 @@ export default function SignUp() {
 
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <label className="relative">
+              <span className="sr-only">Full Name</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500"><User size={18} /></span>
+              <input
+                type="text"
+                placeholder="Full Name"
+                className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 placeholder-gray-400"
+                required
+                value={name}
+                onChange={e => setName(e.target.value)}
+              />
+            </label>
+            <label className="relative">
               <span className="sr-only">Email</span>
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500"><Mail size={18} /></span>
               <input type="email" placeholder="Email" className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 placeholder-gray-400" required value={email} onChange={e => setEmail(e.target.value)} />
@@ -134,4 +163,4 @@ export default function SignUp() {
       `}</style>
     </div>
   );
-} 
+}
