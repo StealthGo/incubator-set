@@ -312,6 +312,21 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 export default function Home() {
     const router = useRouter();
 
+    // Hero background carousel logic
+    const heroImages = [
+        "/1.jpg",
+        "/2.jpg",
+        "/3.jpg",
+        "/5.jpg",
+    ];
+    const [bgIndex, setBgIndex] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setBgIndex((prev) => (prev + 1) % heroImages.length);
+        }, 3500);
+        return () => clearInterval(interval);
+    }, [heroImages.length]);
+
     return (
         <motion.div 
             initial={{ opacity: 0 }}
@@ -320,20 +335,32 @@ export default function Home() {
             className="min-h-screen antialiased relative overflow-x-hidden flex flex-col"
             style={{ backgroundColor: '#FCFAF8', color: '#333333' }}
         >
-            {/* Navbar */}
-            <motion.nav
-                initial={{ y: -100 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="w-full flex items-center justify-between px-6 md:px-12 py-4 bg-white/80 backdrop-blur-lg fixed top-0 left-0 z-50 border-b border-gray-200/80"
-            >
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                        <Globe className="text-amber-600" />
-                    </div>
-                    <span className="text-xl font-bold text-gray-900 tracking-tight">The Modern <span className="text-amber-600">Chanakya</span></span>
-                </div>
-            </motion.nav>
+            {/* Hero Background Carousel */}
+            <div className="absolute top-0 left-0 w-full h-[700px] md:h-[800px] -z-10 overflow-hidden">
+                {heroImages.map((img, i) => (
+                    <motion.div
+                        key={img}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: bgIndex === i ? 1 : 0 }}
+                        transition={{ duration: 1.2, ease: "easeInOut" }}
+                        className="absolute inset-0 w-full h-full"
+                        style={{ zIndex: bgIndex === i ? 1 : 0 }}
+                    >
+                        <Image
+                            src={img}
+                            alt="Hero background"
+                            fill
+                            className="object-cover w-full h-full"
+                            priority={i === 0}
+                            unoptimized
+                        />
+                    </motion.div>
+                ))}
+                {/* Overlay for readability */}
+                <div className="absolute inset-0 bg-black/40" />
+            </div>
+
+
 
             {/* Main Content */}
             <main className="flex-grow pt-24">
