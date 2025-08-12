@@ -1,10 +1,10 @@
 // Production configuration for environment variables
 export const config = {
   // API Configuration
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://incubator-set.onrender.com',
   
   // Auth Configuration
-  nextAuthUrl: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+  nextAuthUrl: process.env.NEXTAUTH_URL || 'https://incubator-set.onrender.com',
   nextAuthSecret: process.env.NEXTAUTH_SECRET,
   
   // Feature Flags
