@@ -244,6 +244,23 @@ interface AccordionProps {
 const SearchInput = () => {
     const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
     const [inputValue, setInputValue] = useState("");
+    const [isSignedIn, setIsSignedIn] = useState(false);
+    const router = useRouter();
+    
+    // Check authentication status on component mount
+    useEffect(() => {
+        // Check if user is signed in - using the correct token key from signin
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+        
+        // Check for any common auth indicators
+        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+        console.log('Auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated });
+        setIsSignedIn(isAuthenticated);
+    }, []);
     
     const prompts = [
         "Create a 7-day Paris itinerary",
@@ -265,14 +282,44 @@ const SearchInput = () => {
         }
     }, [inputValue, prompts.length]);
 
+    const handleSubmit = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const query = inputValue || prompts[currentPromptIndex];
+        if (query) {
+            // Re-check authentication status at the time of submission
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+            const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+            const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+            
+            const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+            console.log('Form submit auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
+            
+            if (isAuthenticated) {
+                // User is signed in, redirect directly to chat
+                console.log('Redirecting to chat with query:', query);
+                router.push(`/chat?prompt=${encodeURIComponent(query)}`);
+            } else {
+                // Store the query in localStorage to use after sign-in
+                console.log('Redirecting to signin, storing query:', query);
+                localStorage.setItem('pendingQuery', query);
+                // Redirect to sign-in page
+                router.push('/signin');
+            }
+        }
+    };
+
     return (
-        <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={prompts[currentPromptIndex]}
-            className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1"
-        />
+        <form onSubmit={handleSubmit} className="flex-1">
+            <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={prompts[currentPromptIndex]}
+                className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1"
+            />
+        </form>
     );
 };
 
@@ -311,6 +358,45 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 
 export default function Home() {
     const router = useRouter();
+    const [isSignedIn, setIsSignedIn] = useState(false);
+
+    // Check authentication status on component mount
+    useEffect(() => {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+        
+        // Check for any common auth indicators
+        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+        console.log('Main component auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated });
+        setIsSignedIn(isAuthenticated);
+    }, []);
+
+    const handleQuickAction = (query: string) => {
+        // Re-check authentication status at the time of action
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+        
+        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+        console.log('Quick action auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
+        
+        if (isAuthenticated) {
+            // User is signed in, redirect directly to chat
+            console.log('Redirecting to chat with query:', query);
+            router.push(`/chat?prompt=${encodeURIComponent(query)}`);
+        } else {
+            // Store the query in localStorage to use after sign-in
+            console.log('Redirecting to signin, storing query:', query);
+            localStorage.setItem('pendingQuery', query);
+            // Redirect to sign-in page
+            router.push('/signin');
+        }
+    };
 
     // Hero background carousel logic
     const heroImages = [
@@ -400,6 +486,34 @@ export default function Home() {
                                     <button 
                                         className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-3.5 transition-all duration-200 hover:scale-105"
                                         aria-label="Search"
+                                        onClick={() => {
+                                            const input = document.querySelector<HTMLInputElement>('input[type="text"]');
+                                            const value = input?.value || "";
+                                            const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
+                                            if (query) {
+                                                // Check if user is signed in with correct token key
+                                                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                                                const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                                                const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+                                                const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+                                                const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+                                                
+                                                const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+                                                console.log('Send button auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
+                                                
+                                                if (isAuthenticated) {
+                                                    // User is signed in, redirect directly to chat
+                                                    console.log('Redirecting to chat with query:', query);
+                                                    window.location.href = `/chat?prompt=${encodeURIComponent(query)}`;
+                                                } else {
+                                                    // Store the query in localStorage to use after sign-in
+                                                    console.log('Redirecting to signin, storing query:', query);
+                                                    localStorage.setItem('pendingQuery', query);
+                                                    // Redirect to sign-in page
+                                                    window.location.href = '/signin';
+                                                }
+                                            }
+                                        }}
                                     >
                                         <Send className="w-5 h-5" />
                                     </button>
@@ -413,6 +527,7 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                                onClick={() => handleQuickAction('Create a new trip')}
                             >
                                 <Globe className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Create a new trip</span>
@@ -422,6 +537,7 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                                onClick={() => handleQuickAction('Inspire me where to go')}
                             >
                                 <MapPin className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Inspire me</span>
@@ -431,6 +547,7 @@ export default function Home() {
                                 whileHover={{ scale: 1.02, y: -2 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
+                                onClick={() => handleQuickAction('Plan weekend getaways')}
                             >
                                 <Users className="w-4 h-4 text-amber-600" />
                                 <span className="text-sm font-medium">Weekend getaways</span>
