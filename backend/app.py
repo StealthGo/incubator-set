@@ -149,7 +149,6 @@ def create_access_token(data: dict, expires_delta: datetime.timedelta = None):
 
 class UserIn(BaseModel):
     name: str
-    dob: str
     email: str
     password: str
 
@@ -229,9 +228,8 @@ async def signup(user: UserIn):
             raise HTTPException(status_code=400, detail="Email already registered")
         hashed_password = get_password_hash(user.password)
         await users_collection.insert_one({
-            "name": user.name, 
-            "dob": user.dob, 
-            "email": user.email, 
+            "name": user.name,
+            "email": user.email,
             "hashed_password": hashed_password,
             "subscription_status": "free",  # free, premium
             "has_premium_subscription": False,  # Boolean for premium subscription access
@@ -277,7 +275,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return {
         "name": current_user.get("name", ""),
         "email": current_user.get("email", ""),
-        "dob": current_user.get("dob", ""),
+        # "dob": current_user.get("dob", ""),  # <-- Removed dob
         "subscription_status": current_user.get("subscription_status", "free"),
         "has_premium_subscription": current_user.get("has_premium_subscription", False),
         "itineraries_created": current_user.get("itineraries_created", 0),
