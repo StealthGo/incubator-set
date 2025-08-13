@@ -221,7 +221,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             detail="Service is shutting down"
         )
 
-@app.post("/api/signup", response_model=UserOut)
+@app.post("/api/signup", response_model=Token)
 async def signup(user: UserIn):
     try:
         if await users_collection.find_one({"email": user.email}):
@@ -238,7 +238,9 @@ async def signup(user: UserIn):
             "chat_messages_used": 0,  # Track chat usage for free users
             "created_at": datetime.datetime.now(datetime.timezone.utc)
         })
-        return {"email": user.email}
+        # Create access token for the new user
+        access_token = create_access_token(data={"sub": user.email})
+        return {"access_token": access_token, "token_type": "bearer"}
     except HTTPException:
         raise
     except asyncio.CancelledError:

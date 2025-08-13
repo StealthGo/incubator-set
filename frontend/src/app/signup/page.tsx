@@ -54,7 +54,17 @@ export default function SignUp() {
         setLoading(false);
         return;
       }
-      router.push("/signin?signup=success");
+      // Try to get token from response and store it, then redirect to preferences
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = {};
+      }
+      if (data && data.access_token) {
+        localStorage.setItem("token", data.access_token);
+      }
+      router.push("/preferences");
     } catch {
       setError("Network error");
       setLoading(false);
