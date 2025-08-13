@@ -483,19 +483,20 @@ export default function Home() {
                     initial="initial"
                     animate="animate"
                     variants={fadeInUp}
-                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-16 px-6"
+                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-20 px-6"
                 >
-                          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight text-center">
-                              This is Our India. Unveiled. <span className="text-amber-500">An AI with human wisdom.</span>
+                          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                              This is Our India. <span className="text-amber-500">Unveiled.</span><br />
+                              <span className="text-amber-600">An AI with human wisdom.</span>
                           </h1>
                           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
                                  A Journey to the Heart of a Nation Built on Stories.
                           </p>
                     
                     {/* Search Section */}
-                    <div className="max-w-4xl mx-auto mb-12">
+                    <div className="max-w-4xl mx-auto mb-16">
                         {/* Main Search Bar */}
-                        <div className="relative mb-6">
+                        <div className="relative mb-8">
                             <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-amber-300 transition-colors">
                                 <SearchInput />
                                 <div className="flex items-center gap-2 ml-4">
@@ -544,7 +545,7 @@ export default function Home() {
                         </div>
 
                         {/* Quick Action Buttons */}
-                        <div className="flex flex-wrap justify-center gap-4 mb-6">
+                        <div className="flex flex-wrap justify-center gap-4 mb-8">
                             <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
                                 <span className="text-amber-500">✈️</span>
                                 Create a new trip
@@ -833,7 +834,7 @@ export default function Home() {
                                 { img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=600&q=80", title: "Jaipur", desc: "Live the royal life in Jaipur" },
                                 { img: "https://images.unsplash.com/photo-1516685018646-5499d0a7d42f?auto=format&fit=crop&w=600&q=80", title: "Goa", desc: "Unwind on Goa’s golden sands" },
                                 { img: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=600&q=80", title: "Kerala", desc: "Cruise Kerala’s tranquil backwaters" },
-                                { img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80", , desc: "Witness the Ganga Aarti" },
+                                { img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80", title: "Varanasi", desc: "Witness the Ganga Aarti" },
                                 { img: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80", title: "Leh-Ladakh", desc: "Ride the passes of Ladakh" },
                                 { img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", title: "Rann of Kutch", desc: "Experience the Rann Utsav" },
                                 { img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80", title: "Meghalaya", desc: "Chase waterfalls in the clouds" },
