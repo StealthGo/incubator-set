@@ -9,6 +9,14 @@ import { Marquee } from "@/components/magicui/marquee";
 import { CardCarousel } from "@/components/ui/card-carousel";
 import HoverExpand from "@/components/ui/hover-expand";
 import {
+    MinimalCard,
+    MinimalCardImage,
+    MinimalCardTitle,
+    MinimalCardDescription,
+    MinimalCardContent,
+    MinimalCardFooter
+} from "@/components/ui/minimal-card";
+import {
     ArrowRight,
     CheckCircle,
     ChevronDown,
@@ -497,7 +505,7 @@ export default function Home() {
                               Discover India, <span className="text-amber-500">Your Way.</span>
                           </h1>
                           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
-                                 A Journey to the Heart of a Nation Built on Stories.
+                                 AI-powered itineraries, tailored for you.
                           </p>
                     
                     {/* Search Section */}
@@ -631,71 +639,89 @@ export default function Home() {
                             </p>
                         </div>
 
-                        {/* Flow Diagram */}
+                        {/* Flow Diagram with MinimalCard UI */}
                         <div className="relative">
                             {/* Desktop Layout */}
-                            <div className="hidden lg:flex items-center justify-between relative">
-                                {/* Connecting Lines */}
-                                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 -translate-y-1/2 z-0">
-                                    <div className="absolute top-1/2 left-1/3 w-3 h-3 bg-amber-500 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                                    <div className="absolute top-1/2 left-2/3 w-3 h-3 bg-amber-500 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-                                </div>
-
+                            <div className="hidden lg:grid grid-cols-3 gap-8 relative">
                                 {/* Step 1 */}
                                 <motion.div 
-                                    className="flex-1 max-w-sm relative z-10"
+                                    className="relative z-10"
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
                                 >
-                                    <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center group hover:shadow-2xl transition-all duration-300">
-                                        <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                                            <Heart className="w-10 h-10 text-white" />
-                                        </div>
-                                        <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 1</div>
-                                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Unveil Your Soul</h3>
-                                        <p className="text-gray-600 leading-relaxed">
-                                            Tell us what you love (Food, History, Art) in our fun, personalized onboarding.
-                                        </p>
-                                    </div>
+                                    <MinimalCard className="h-full">
+                                        <MinimalCardImage 
+                                            src="/1.jpg"
+                                            alt="Step 1 - Unveil Your Soul" 
+                                        />
+                                        <MinimalCardContent>
+                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 1</div>
+                                            <MinimalCardTitle>Unveil Your Soul</MinimalCardTitle>
+                                            <MinimalCardDescription>
+                                                Tell us what you love (Food, History, Art) in our fun, personalized onboarding.
+                                            </MinimalCardDescription>
+                                        </MinimalCardContent>
+                                        <MinimalCardFooter>
+                                            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                                <Heart className="w-5 h-5 text-white" />
+                                            </div>
+                                        </MinimalCardFooter>
+                                    </MinimalCard>
                                 </motion.div>
 
                                 {/* Step 2 */}
                                 <motion.div 
-                                    className="flex-1 max-w-sm relative z-10"
+                                    className="relative z-10"
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4 }}
                                 >
-                                    <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center group hover:shadow-2xl transition-all duration-300">
-                                        <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                                            <Settings2 className="w-10 h-10 text-white" />
-                                        </div>
-                                        <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 2</div>
-                                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Let Chanakya Weave the Path</h3>
-                                        <p className="text-gray-600 leading-relaxed">
-                                            Our AI instantly creates a bespoke itinerary from our database of authentic gems.
-                                        </p>
-                                    </div>
+                                    <MinimalCard className="h-full">
+                                        <MinimalCardImage 
+                                            src="/2.jpg"
+                                            alt="Step 2 - Let Chanakya Weave the Path" 
+                                        />
+                                        <MinimalCardContent>
+                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 2</div>
+                                            <MinimalCardTitle>Let Chanakya Weave the Path</MinimalCardTitle>
+                                            <MinimalCardDescription>
+                                                Our AI instantly creates a bespoke itinerary from our database of authentic gems.
+                                            </MinimalCardDescription>
+                                        </MinimalCardContent>
+                                        <MinimalCardFooter>
+                                            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                                <Settings2 className="w-5 h-5 text-white" />
+                                            </div>
+                                        </MinimalCardFooter>
+                                    </MinimalCard>
                                 </motion.div>
 
                                 {/* Step 3 */}
                                 <motion.div 
-                                    className="flex-1 max-w-sm relative z-10"
+                                    className="relative z-10"
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.6 }}
                                 >
-                                    <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center group hover:shadow-2xl transition-all duration-300">
-                                        <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-                                            <MapPin className="w-10 h-10 text-white" />
-                                        </div>
-                                        <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 3</div>
-                                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Discover & Do</h3>
-                                        <p className="text-gray-600 leading-relaxed">
-                                            Experience India effortlessly with seamless navigation and direct booking for unique local experiences.
-                                        </p>
-                                    </div>
+                                    <MinimalCard className="h-full">
+                                        <MinimalCardImage 
+                                            src="/3.jpg"
+                                            alt="Step 3 - Discover & Do" 
+                                        />
+                                        <MinimalCardContent>
+                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 3</div>
+                                            <MinimalCardTitle>Discover & Do</MinimalCardTitle>
+                                            <MinimalCardDescription>
+                                                Experience India effortlessly with seamless navigation and direct booking for unique local experiences.
+                                            </MinimalCardDescription>
+                                        </MinimalCardContent>
+                                        <MinimalCardFooter>
+                                            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                                <MapPin className="w-5 h-5 text-white" />
+                                            </div>
+                                        </MinimalCardFooter>
+                                    </MinimalCard>
                                 </motion.div>
                             </div>
 
@@ -707,6 +733,7 @@ export default function Home() {
                                         step: "Step 1",
                                         title: "Unveil Your Soul",
                                         description: "Tell us what you love (Food, History, Art) in our fun, personalized onboarding.",
+                                        image: "/1.jpg",
                                         delay: 0.2
                                     },
                                     {
@@ -714,6 +741,7 @@ export default function Home() {
                                         step: "Step 2", 
                                         title: "Let Chanakya Weave the Path",
                                         description: "Our AI instantly creates a bespoke itinerary from our database of authentic gems.",
+                                        image: "/2.jpg",
                                         delay: 0.4
                                     },
                                     {
@@ -721,6 +749,7 @@ export default function Home() {
                                         step: "Step 3",
                                         title: "Discover & Do", 
                                         description: "Experience India effortlessly with seamless navigation and direct booking for unique local experiences.",
+                                        image: "/3.jpg",
                                         delay: 0.6
                                     }
                                 ].map((item, index) => (
@@ -731,14 +760,23 @@ export default function Home() {
                                         whileInView={{ opacity: 1, y: 0 }}
                                         transition={{ delay: item.delay }}
                                     >
-                                        <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center">
-                                            <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                                                <item.icon className="w-10 h-10 text-white" />
-                                            </div>
-                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">{item.step}</div>
-                                            <h3 className="text-2xl font-bold text-gray-900 mb-4">{item.title}</h3>
-                                            <p className="text-gray-600 leading-relaxed">{item.description}</p>
-                                        </div>
+                                        <MinimalCard>
+                                            <MinimalCardImage 
+                                                src={item.image}
+                                                alt={`Step ${index + 1} - ${item.title}`}
+                                            />
+                                            <MinimalCardContent>
+                                                <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">{item.step}</div>
+                                                <MinimalCardTitle>{item.title}</MinimalCardTitle>
+                                                <MinimalCardDescription>{item.description}</MinimalCardDescription>
+                                            </MinimalCardContent>
+                                            <MinimalCardFooter>
+                                                <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                                    <item.icon className="w-5 h-5 text-white" />
+                                                </div>
+                                            </MinimalCardFooter>
+                                        </MinimalCard>
+                                        
                                         {/* Connecting Arrow for Mobile */}
                                         {index < 2 && (
                                             <div className="flex justify-center py-4">
