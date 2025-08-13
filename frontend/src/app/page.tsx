@@ -817,47 +817,6 @@ export default function Home() {
                         </motion.div>
                     </div>
                 </motion.section>
-
-                {/* Get Inspired Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <h2 className="text-6xl font-extrabold text-gray-900 text-center mb-4 tracking-tight">Get inspired.</h2>
-                        <p className="text-xl text-gray-600 text-center mb-12">Explore India’s wonders, curated by AI and crafted for you.</p>
-                        <p className="max-w-3xl mx-auto text-center text-lg text-gray-600 mb-16 leading-relaxed">
-                            Incredible India, Infinite Possibilities.<br />
-                            From the mighty Himalayas to the vibrant streets of Mumbai, The Modern Chanakya is your AI-powered travel companion—designed by Indians, for Indians, right here in India.<br />
-                            Discover hidden gems, iconic landmarks, and authentic experiences across Bharat. Let our smart platform recommend journeys that match your vibe, your pace, and your dreams.
-                        </p>
-                        <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                            {[
-                                { img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80", title: "Kashmir", desc: "Sail Dal Lake at sunrise" },
-                                { img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=600&q=80", title: "Jaipur", desc: "Live the royal life in Jaipur" },
-                                { img: "https://images.unsplash.com/photo-1516685018646-5499d0a7d42f?auto=format&fit=crop&w=600&q=80", title: "Goa", desc: "Unwind on Goa’s golden sands" },
-                                { img: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=600&q=80", title: "Kerala", desc: "Cruise Kerala’s tranquil backwaters" },
-                                { img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80", title: "Varanasi", desc: "Witness the Ganga Aarti" },
-                                { img: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80", title: "Leh-Ladakh", desc: "Ride the passes of Ladakh" },
-                                { img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", title: "Rann of Kutch", desc: "Experience the Rann Utsav" },
-                                { img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80", title: "Meghalaya", desc: "Chase waterfalls in the clouds" },
-                            ].map(card => (
-                                <motion.div 
-                                    key={card.title} 
-                                    variants={fadeInUp} 
-                                    whileHover={{ scale: 1.05, y: -8 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="relative rounded-2xl overflow-hidden group h-80"
-                                >
-                                    <Image src={card.img} alt={card.title} layout="fill" className="object-cover transition-transform duration-500 group-hover:scale-110" unoptimized />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                    <div className="absolute bottom-0 left-0 p-5 text-white">
-                                        <h3 className="font-bold text-lg drop-shadow-md">{card.title}</h3>
-                                        <p className="text-sm drop-shadow-sm opacity-90">{card.desc}</p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </div>
-                </motion.section>
-
                 {/* Indian Itineraries Section */}
                 <motion.section 
                     initial="initial" 
