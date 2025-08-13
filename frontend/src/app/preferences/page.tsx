@@ -1,41 +1,28 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { buildApiUrl, API_ENDPOINTS, apiRequest } from '@/lib/api';
-import SubscriptionPopup from "./SubscriptionPopup";
-import { Button } from "@/components/ui/button";
-import { TagBadge } from "@/components/ui/badge";
-
-import { DateRange } from "react-date-range";
+import { DateRange } from 'react-date-range';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 import { addDays, format } from 'date-fns';
-import {
-  MapPin, Clock, Calendar, Users, DollarSign, Star, Camera, Coffee, Mountain, Heart,
-  ExternalLink, Navigation, Eye, Bookmark, Wifi, Utensils, BedDouble, Gem, Bus, Plane, Truck, Globe
+import SubscriptionPopup from './SubscriptionPopup';
+import { TagBadge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  MapPin, Clock, Calendar, Users, DollarSign, 
+  Star, Camera, Coffee, Mountain, Heart,
+  ExternalLink, Navigation, Eye, Bookmark,
+  Wifi, Utensils, BedDouble, Gem, Bus, Plane, Truck, Globe
 } from "lucide-react";
-// If you have a local Icon component, import it:
-// import Icon from '@/components/Icon';
+import { buildApiUrl, API_ENDPOINTS, apiRequest } from '@/lib/api';
 
-// Restore any constants or helpers used in the file
-const getRandomFlexibleDates = () => {
-  const today = new Date();
-  const startOffset = Math.floor(Math.random() * 20) + 1;
-  const startDate = addDays(today, startOffset);
-  const endDate = addDays(startDate, 4);
-  return `${format(startDate, 'yyyy-MM-dd')} to ${format(endDate, 'yyyy-MM-dd')}`;
-};
-
-// Restore systemPrompt if used
-const systemPrompt = `You are \"The Modern Chanakya\" - a friendly, knowledgeable Indian travel buddy who helps plan amazing trips within India. You chat like a friend on WhatsApp - casual, quick, and fun!\n\n🎯 YOUR MISSION: Get the essentials in 6-7 quick questions, then create an AMAZING itinerary!\n...`;
-
-// If you have a local Icon component, define a fallback if not imported
-const Icon = ({ name, className }: { name: string, className?: string }) => <span className={className}>{name}</span>;
-
-// Restore animation variants if used
+// Enhanced Animation variants
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
   animate: { opacity: 1, y: 0 }
 };
+
 const staggerContainer = {
   initial: {},
   animate: {
@@ -46,7 +33,148 @@ const staggerContainer = {
   },
 };
 
+// Enhanced Button component
+const Button = ({ children, onClick, variant = "default", size = "default", className = "", ...props }: any) => {
+  const baseClasses = "inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 transform-gpu";
+  const variants: Record<string, string> = {
+    default: "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    outline: "border-2 border-gray-300 bg-white/80 backdrop-blur-sm hover:bg-gray-50 shadow-md hover:shadow-xl hover:border-gray-400 hover:-translate-y-0.5",
+    primary: "bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg hover:shadow-2xl hover:-translate-y-1",
+    glass: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 shadow-lg hover:shadow-2xl"
+  };
+  const sizes: Record<string, string> = {
+    default: "h-11 px-6 py-2",
+    sm: "h-9 px-4 text-xs",
+    lg: "h-14 px-10 text-base font-semibold"
+  };
+  
+  return (
+    <motion.button 
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className={`${baseClasses} ${variants[variant] || variants.default} ${sizes[size] || sizes.default} ${className}`}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </motion.button>
+  );
+};
 
+// Dynamic conversation system - now LLM handles all interactions
+const systemPrompt = `You are "The Modern Chanakya" - a friendly, knowledgeable Indian travel buddy who helps plan amazing trips within India. You chat like a friend on WhatsApp - casual, quick, and fun!
+
+🎯 YOUR MISSION: Get the essentials in 6-7 quick questions, then create an AMAZING itinerary!
+
+CHAT STYLE:
+- Keep it SHORT and snappy (like WhatsApp messages)
+- Use emojis naturally 🚀✨
+- Mix English and Hindi casually ("Kahan jaana hai?", "Sounds amazing yaar!")
+- Be enthusiastic but not overwhelming
+- Ask ONE simple question at a time
+
+QUICK QUESTION FLOW (Max 6-7 questions):
+1. "Hey! Kahan jaana hai? Which part of incredible India?" 🇮🇳
+2. "Nice choice! When are you planning to go?" 📅
+3. "Cool! Who's coming along on this adventure?" 👥
+4. "What about food - vegetarian, non-veg, or no restrictions?" 🍛
+5. "What gets you most excited - culture, adventure, nature?" 🎯
+6. "What's your vibe - budget travel, comfortable, or luxury?" 💰
+7. Optional: "Any special requests or pace preference?" (if needed)
+
+Then: "Perfect! Ready to create your dream itinerary? ✨"
+
+IMPORTANT RULES:
+- ONLY India destinations (redirect international requests politely)
+- Keep responses under 50 words
+- Be conversational, not formal
+- After 6 user answers, offer to generate itinerary
+- Sound excited but not pushy
+- Use Indian context (monsoon, festivals, etc.)
+
+Example responses:
+"Goa? Fantastic choice! 🏖️ When are you planning this beach escape?"
+"Solo trip? That's so cool! 🎒 What excites you most - beaches, culture, or food tours?"
+"Food tours sound amazing! 🍛 Any dietary preferences - vegetarian, non-veg, or special needs?"
+"Amazing! I've got all I need. Ready to create your perfect Goa itinerary? 🚀"
+
+Current conversation context will be provided. Respond as the next message in the conversation.`;
+
+// Quick replies for different conversation stages - WhatsApp style, short and sweet
+const smartQuickReplies: Record<string, string[]> = {
+  destination: ["🏔️ Himachal", "🏖️ Goa", "🕌 Rajasthan", "🌴 Kerala", "🏛️ Agra", "🏝️ Andaman"],
+  dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "❄️ Winter Trip", "🌸 Summer", "🎯 Festival Time"],
+  travelers: ["✈️ Solo", "👫 With Partner", "👨‍👩‍👧‍👦 Family", "🎉 Friends", "💕 Honeymoon", "👥 Big Group"],
+  interests: ["🍛 Food", "🏛️ Heritage", "🌿 Nature", "🙏 Spiritual", "🧘‍♀️ Wellness", "🎭 Culture"],
+  food_preferences: ["🥗 Vegetarian", "🍖 Non-Vegetarian", "🌱 Vegan", "🍽️ Jain Food", "🌍 Everything", "🚫 Allergies"],
+  budget: ["💸 Budget", "💰 Comfortable", "💎 Luxury", "🎯 Best Value", "👨‍👩‍👧‍👦 Family Friendly", "🎓 Student"],
+  pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Adventure", "🧘‍♀️ Peaceful", "📸 Photo Tour", "🎒 Backpacker"]
+};
+
+// --- Helper Functions & Components ---
+
+const getRandomFlexibleDates = () => {
+  const today = new Date();
+  const startOffset = Math.floor(Math.random() * 20) + 1;
+  const startDate = addDays(today, startOffset);
+  const endDate = addDays(startDate, 4);
+  return `${format(startDate, 'yyyy-MM-dd')} to ${format(endDate, 'yyyy-MM-dd')}`;
+};
+
+const Icon = ({ name, className }: { name: string, className?: string }) => (
+  <span className={`material-icons-outlined ${className}`}>{name}</span>
+);
+
+const ChatBubble = ({ sender, children, timestamp }: { sender: string, children: React.ReactNode, timestamp?: string }) => {
+  const isUser = sender === 'user';
+  
+  return (
+    <motion.div 
+      className={`flex w-full mb-3 ${isUser ? 'justify-end' : 'justify-start'}`}
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 500, 
+        damping: 30,
+        duration: 0.3 
+      }}
+    >
+      <div className={`
+        max-w-[85%] sm:max-w-[75%] px-4 py-3 text-[15px] leading-[1.4] font-normal
+        ${isUser 
+          ? 'bg-[#005c4b] text-white rounded-[18px] rounded-br-[4px] ml-auto shadow-sm' 
+          : 'bg-white text-[#1f2937] rounded-[18px] rounded-bl-[4px] shadow-sm border border-gray-100'
+        }
+        relative group font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']
+      `}>
+        <div className="break-words">
+          {children}
+        </div>
+        {timestamp && (
+          <div className={`text-[11px] mt-2 ${isUser ? 'text-green-100' : 'text-gray-400'} text-right flex items-center justify-end gap-1`}>
+            {timestamp}
+            {isUser && (
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+              </svg>
+            )}
+          </div>
+        )}
+        
+        {/* WhatsApp-style tail */}
+        <div className={`
+          absolute bottom-0 w-0 h-0
+          ${isUser 
+            ? 'right-[-8px] border-l-[8px] border-l-[#005c4b] border-t-[8px] border-t-transparent' 
+            : 'left-[-8px] border-r-[8px] border-r-white border-t-[8px] border-t-transparent'
+          }
+        `} />
+      </div>
+    </motion.div>
+  );
+};
 
 // Enhanced typing indicator with WhatsApp-style animation
 const TypingIndicator = () => (
@@ -152,7 +280,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
       const res = await apiRequest(API_ENDPOINTS.signup, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, dob, email, password }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -160,41 +288,10 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
         setLoading(false);
         return;
       }
-      // Automatically sign in after successful signup
-      const signInForm = new URLSearchParams();
-      signInForm.append("username", email);
-      signInForm.append("password", password);
-      const signInRes = await apiRequest(API_ENDPOINTS.signin, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: signInForm.toString(),
-      });
-      if (!signInRes.ok) {
-        setError("Signup succeeded but automatic login failed. Please sign in manually.");
-        setShowSignUp(false);
-        setLoading(false);
-        return;
-      }
-      const signInData = await signInRes.json();
-      localStorage.setItem("token", signInData.access_token);
-      // Fetch user data after successful login
-      try {
-        const userRes = await apiRequest(API_ENDPOINTS.me, {
-          method: "GET",
-          headers: { "Authorization": `Bearer ${signInData.access_token}` },
-        });
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          onUserUpdate(userData);
-        }
-      } catch (error) {
-        console.error("Error fetching user data after auto-login:", error);
-      }
+      setSignUpSuccess("Sign up successful! Please sign in.");
       setShowSignUp(false);
       setError("");
       setLoading(false);
-      onSuccess();
-      onClose();
     } catch {
       setError("Network error. Is the backend running?");
       setLoading(false);
@@ -818,7 +915,7 @@ export default function PreferencesPage() {
                                   <DollarSign className="w-4 h-4 text-green-500" />
                                   {opt.estimated_cost}
                                 </p>
-                                <Button variant="default" size="sm">
+                                <Button variant="primary" size="sm" asChild>
                                   <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm">
                                       <ExternalLink className="w-3 h-3" /> Book Now
                                   </a>
@@ -880,7 +977,7 @@ export default function PreferencesPage() {
                                       <BedDouble className="text-sm text-white" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-base text-gray-800 mb-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.name}</h4>
+                                        <h4 className="font-semibold text-base text-gray-800 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.name}</h4>
                                         <p className="text-sm text-gray-500 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{opt.type}</p>
                                     </div>
                                 </div>
@@ -890,7 +987,7 @@ export default function PreferencesPage() {
                                       <DollarSign className="w-4 h-4 text-green-500" />
                                       {opt.estimated_cost}
                                     </p>
-                                    <Button variant="default" size="sm">
+                                    <Button variant="primary" size="sm" asChild>
                                       <a href={opt.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm">
                                           <BedDouble className="w-3 h-3" /> Book on MMT
                                       </a>
@@ -1109,14 +1206,14 @@ export default function PreferencesPage() {
                               
                               <div className="flex gap-3">
                                 {day.breakfast.google_maps_link && (
-                                  <Button variant="default" size="default">
+                                  <Button variant="primary" size="default" asChild>
                                     <a href={day.breakfast.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                       <MapPin className="w-4 h-4" /> Google Maps
                                     </a>
                                   </Button>
                                 )}
                                 {day.breakfast.zomato_link && (
-                                  <Button variant="outline" size="default">
+                                  <Button variant="outline" size="default" asChild>
                                     <a href={day.breakfast.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                       <Utensils className="w-4 h-4" /> Zomato
                                     </a>
@@ -1216,13 +1313,13 @@ export default function PreferencesPage() {
                                  )}
                                  
                                  <div className="mt-6 flex items-center gap-4 flex-wrap">
-                                     <Button variant="default" size="default">
+                                     <Button variant="primary" size="default" asChild>
                                        <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                            <MapPin className="w-4 h-4" /> Google Maps
                                        </a>
                                      </Button>
                                      {activity.booking_link && (
-                                          <Button variant="outline" size="default">
+                                          <Button variant="outline" size="default" asChild>
                                             <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                                 {activity.booking_link.includes('zomato') && <Utensils className="w-4 h-4" />}
                                                 {activity.booking_link.includes('asi') && <Globe className="w-4 h-4" />}
@@ -1238,7 +1335,7 @@ export default function PreferencesPage() {
                                           </Button>
                                      )}
                                      {activity.official_website && activity.official_website !== activity.booking_link && (
-                                          <Button variant="outline" size="default">
+                                          <Button variant="outline" size="default" asChild>
                                             <a href={activity.official_website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                                 <Globe className="w-4 h-4" /> Official Site
                                             </a>
@@ -1316,20 +1413,20 @@ export default function PreferencesPage() {
                                     <Star className="w-5 h-5" />
                                     Insider Tip:
                                   </p>
-                                  <p className="text-lg text-amber-700 italic font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">"{day.lunch.insider_tip}"</p>
+                                  <p className="text-lg text-amber-700 italic">"{day.lunch.insider_tip}"</p>
                                 </motion.div>
                               )}
                               
                               <div className="flex gap-3">
                                 {day.lunch.google_maps_link && (
-                                  <Button variant="default" size="default">
+                                  <Button variant="primary" size="default" asChild>
                                     <a href={day.lunch.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                       <MapPin className="w-4 h-4" /> Google Maps
                                     </a>
                                   </Button>
                                 )}
                                 {day.lunch.zomato_link && (
-                                  <Button variant="outline" size="default">
+                                  <Button variant="outline" size="default" asChild>
                                     <a href={day.lunch.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                       <Utensils className="w-4 h-4" /> Zomato
                                     </a>
@@ -1429,13 +1526,13 @@ export default function PreferencesPage() {
                                  )}
                                  
                                  <div className="mt-6 flex items-center gap-4 flex-wrap">
-                                     <Button variant="default" size="default">
+                                     <Button variant="primary" size="default" asChild>
                                        <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                            <MapPin className="w-4 h-4" /> Google Maps
                                        </a>
                                      </Button>
                                      {activity.booking_link && (
-                                          <Button variant="outline" size="default">
+                                          <Button variant="outline" size="default" asChild>
                                             <a href={activity.booking_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                                 {activity.booking_link.includes('zomato') && <Utensils className="w-4 h-4" />}
                                                 {activity.booking_link.includes('asi') && <Globe className="w-4 h-4" />}
@@ -1451,7 +1548,7 @@ export default function PreferencesPage() {
                                           </Button>
                                      )}
                                      {activity.official_website && activity.official_website !== activity.booking_link && (
-                                          <Button variant="outline" size="default">
+                                          <Button variant="outline" size="default" asChild>
                                             <a href={activity.official_website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                                 <Globe className="w-4 h-4" /> Official Site
                                             </a>
@@ -1464,7 +1561,779 @@ export default function PreferencesPage() {
                                             'bg-gray-100 text-gray-600'
                                           }`}>
                                             {activity.booking_priority === 'Required' ? '🎫 Booking Required' :
-                                             activity.booking_priority === 'Recommended' ? '🔖 Booking Recommended' :
+                                             activity.booking_priority === 'Recommended' ? '📝 Booking Recommended' :
                                              '🚶 Walk-in Welcome'}
                                           </span>
                                      )}
+                                 </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Evening Snacks */}
+                    {day.evening_snacks && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
+                          <Utensils className="w-7 h-7 text-orange-500" />
+                          Evening Snacks ({day.evening_snacks.time})
+                        </h5>
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 shadow-lg border border-purple-200">
+                          <div className="flex items-start gap-6">
+                            {day.evening_snacks.image_url && (
+                              <motion.img 
+                                src={day.evening_snacks.image_url} 
+                                alt={day.evening_snacks.dish} 
+                                className="w-32 h-32 object-cover rounded-2xl shadow-md flex-shrink-0"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.evening_snacks.dish}</h6>
+                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-blue-500" />
+                                {day.evening_snacks.place} - {day.evening_snacks.location}
+                              </p>
+                              
+                              {/* Snacks Tags */}
+                              {day.evening_snacks.tags && day.evening_snacks.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {day.evening_snacks.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                    <TagBadge key={tagIndex} tag={tag} type="food" />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.evening_snacks.description}</p>
+                              <p className="text-green-600 font-bold text-xl mb-3">{day.evening_snacks.estimated_cost}</p>
+                              
+                              {day.evening_snacks.local_experience && (
+                                <motion.div 
+                                  className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400 mb-4"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Local Experience:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{day.evening_snacks.local_experience}"</p>
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Dinner */}
+                    {day.dinner && (
+                      <motion.div 
+                        className="mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-4 flex items-center gap-3">
+                          <Utensils className="w-7 h-7 text-orange-500" />
+                          Dinner ({day.dinner.time})
+                        </h5>
+                        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 shadow-lg border border-red-200">
+                          <div className="flex items-start gap-6">
+                            {day.dinner.image_url && (
+                              <motion.img 
+                                src={day.dinner.image_url} 
+                                alt={day.dinner.dish} 
+                                className="w-32 h-32 object-cover rounded-2xl shadow-md flex-shrink-0"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                            )}
+                            <div className="flex-1">
+                              <h6 className="font-bold text-2xl text-gray-800 mb-2">{day.dinner.dish}</h6>
+                              <p className="text-lg text-gray-600 mb-2 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-blue-500" />
+                                {day.dinner.restaurant} - {day.dinner.location}
+                              </p>
+                              
+                              {/* Dinner Tags */}
+                              {day.dinner.tags && day.dinner.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {day.dinner.tags.slice(0, 3).map((tag: string, tagIndex: number) => (
+                                    <TagBadge key={tagIndex} tag={tag} type="food" />
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <p className="text-gray-700 mb-3 text-lg leading-relaxed">{day.dinner.description}</p>
+                              <p className="text-green-600 font-bold text-xl mb-3">{day.dinner.estimated_cost}</p>
+                              
+                              {day.dinner.ambiance && (
+                                <p className="text-gray-600 mb-3 text-lg italic">Ambiance: {day.dinner.ambiance}</p>
+                              )}
+                              
+                              {day.dinner.insider_tip && (
+                                <motion.div 
+                                  className="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 rounded-2xl border-l-4 border-amber-400 mb-4"
+                                  whileHover={{ x: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <p className="font-bold text-base text-amber-800 mb-2 flex items-center gap-2">
+                                    <Star className="w-5 h-5" />
+                                    Insider Tip:
+                                  </p>
+                                  <p className="text-lg text-amber-700 italic">"{day.dinner.insider_tip}"</p>
+                                </motion.div>
+                              )}
+                              
+                              <div className="flex gap-3">
+                                {day.dinner.google_maps_link && (
+                                  <Button variant="primary" size="default" asChild>
+                                    <a href={day.dinner.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <MapPin className="w-4 h-4" /> Google Maps
+                                    </a>
+                                  </Button>
+                                )}
+                                {day.dinner.zomato_link && (
+                                  <Button variant="outline" size="default" asChild>
+                                    <a href={day.dinner.zomato_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                      <Utensils className="w-4 h-4" /> Zomato
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Day End Summary */}
+                    {day.day_end_summary && (
+                      <motion.div 
+                        className="mt-8 pt-8 border-t border-gray-200"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7, duration: 0.5 }}
+                        viewport={{ once: true }}
+                      >
+                        <h5 className="font-bold text-2xl text-gray-700 mb-6 flex items-center gap-3">
+                          <Star className="w-7 h-7 text-orange-500" />
+                          Day Summary
+                        </h5>
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 shadow-lg border border-blue-200">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <h6 className="font-bold text-lg text-gray-800 mb-3">Key Experiences</h6>
+                              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                                {day.day_end_summary.key_experiences?.map((exp: string, idx: number) => (
+                                  <li key={idx}>{exp}</li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <h6 className="font-bold text-lg text-gray-800 mb-3">Photo Opportunities</h6>
+                              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                                {day.day_end_summary.photos_to_take?.map((photo: string, idx: number) => (
+                                  <li key={idx}>{photo}</li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="md:col-span-2">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <h6 className="font-bold text-lg text-gray-800">Total Cost</h6>
+                                  <p className="text-2xl font-bold text-green-600">{day.day_end_summary.total_estimated_cost}</p>
+                                </div>
+                                <div className="text-right">
+                                  <h6 className="font-bold text-lg text-gray-800">Energy Level</h6>
+                                  <p className="text-lg text-gray-600">{day.day_end_summary.energy_level}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+        
+        {/* Enhanced Hidden Gems Section */}
+        {itinerary.hidden_gems && (
+            <motion.section
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+                <motion.h3 
+                  className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                    <Gem className="w-4 h-4 text-white" />
+                  </div>
+                  Hidden Gems
+                </motion.h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {itinerary.hidden_gems.map((gem: any, i: number) => (
+                        <motion.div 
+                          key={i} 
+                          className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group relative overflow-hidden"
+                          initial={{ opacity: 0, y: 30 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1, duration: 0.6 }}
+                          viewport={{ once: true }}
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          {/* Background gradient on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          
+                          <div className="relative z-10">
+                            <div className="flex items-center gap-4 mb-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+                                <Gem className="w-6 h-6 text-white" />
+                              </div>
+                              <h4 className="font-bold text-[15px] text-gray-800 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{gem.name}</h4>
+                            </div>
+                            <p className="text-gray-700 mb-4 text-[15px] leading-relaxed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{gem.description}</p>
+                            <motion.div 
+                              className="text-lg text-purple-800 bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-2xl italic border-l-4 border-purple-400 mb-6"
+                              whileHover={{ x: 5 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <strong className="flex items-center gap-2 mb-2">
+                                <Star className="w-5 h-5" />
+                                Why it's special:
+                              </strong> 
+                              {gem.why_special}
+                            </motion.div>
+                            <Button variant="outline" size="default" asChild>
+                              <a href={gem.search_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                  <MapPin className="w-4 h-4" /> Find on Map
+                              </a>
+                            </Button>
+                          </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </motion.section>
+        )}
+
+        {/* Other Sections in a Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {/* Signature Experiences */}
+            {itinerary.signature_experiences && (
+            <section>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="star" className="w-4 h-4 text-orange-500"/> Signature Experiences</h3>
+                <div className="space-y-6">
+                {itinerary.signature_experiences.map((exp: any, i: number) => (
+                    <div key={i} className="bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl p-6 border border-orange-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div className="font-bold text-[15px] text-gray-900 mb-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{exp.name}</div>
+                    
+                    {/* Experience Tags */}
+                    {exp.tags && exp.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {exp.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="activity" />
+                        ))}
+                        {exp.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{exp.tags.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="text-gray-700 text-[15px] mb-3 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{exp.description}</p>
+                    <div className="text-[15px] text-orange-800 bg-orange-200/50 p-3 rounded-lg italic font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><strong>Local's Take:</strong> {exp.why_local_loves_it}</div>
+                    <div className="flex justify-between items-center mt-4">
+                        <p className="text-gray-800 font-semibold text-[15px] font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{exp.estimated_cost}</p>
+                        <a href={exp.booking_link} target="_blank" rel="noopener noreferrer" className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center gap-2">
+                            <Icon name="confirmation_number"/> Book Experience
+                        </a>
+                    </div>
+                    </div>
+                ))}
+                </div>
+            </section>
+            )}
+
+            {/* Hyperlocal Food Guide */}
+            {itinerary.hyperlocal_food_guide && (
+            <section>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="restaurant" className="w-4 h-4 text-orange-500"/> Hyperlocal Food Guide</h3>
+                <div className="space-y-6">
+                {itinerary.hyperlocal_food_guide.map((food: any, i: number) => (
+                    <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div className="font-bold text-[15px] text-gray-900 mb-1 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">{food.dish}</div>
+                    
+                    {/* Food Tags */}
+                    {food.tags && food.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {food.tags.slice(0, 4).map((tag: string, tagIndex: number) => (
+                          <TagBadge key={tagIndex} tag={tag} type="food" />
+                        ))}
+                        {food.tags.length > 4 && (
+                          <span className="text-xs text-gray-500">+{food.tags.length - 4} more</span>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="text-gray-700 text-base mb-2">{food.description}</p>
+                    <p className="text-base text-gray-600 mb-3"><strong>Find it at:</strong> {food.where_to_find}</p>
+                    <div className="text-base text-green-800 bg-green-100/60 p-3 rounded-lg italic"><strong>Tip:</strong> {food.local_tip}</div>
+                    <a href={food.search_link} target="_blank" rel="noopener noreferrer" className="text-sm text-red-600 hover:underline font-semibold mt-4 inline-flex items-center gap-1">
+                        <Icon name="restaurant_menu"/> Check on Zomato
+                    </a>
+                    </div>
+                ))}
+                </div>
+            </section>
+            )}
+
+            {/* Shopping Guide */}
+            {itinerary.shopping_insider_guide && (
+            <section>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="shopping_cart" className="w-4 h-4 text-orange-500"/> Shopping Insider Guide</h3>
+                <div className="space-y-6">
+                {itinerary.shopping_insider_guide.map((shop: any, i: number) => (
+                    <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                    <div className="font-bold text-lg text-gray-900 mb-1">{shop.item}</div>
+                    <p className="text-gray-700 text-base mb-2"><strong>Where to buy:</strong> {shop.where_to_buy}</p>
+                    <div className="text-base text-blue-800 bg-blue-100/60 p-3 rounded-lg italic"><strong>Tip:</strong> {shop.local_tip}</div>
+                    <a href={shop.search_link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline font-semibold mt-4 inline-flex items-center gap-1">
+                        <Icon name="search"/> Search Online
+                    </a>
+                    </div>
+                ))}
+                </div>
+            </section>
+            )}
+
+            {/* Practical Wisdom */}
+            {itinerary.practical_local_wisdom && (
+            <section>
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']"><Icon name="lightbulb" className="w-4 h-4 text-orange-500"/> Practical Wisdom</h3>
+                <div className="bg-green-50 rounded-xl p-6 border border-green-200 text-base space-y-4 shadow-lg">
+                    {Object.entries(itinerary.practical_local_wisdom).map(([key, value]: [string, any]) => (
+                        <div key={key} className="flex items-start">
+                            <strong className="capitalize text-green-900 w-1/3">{key.replace(/_/g, ' ')}:</strong>
+                            <span className="text-gray-700 ml-2 w-2/3">{Array.isArray(value) ? value.join(', ') : value}</span>
+                        </div>
+                    ))}
+                </div>
+            </section>
+            )}
+        </div>
+      </motion.div>
+    );
+  };
+
+  return (
+    <div className={`min-h-screen bg-gray-100 font-sans flex flex-col ${showSignInModal || showSubscriptionPopup ? 'overflow-hidden' : ''}`}>
+      <link href="https://fonts.googleapis.com/css2?family=Material+Icons+Outlined" rel="stylesheet" />
+      <nav className="sticky top-0 z-20 bg-white shadow-sm flex items-center justify-between px-4 md:px-6 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.push("/")} className="flex items-center gap-3 focus:outline-none hover:opacity-80 transition-opacity">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#128c7e] to-[#075e54] flex items-center justify-center shadow-sm">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="text-base font-semibold text-gray-900 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">The Modern Chanakya</span>
+              <span className="text-xs text-gray-500 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">Your Indian Travel Expert</span>
+            </div>
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => { 
+            if (isUserLocked()) {
+              setShowSubscriptionPopup(true);
+              return;
+            }
+            // Clear localStorage for fresh start
+            localStorage.removeItem("currentItinerary");
+            localStorage.removeItem("conversationMessages");
+            localStorage.removeItem("conversationComplete");
+            
+            setItinerary(null); 
+            setMessages([{ sender: 'system', text: "Hey! 👋 Ready to explore incredible India? \n\nKahan jaana hai? Where do you want to go? 🇮🇳✨" }]); 
+            setConversationComplete(false);
+            setCurrentQuestionType("destination");
+            setShowOptions(false);
+            setShowSignInModal(false);
+          }} className={`px-5 py-2 rounded-full font-semibold shadow transition-all text-sm ${
+            isUserLocked() 
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-orange-500 text-white hover:bg-orange-600'
+          }`}>
+              {isUserLocked() ? '🔒 Upgrade for New Trips' : 'New Trip'}
+          </button>
+          
+          {isLoggedIn && user ? (
+            <>
+              {/* User Profile Button */}
+              <button 
+                onClick={() => router.push("/profile")} 
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition-all text-sm"
+                title={`Profile: ${user.name}`}
+              >
+                <Icon name="account_circle" className="text-lg" />
+                <span className="hidden md:inline">{user.name}</span>
+              </button>
+              
+              {/* Sign Out Button */}
+              <button onClick={() => { 
+                localStorage.removeItem("token");
+                clearConversationData();
+                setUser(null);
+                setIsLoggedIn(false);
+                setShowSignInModal(true);
+              }} className="px-3 py-2 rounded-full bg-gray-500 text-white font-semibold shadow hover:bg-gray-600 transition-all text-xs">
+                  Sign Out
+              </button>
+            </>
+          ) : (
+            /* Sign In Button for non-logged in users */
+            <button onClick={() => setShowSignInModal(true)} className="px-4 py-2 rounded-full bg-green-500 text-white font-semibold shadow hover:bg-green-600 transition-all text-sm">
+                Sign In
+            </button>
+          )}
+        </div>
+      </nav>
+
+      <div className="flex flex-col md:flex-row w-full flex-1" style={{ height: 'calc(100vh - 81px)' }}>
+        {/* Left: Chat Section - WhatsApp Style */}
+        <section className={`w-full md:w-2/5 flex flex-col bg-[#efeae2] ${showFullItinerary ? 'hidden md:flex' : ''}`}>
+          {/* Chat Header */}
+          <div className="bg-[#128c7e] text-white px-4 py-3 flex items-center gap-3 shadow-sm">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-[16px] font-['Inter','sans-serif']">The Modern Chanakya</h3>
+              <p className="text-[13px] text-green-100 font-['Inter','sans-serif']">
+                {isConversing ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></span>
+                    typing...
+                  </span>
+                ) : 'Your Indian Travel Expert'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Chat Messages Container */}
+          <div className="flex-1 overflow-y-auto px-3 py-2 bg-[#e5ddd5] bg-opacity-30" style={{ 
+            backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
+            backgroundSize: '60px 60px'
+          }}>
+            {/* Welcome message for non-authenticated users */}
+            {!isLoggedIn && (
+              <div className="flex justify-center items-center h-full">
+                <motion.div 
+                  className="bg-white rounded-2xl p-6 shadow-lg max-w-sm text-center mx-4"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="text-4xl mb-3">🇮🇳</div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">Welcome to The Modern Chanakya!</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Sign in to start planning your incredible India journey!
+                  </p>
+                  <button 
+                    onClick={() => setShowSignInModal(true)}
+                    className="px-6 py-2 bg-orange-500 text-white font-medium rounded-full hover:bg-orange-600 transition-colors text-sm"
+                  >
+                    Start Planning
+                  </button>
+                </motion.div>
+              </div>
+            )}
+            
+            {/* Chat Messages */}
+            {isLoggedIn && (
+              <div className="space-y-1 py-2">
+                {messages.map((msg, i) => 
+                  msg.text === "typing..." ? (
+                    <TypingIndicator key={i} />
+                  ) : (
+                    <ChatBubble 
+                      key={i} 
+                      sender={msg.sender}
+                      timestamp={i === messages.length - 1 ? new Date().toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        hour12: true 
+                      }) : undefined}
+                    >
+                      {msg.text}
+                    </ChatBubble>
+                  )
+                )}
+                <div ref={chatEndRef} />
+              </div>
+            )}
+          </div>
+          
+          {/* Input Area - WhatsApp Style */}
+          {isLoggedIn && (
+            <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200">
+              {/* Quick Replies */}
+              {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
+                <motion.div 
+                  className="flex flex-wrap gap-2 mb-3"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {smartQuickReplies[getCurrentQuestionType()].map((option: string) => (
+                    <motion.button 
+                      key={option} 
+                      type="button" 
+                      className="px-4 py-2 rounded-full border border-[#128c7e] bg-white text-[#128c7e] text-[15px] font-medium hover:bg-[#f0f9ff] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif'] shadow-sm hover:shadow-md"
+                      onClick={() => handleSend(undefined, option)}
+                      disabled={isConversing || isUserLocked()}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2, delay: Math.random() * 0.1 }}
+                    >
+                      {option}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              )}
+
+              {/* Date Picker Modal */}
+              {showDatePicker && (
+                <motion.div 
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <motion.div 
+                    className="bg-white rounded-2xl shadow-2xl p-4 m-4"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    <DateRange
+                      editableDateInputs
+                      onChange={handleDateSelect}
+                      moveRangeOnFirstSelection={false}
+                      ranges={[{ startDate: new Date(), endDate: addDays(new Date(), 6), key: 'selection' }]}
+                      minDate={new Date()}
+                    />
+                    <button 
+                      onClick={() => setShowDatePicker(false)}
+                      className="w-full mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {/* Input Box */}
+              <form onSubmit={handleSend} className="flex items-end gap-3">
+                <div className="flex-1 relative">
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-3 bg-white rounded-[25px] border border-gray-200 focus:outline-none focus:ring-0 focus:border-[#128c7e] text-[15px] placeholder-gray-500 font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif'] shadow-sm transition-all duration-200"
+                    placeholder={
+                      isUserLocked()
+                        ? "🔒 Upgrade for unlimited chat..."
+                        : isConversing
+                          ? "Wait for response..."
+                          : conversationComplete
+                            ? "Ready for itinerary! 🎯"
+                            : itinerary 
+                              ? "Want changes? Type here..." 
+                              : "Type a message..."
+                    }
+                    value={input} 
+                    onChange={e => setInput(e.target.value)} 
+                    disabled={isConversing || isUserLocked()}
+                  />
+                </div>
+                
+                {/* Send Button */}
+                <motion.button 
+                  type="submit" 
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-md ${
+                    isConversing || isUserLocked() || (!input.trim() && !conversationComplete)
+                      ? 'bg-gray-300 cursor-not-allowed' 
+                      : 'bg-[#128c7e] hover:bg-[#075e54] active:scale-95'
+                  }`}
+                  disabled={isConversing || isUserLocked() || (!input.trim() && !conversationComplete)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isConversing ? (
+                    <motion.div 
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    />
+                  ) : (
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                  )}
+                </motion.button>
+              </form>
+
+              {/* Action Buttons */}
+              {showOptions && !isUserLocked() && (
+                <motion.div 
+                  className="flex gap-2 mt-3"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <button 
+                    onClick={handleAskMore} 
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-medium text-sm hover:bg-gray-200 transition-colors"
+                  >
+                    Ask More
+                  </button>
+                  <button 
+                    onClick={() => handleGenerate()} 
+                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-full font-medium text-sm hover:bg-orange-600 transition-colors"
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? "Creating..." : "🚀 Generate"}
+                  </button>
+                </motion.div>
+              )}
+
+              {conversationComplete && !showOptions && !isUserLocked() && (
+                <motion.button 
+                  onClick={() => handleGenerate()} 
+                  className="w-full mt-3 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all shadow-lg"
+                  disabled={isGenerating}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isGenerating ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <motion.div 
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                      Creating Your Itinerary...
+                    </div>
+                  ) : (
+                    "✨ Generate My Dream Itinerary"
+                  )}
+                </motion.button>
+              )}
+
+              {/* Subscription Lock Message */}
+              {isUserLocked() && (
+                <motion.div 
+                  className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-4 text-center"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="text-3xl mb-2">🔒</div>
+                  <h3 className="text-lg font-bold text-orange-800 mb-2">Free chat limit reached!</h3>
+                  <p className="text-gray-700 text-sm mb-3">
+                    Upgrade to premium for unlimited travel planning with advanced AI features.
+                  </p>
+                  <button 
+                    onClick={() => setShowSubscriptionPopup(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transition-all shadow-md text-sm"
+                  >
+                    🇮🇳 Upgrade Now
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Right: Itinerary Output Section */}
+        <section className={`w-full md:w-3/5 flex flex-col ${showFullItinerary ? 'w-full' : ''} h-full`}>
+            <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 bg-white">
+                <h2 className="text-xl font-bold text-gray-900">Your Itinerary</h2>
+                <button type="button" className="ml-auto px-4 py-1 rounded-full bg-orange-100 text-orange-800 font-semibold hover:bg-orange-200 transition-all text-xs flex items-center gap-1" onClick={() => setShowFullItinerary(v => !v)}>
+                  <Icon name={showFullItinerary ? "chat" : "fullscreen"} className="text-sm"/>
+                  {showFullItinerary ? "Show Chat" : "Full Page"}
+                </button>
+            </div>
+            <div className="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-8 hide-scrollbar">
+              {renderItinerary()}
+            </div>
+        </section>
+      </div>
+
+      <style jsx global>{`
+        .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .rdrDay.rdrDaySelected, .rdrDay.rdrDayActive { background: #f97316 !important; }
+        .rdrDay.rdrDayInRange, .rdrDay.rdrDayInPreview { background: #fed7aa !important; color: #c2410c !important; }
+        .rdrDayToday .rdrDayNumber span { border: 1.5px solid #f97316 !important; }
+      `}</style>
+      {showSignInModal && (
+        <SignInModal 
+          onClose={() => setShowSignInModal(false)} 
+          onSuccess={() => {
+            // Start the conversation after successful sign in
+            setMessages([{ sender: 'system', text: "Hey! 👋 Ready to explore incredible India? \n\nKahan jaana hai? Where do you want to go? 🇮🇳✨" }]);
+            setConversationComplete(false);
+            setCurrentQuestionType("destination");
+            setShowOptions(false);
+            setItinerary(null);
+          }} 
+          onUserUpdate={(userData) => {
+            setUser(userData);
+            setIsLoggedIn(true);
+          }}
+        />
+      )}
+      
+      {/* Subscription Popup */}
+      <SubscriptionPopup 
+        isOpen={showSubscriptionPopup}
+        onClose={() => setShowSubscriptionPopup(false)}
+      />
+    </div>
+  );
+}
