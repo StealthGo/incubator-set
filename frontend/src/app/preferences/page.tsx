@@ -351,6 +351,7 @@ export default function PreferencesPage() {
     itineraries_created?: number;
   } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [initialPromptProcessed, setInitialPromptProcessed] = useState(false);
   
   // Store conversation state
   const [conversationComplete, setConversationComplete] = useState(false);
@@ -479,6 +480,48 @@ export default function PreferencesPage() {
 
     checkUserStatus();
   }, []);
+  
+  // Process the URL parameters and pendingQuery from localStorage
+  useEffect(() => {
+    // Only process this once and only after user is confirmed to be logged in
+    if (initialPromptProcessed || !isLoggedIn) return;
+    
+    const processInitialPrompt = async () => {
+      try {
+        // First check for URL parameters
+        let initialPrompt = '';
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search);
+          initialPrompt = urlParams.get('prompt') || '';
+          
+          // If no URL prompt, check localStorage for pendingQuery
+          if (!initialPrompt && localStorage.getItem('pendingQuery')) {
+            initialPrompt = localStorage.getItem('pendingQuery') || '';
+            // Clear pendingQuery after using it
+            localStorage.removeItem('pendingQuery');
+          }
+        }
+        
+        // If we have an initial prompt, submit it to the chat
+        if (initialPrompt && !isConversing) {
+          console.log("Processing initial prompt:", initialPrompt);
+          // Add user message
+          setMessages(current => [...current, { sender: "user", text: initialPrompt }]);
+          
+          // Use handleSend to process the message properly instead of calling getLLMResponse directly
+          await handleSend(undefined, initialPrompt);
+        }
+        
+        // Mark as processed to avoid duplicates
+        setInitialPromptProcessed(true);
+      } catch (error) {
+        console.error("Error processing initial prompt:", error);
+        setInitialPromptProcessed(true); // Mark as processed even on error to avoid loops
+      }
+    };
+    
+    processInitialPrompt();
+  }, [isLoggedIn, initialPromptProcessed, isConversing]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -535,7 +578,7 @@ export default function PreferencesPage() {
   };
 
   // Function to get intelligent responses from LLM
-  const getLLMResponse = async (conversationHistory: Array<{sender: string, text: string}>) => {
+  const getLLMResponse = async (conversationHistory: Array<{sender: string, text: string}>, retryCount = 0) => {
     const token = localStorage.getItem("token");
     if (!token) {
       setShowSignInModal(true);
@@ -544,8 +587,10 @@ export default function PreferencesPage() {
 
     setIsConversing(true);
     
-    // Add typing indicator immediately
-    setMessages((msgs) => [...msgs, { sender: "system", text: "typing..." }]);
+    // Add typing indicator immediately (only on first attempt)
+    if (retryCount === 0) {
+      setMessages((msgs) => [...msgs, { sender: "system", text: "typing..." }]);
+    }
 
     try {
       const response = await apiRequest(API_ENDPOINTS.chatConversation, {
@@ -567,6 +612,12 @@ export default function PreferencesPage() {
           setShowSignInModal(true);
           return;
         }
+        
+        // Handle 503 (Service Unavailable) errors separately
+        if (response.status === 503) {
+          throw new Error("model_overloaded");
+        }
+        
         throw new Error(`API error: ${response.statusText}`);
       }
 
@@ -597,10 +648,45 @@ export default function PreferencesPage() {
       setMessages((msgs) => {
         const newMsgs = [...msgs];
         newMsgs.pop(); // Remove typing indicator
-        newMsgs.push({ 
-          sender: "system", 
-          text: "Oops! Network issue ho gaya. Try again? 😅" 
-        });
+        
+        // Custom error message based on error type
+        if (error instanceof Error && error.message === "model_overloaded") {
+          // If we haven't exceeded retry limit, attempt to retry after a delay
+          const MAX_RETRIES = 2;
+          if (retryCount < MAX_RETRIES) {
+            // Show temporary message about retrying
+            newMsgs.push({ 
+              sender: "system", 
+              text: `The AI is a bit busy right now. Retrying automatically in a few seconds... (Attempt ${retryCount + 1}/${MAX_RETRIES})` 
+            });
+            
+            // Set up retry after a delay
+            setTimeout(() => {
+              // Remove the retry message
+              setMessages(msgs => {
+                const updatedMsgs = [...msgs];
+                updatedMsgs.pop(); // Remove the retry message
+                return updatedMsgs;
+              });
+              
+              // Retry the request with incremented retry count
+              getLLMResponse(conversationHistory, retryCount + 1);
+            }, 5000 + (retryCount * 3000)); // Increasing backoff
+            
+            return newMsgs;
+          } else {
+            // We've exceeded retry limit, show final error
+            newMsgs.push({ 
+              sender: "system", 
+              text: "Our AI assistant is currently experiencing high demand. Please try asking your question again in a little while. 🙏" 
+            });
+          }
+        } else {
+          newMsgs.push({ 
+            sender: "system", 
+            text: "Oops! Network issue ho gaya. Try again? 😅" 
+          });
+        }
         return newMsgs;
       });
     } finally {
@@ -650,7 +736,7 @@ export default function PreferencesPage() {
     }
   };
 
-  const handleGenerate = async (followUpPrompt?: string) => {
+  const handleGenerate = async (followUpPrompt?: string, retryCount = 0) => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     
     // Check if token exists and is not empty
@@ -663,10 +749,13 @@ export default function PreferencesPage() {
     setIsGenerating(true);
     setShowOptions(false);
 
-    const generatingMessage = followUpPrompt 
-        ? "Updating your itinerary based on your request..."
-        : "Creating your hyper-detailed travel itinerary with local insights...";
-    setMessages((msgs) => [...msgs, { sender: "llm", text: generatingMessage }]);
+    // Only show generating message on first attempt
+    if (retryCount === 0) {
+      const generatingMessage = followUpPrompt 
+          ? "Updating your itinerary based on your request..."
+          : "Creating your hyper-detailed travel itinerary with local insights...";
+      setMessages((msgs) => [...msgs, { sender: "llm", text: generatingMessage }]);
+    }
 
     const requestBody = {
       messages: followUpPrompt ? [...messages, { sender: 'user', text: followUpPrompt }] : messages,
@@ -708,6 +797,37 @@ export default function PreferencesPage() {
           setIsGenerating(false);
           return;
         }
+        if (res.status === 503) {
+          // Service unavailable / model overloaded
+          const MAX_RETRIES = 2;
+          if (retryCount < MAX_RETRIES) {
+            // Update the generating message to show retry status
+            setMessages((msgs) => {
+              const newMsgs = [...msgs];
+              // Replace the last message with a retry message
+              newMsgs[newMsgs.length - 1] = { 
+                sender: "llm", 
+                text: `Our servers are experiencing high demand. Retrying automatically in a moment... (Attempt ${retryCount + 1}/${MAX_RETRIES})` 
+              };
+              return newMsgs;
+            });
+            
+            // Retry after a delay with exponential backoff
+            setTimeout(() => {
+              handleGenerate(followUpPrompt, retryCount + 1);
+            }, 5000 + (retryCount * 3000));
+            
+            return;
+          } else {
+            // Max retries exceeded
+            setMessages((msgs) => [
+              ...msgs,
+              { sender: "llm", text: "I'm sorry, our servers are currently overloaded. Please try generating your itinerary again in a few minutes." },
+            ]);
+            setIsGenerating(false);
+            return;
+          }
+        }
         throw new Error(`API error: ${res.statusText}`);
       }
 
@@ -727,11 +847,63 @@ export default function PreferencesPage() {
         }, 3000); // Show popup after 3 seconds to let them see the itinerary
       }
     } catch (err: unknown) {
+      console.error("Error generating itinerary:", err);
+      
+      // Check for model overload errors in the error message
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setMessages((msgs) => [
-        ...msgs,
-        { sender: "llm", text: `Sorry, there was an error: ${errorMessage}. Please try again.` },
-      ]);
+      const isModelOverloaded = 
+        errorMessage.includes('overloaded') || 
+        errorMessage.includes('503') || 
+        errorMessage.includes('unavailable');
+      
+      // Handle model overload errors with retry logic
+      if (isModelOverloaded && retryCount < 2) {
+        // Update the generating message to show retry status
+        setMessages((msgs) => {
+          const newMsgs = [...msgs];
+          // Replace the last message with a retry message
+          newMsgs[newMsgs.length - 1] = { 
+            sender: "llm", 
+            text: `Our AI is a bit busy right now. Retrying automatically in a moment... (Attempt ${retryCount + 1}/2)` 
+          };
+          return newMsgs;
+        });
+        
+        // Retry after a delay
+        setTimeout(() => {
+          handleGenerate(followUpPrompt, retryCount + 1);
+        }, 5000 + (retryCount * 3000));
+        
+        return;
+      }
+      
+      // If not a model overload error or max retries exceeded, show error message
+      setMessages((msgs) => {
+        const newMsgs = [...msgs];
+        // If the last message is a "generating" message, replace it
+        const lastMessage = newMsgs.length > 0 ? newMsgs[newMsgs.length - 1] : null;
+        if (lastMessage && 
+            lastMessage.sender === "llm" && 
+            (lastMessage.text.includes("Creating") || 
+             lastMessage.text.includes("Updating") ||
+             lastMessage.text.includes("Retrying"))) {
+          newMsgs.pop();
+        }
+        
+        // Add appropriate error message based on the error type
+        if (isModelOverloaded) {
+          newMsgs.push({ 
+            sender: "llm", 
+            text: "I'm sorry, our servers are currently very busy. Please try again in a few minutes." 
+          });
+        } else {
+          newMsgs.push({ 
+            sender: "llm", 
+            text: "Sorry, there was an error creating your itinerary. Please try again." 
+          });
+        }
+        return newMsgs;
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -2107,6 +2279,7 @@ export default function PreferencesPage() {
           {isLoggedIn && (
             <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200">
               {/* Quick Replies */}
+              {/* @ts-ignore - We know getCurrentQuestionType returns a valid key */}
               {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
                 <motion.div 
                   className="flex flex-wrap gap-2 mb-3"
@@ -2114,7 +2287,7 @@ export default function PreferencesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {smartQuickReplies[getCurrentQuestionType()].map((option: string) => (
+                  {smartQuickReplies[getCurrentQuestionType()]?.map((option: string) => (
                     <motion.button 
                       key={option} 
                       type="button" 
