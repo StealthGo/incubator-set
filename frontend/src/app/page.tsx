@@ -312,13 +312,21 @@ const SearchInput = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex-1">
+        <form 
+            onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(e);
+            }} 
+            className="flex-1"
+            onClick={(e) => e.stopPropagation()} // Prevent clicks on the form from triggering the parent div's onClick
+        >
             <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={prompts[currentPromptIndex]}
-                className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1"
+                className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
+                onClick={(e) => e.stopPropagation()} // Prevent clicks on the input from triggering the parent div's onClick
             />
         </form>
     );
@@ -486,8 +494,7 @@ export default function Home() {
                     className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-20 px-6"
                 >
                           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                              This is Our India. <span className="text-amber-500">Unveiled.</span><br />
-                              <span className="text-amber-600">An AI with human wisdom.</span>
+                              Discover India, <span className="text-amber-500">Your Way.</span>
                           </h1>
                           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
                                  A Journey to the Heart of a Nation Built on Stories.
@@ -497,19 +504,54 @@ export default function Home() {
                     <div className="max-w-4xl mx-auto mb-16">
                         {/* Main Search Bar */}
                         <div className="relative mb-8">
-                            <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-amber-300 transition-colors">
+                            <div 
+                                className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-amber-300 transition-colors cursor-pointer"
+                                onClick={() => {
+                                    const input = document.querySelector<HTMLInputElement>('input[type="text"]');
+                                    const value = input?.value || "";
+                                    const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
+                                    if (query) {
+                                        // Check if user is signed in with correct token key
+                                        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                                        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                                        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+                                        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+                                        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
+                                        
+                                        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
+                                        console.log('Search box click:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
+                                        
+                                        if (isAuthenticated) {
+                                            // User is signed in, redirect directly to preferences
+                                            console.log('Redirecting to preferences with query:', query);
+                                            window.location.href = `/preferences?prompt=${encodeURIComponent(query)}`;
+                                        } else {
+                                            // Store the query in localStorage to use after sign-in
+                                            console.log('Redirecting to signin, storing query:', query);
+                                            localStorage.setItem('pendingQuery', query);
+                                            // Redirect to sign-in page
+                                            window.location.href = '/signin';
+                                        }
+                                    }
+                                }}
+                            >
                                 <SearchInput />
                                 <div className="flex items-center gap-2 ml-4">
                                     <button 
                                         aria-label="Voice input"
                                         className="p-2 rounded-full hover:bg-gray-100 transition-colors group"
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent the parent div's onClick from firing
+                                            // Voice input logic here
+                                        }}
                                     >
                                         <Mic className="w-5 h-5 text-gray-500 group-hover:text-amber-500" />
                                     </button>
                                     <button 
                                         className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105"
                                         aria-label="Search"
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent the parent div's onClick from firing
                                             const input = document.querySelector<HTMLInputElement>('input[type="text"]');
                                             const value = input?.value || "";
                                             const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
@@ -933,41 +975,88 @@ export default function Home() {
                         <MarqueeTestimonials />
                     </div>
                 </motion.section>
-
-                {/* Featured Travel Creators Section */}
-                <motion.section 
-                    initial="initial" 
-                    whileInView="animate" 
-                    viewport={{ once: true, amount: 0.2 }} 
-                    variants={fadeInUp} 
+                {/* Contribute Section */}
+                <motion.section
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={fadeInUp}
                     className="py-24"
-                    style={{ backgroundColor: '#FCFAF8' }}
                 >
                     <div className="max-w-7xl mx-auto px-6">
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-4">Featured Travel Creators</h2>
-                        <p className="text-gray-600 text-center mb-12 text-lg">Follow these amazing Indian travellers and check out their favourite itineraries!</p>
-                        <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                            {[
-                                { name: "Rohit Sharma", handle: "@rohit_traveldiaries", bio: "Solo backpacker, chai lover, and Himalaya explorer. Sharing desi hacks for budget travel!", userImg: imageLinks.userRohit, itinImg: imageLinks.lehLadakh, itinTitle: "Leh-Ladakh Road Trip", href: "/itineraries/leh-ladakh-rohit" },
-                                { name: "Ananya Singh", handle: "@ananya_wanders", bio: "Foodie, vlogger, and city explorer. Loves finding hidden gems in every Indian city!", userImg: imageLinks.userAnanya, itinImg: imageLinks.kolkata, itinTitle: "Kolkata Food Trail", href: "/itineraries/kolkata-food-ananya" },
-                                { name: "Siddharth Mehra", handle: "@sid_on_the_road", bio: "Adventure junkie, biker, and storyteller. Always ready for the next road trip!", userImg: imageLinks.userSiddharth, itinImg: imageLinks.spitiValley, itinTitle: "Spiti Valley Adventure", href: "/itineraries/spiti-valley-sid" },
-                            ].map(creator => (
-                                <motion.div key={creator.name} variants={fadeInUp} className="bg-white rounded-2xl border border-gray-200/80 p-6 flex flex-col items-center text-center">
-                                    <Image src={creator.userImg} alt={creator.name} width={80} height={80} className="w-20 h-20 rounded-full object-cover mb-4 border-4 border-amber-200" unoptimized />
-                                    <h3 className="font-bold text-xl text-gray-900">{creator.name}</h3>
-                                    <p className="text-amber-600 text-sm mb-3">{creator.handle}</p>
-                                    <p className="text-gray-600 text-sm mb-6 flex-grow">{creator.bio}</p>
-                                    <a href={creator.href} className="block w-full rounded-xl overflow-hidden group border border-gray-200 hover:shadow-lg transition">
-                                        <Image src={creator.itinImg} alt={creator.itinTitle} width={300} height={150} className="w-full h-36 object-cover" unoptimized />
-                                        <div className="p-4 bg-gray-50 text-gray-800 font-semibold group-hover:text-amber-600 transition">{creator.itinTitle}</div>
-                                    </a>
-                                </motion.div>
-                            ))}
-                        </motion.div>
+                        <div className="flex flex-col lg:flex-row items-center gap-12">
+                            <div className="lg:w-1/2">
+                                <div className="relative overflow-hidden rounded-xl shadow-xl">
+                                    <Image 
+                                        src="https://images.unsplash.com/photo-1534531409543-069f6204c5b4?q=80&w=1176&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                                        alt="Beautiful lake with mountains" 
+                                        width={600} 
+                                        height={1000} 
+                                        className="object-cover w-full h-[500px]"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <div className="absolute bottom-0 left-0 p-8">
+                                        <h3 className="text-2xl font-bold text-white mb-2">Share Your Hidden Gems</h3>
+                                        <p className="text-white/90 text-sm">Help fellow travelers discover authentic experiences</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="lg:w-1/2">
+                                <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                                    Contribute to a <span className="text-amber-500">Legacy</span>. <br />
+                                    Become a Modern Chanakya Lorekeeper.
+                                </h2>
+
+                                <div className="space-y-8 mt-8">
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-amber-100 p-3 rounded-full">
+                                            <Heart className="w-6 h-6 text-amber-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg mb-1">Share Your Passion</h3>
+                                            <p className="text-gray-600">
+                                                Do you know Delhi's best-kept secrets? The Modern Chanakya is built on local wisdom, and we believe your discoveries deserve to be shared.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-amber-100 p-3 rounded-full">
+                                            <Users className="w-6 h-6 text-amber-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg mb-1">Join the Community</h3>
+                                            <p className="text-gray-600">
+                                                Join our community of 'Lorekeepers' to earn recognition and rewards for contributing unique, unbookable hidden gems and wise traveler tips.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-4">
+                                        <div className="bg-amber-100 p-3 rounded-full">
+                                            <Globe className="w-6 h-6 text-amber-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg mb-1">Empower Communities</h3>
+                                            <p className="text-gray-600">
+                                                Help us build India's most authentic travel resource and empower local communities through responsible tourism.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-10">
+                                    <button className="bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-full px-8 py-3">
+                                        Coming Soon
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </motion.section>
 
-                {/* FAQ Section */}
+            </main>
+                            {/* FAQ Section */}
                 <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
                     <div className="max-w-3xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-10">FAQs – Sawal Jo Aksar Puchte Hain</h2>
@@ -991,46 +1080,6 @@ export default function Home() {
                         </div>
                     </div>
                 </motion.section>
-
-
-
-                {/* Pro Features Section */}
-                <motion.section 
-                    initial="initial" 
-                    whileInView="animate" 
-                    viewport={{ once: true, amount: 0.2 }} 
-                    variants={fadeInUp} 
-                    className="py-24"
-                    style={{ backgroundColor: '#FCFAF8' }}
-                >
-                    <div className="max-w-6xl mx-auto px-6">
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-4">Upgrade Your Yatra with Stealth Pro</h2>
-                        <p className="text-gray-600 text-center mb-12 text-lg">Unlock the full power of The Modern Chanakya with Pro features – made for Indian travellers who want more!</p>
-                        <motion.div variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[
-                                { icon: <PlaneTakeoff />, title: "Live Train & Flight Updates", desc: "Get instant alerts for IRCTC trains and flights – no more last-minute surprises, boss!" },
-                                { icon: <CloudOff />, title: "Offline Access", desc: "No network? No tension! Download your itinerary and access it anywhere, even in the mountains." },
-                                { icon: <MessageSquare />, title: "WhatsApp Support", desc: "Kuch bhi doubt ho? Message us on WhatsApp for quick help – like a travel buddy in your pocket." },
-                                { icon: <Route />, title: "Route Optimization", desc: "Save time and petrol! Get the best route for your road trips, auto-arranged for you." },
-                                { icon: <Ticket />, title: "Cheap Deals & Alerts", desc: "Get exclusive deals on hotels, flights, and activities – sasta, sundar, tikau!" },
-                                { icon: <Settings2 />, title: "Export to Google Maps", desc: "Send your itinerary to Google Maps in one click. Perfect for navigation on the go!" },
-                                { icon: <FileText />, title: "Unlimited Attachments", desc: "Keep all your tickets, PDFs, and travel docs in one place – no more searching in 10 apps!" },
-                            ].map(feature => (
-                                <motion.div key={feature.title} variants={fadeInUp} className="bg-white rounded-2xl p-6 flex items-start gap-4 border border-gray-200/80">
-                                    <div className="text-amber-500 bg-amber-50 rounded-lg p-3 mt-1">
-                                        {feature.icon}
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-lg text-gray-900 mb-1">{feature.title}</h3>
-                                        <p className="text-gray-600 text-sm">{feature.desc}</p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </div>
-                </motion.section>
-
-            </main>
 
             {/* Footer */}
             <footer 
