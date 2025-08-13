@@ -477,10 +477,11 @@ export default function Home() {
                         {/* Navigation Links */}
                         <div className="hidden md:flex items-center space-x-8">
                             <a href="#home" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
-                            <a href="#destinations" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">DESTINATIONS</a>
                             <a href="#how-it-works" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
                             <a href="#why-us" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">WHY US</a>
-                            <a href="#testimonials" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">REVIEWS</a>
+                            <a href="#get-inspired" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">INSPIRED</a>
+                            <a href="#itineraries" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">ITINERARIES</a>
+                            <a href="#testimonials" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">TESTIMONIALS</a>
                             <a href="#contact" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
                         </div>
 
@@ -867,6 +868,7 @@ export default function Home() {
                 
                 {/* Get Inspired Section */}
                 <motion.section 
+                    id="get-inspired"
                     initial="initial" 
                     whileInView="animate" 
                     viewport={{ once: true, amount: 0.2 }} 
@@ -907,6 +909,7 @@ export default function Home() {
                 
                 {/* Indian Itineraries Section */}
                 <motion.section 
+                    id="itineraries"
                     initial="initial" 
                     whileInView="animate" 
                     viewport={{ once: true, amount: 0.2 }} 

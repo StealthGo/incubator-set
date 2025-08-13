@@ -220,6 +220,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Service is shutting down"
         )
+    
+
+
 
 @app.post("/api/signup", response_model=Token)
 async def signup(user: UserIn):
