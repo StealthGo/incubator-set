@@ -106,8 +106,8 @@ const smartQuickReplies: Record<string, string[]> = {
   destination: ["🏔️ Himachal", "🏖️ Goa", "🕌 Rajasthan", "🌴 Kerala", "🏛️ Agra", "🏝️ Andaman"],
   dates: ["📅 Pick Dates", "🤷‍♀️ I'm Flexible", "🌞 Next Month", "❄️ Winter Trip", "🌸 Summer", "🎯 Festival Time"],
   travelers: ["✈️ Solo", "👫 With Partner", "👨‍👩‍👧‍👦 Family", "🎉 Friends", "💕 Honeymoon", "👥 Big Group"],
-  interests: ["🍛 Food", "🏛️ Heritage", "🌿 Nature", "🙏 Spiritual", "🧘‍♀️ Wellness", "🎭 Culture"],
   food_preferences: ["🥗 Vegetarian", "🍖 Non-Vegetarian", "🌱 Vegan", "🍽️ Jain Food", "🌍 Everything", "🚫 Allergies"],
+  interests: ["🍛 Food", "🏛️ Heritage", "🌿 Nature", "🙏 Spiritual", "🧘‍♀️ Wellness", "🎭 Culture"],
   budget: ["💸 Budget", "💰 Comfortable", "💎 Luxury", "🎯 Best Value", "👨‍👩‍👧‍👦 Family Friendly", "🎓 Student"],
   pace: ["🐌 Relaxed", "⚖️ Balanced", "🏃‍♂️ Adventure", "🧘‍♀️ Peaceful", "📸 Photo Tour", "🎒 Backpacker"]
 };

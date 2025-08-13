@@ -16,6 +16,8 @@ import {
     MinimalCardContent,
     MinimalCardFooter
 } from "@/components/ui/minimal-card";
+import { ImageCursorTrail } from "@/components/ui/image-cursortrail";
+import { BentoGridWhyUs } from "@/components/ui/bento-grid-demo";
 import {
     ArrowRight,
     CheckCircle,
@@ -26,8 +28,8 @@ import {
     Send,
     Mic,
     Plus,
-    Heart,
-    Eye,
+    Compass,
+    LineChart,
     Globe,
     PlaneTakeoff,
     CloudOff,
@@ -35,14 +37,26 @@ import {
     Route,
     Ticket,
     FileText,
-    Settings2,
+    Settings,
     Instagram,
     Linkedin,
-    Youtube
+    Youtube,
+    Briefcase,
+    Map,
+    CalendarDays,
+    Clock,
+    Sparkle
 } from "lucide-react";
 
 // Assuming imageLinks is a file like: export default { delhi: '...', kashmir: '...' }
 // If not, replace with actual paths or import statements.
+import img1Light1 from '../../public/1.jpg';
+import img1Light2 from '../../public/2.jpg';
+import img2Light1 from '../../public/3.jpg';
+import img2Light2 from '../../public/4.jpg';
+import img3Light from '../../public/5.jpg';
+import img4Light from '../../public/WhatsApp Image 2025-08-13 at 17.13.54_5e0a8408.jpg';
+
 const imageLinks = {
     delhi: "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=600&q=80",
     kerala: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80",
@@ -652,7 +666,7 @@ export default function Home() {
                                 >
                                     <MinimalCard className="h-full">
                                         <MinimalCardImage 
-                                            src="/1.jpg"
+                                            src="/1.jpeg"
                                             alt="Step 1 - Unveil Your Soul" 
                                         />
                                         <MinimalCardContent>
@@ -664,7 +678,7 @@ export default function Home() {
                                         </MinimalCardContent>
                                         <MinimalCardFooter>
                                             <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
-                                                <Heart className="w-5 h-5 text-white" />
+                                                <Compass className="w-5 h-5 text-white" />
                                             </div>
                                         </MinimalCardFooter>
                                     </MinimalCard>
@@ -679,7 +693,7 @@ export default function Home() {
                                 >
                                     <MinimalCard className="h-full">
                                         <MinimalCardImage 
-                                            src="/2.jpg"
+                                            src="/22.jpeg"
                                             alt="Step 2 - Let Chanakya Weave the Path" 
                                         />
                                         <MinimalCardContent>
@@ -691,7 +705,7 @@ export default function Home() {
                                         </MinimalCardContent>
                                         <MinimalCardFooter>
                                             <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
-                                                <Settings2 className="w-5 h-5 text-white" />
+                                                <Settings className="w-5 h-5 text-white" />
                                             </div>
                                         </MinimalCardFooter>
                                     </MinimalCard>
@@ -706,7 +720,7 @@ export default function Home() {
                                 >
                                     <MinimalCard className="h-full">
                                         <MinimalCardImage 
-                                            src="/3.jpg"
+                                            src="/33.jpeg"
                                             alt="Step 3 - Discover & Do" 
                                         />
                                         <MinimalCardContent>
@@ -729,7 +743,7 @@ export default function Home() {
                             <div className="lg:hidden space-y-8">
                                 {[
                                     {
-                                        icon: Heart,
+                                        icon: Compass,
                                         step: "Step 1",
                                         title: "Unveil Your Soul",
                                         description: "Tell us what you love (Food, History, Art) in our fun, personalized onboarding.",
@@ -737,7 +751,7 @@ export default function Home() {
                                         delay: 0.2
                                     },
                                     {
-                                        icon: Settings2,
+                                        icon: Settings,
                                         step: "Step 2", 
                                         title: "Let Chanakya Weave the Path",
                                         description: "Our AI instantly creates a bespoke itinerary from our database of authentic gems.",
@@ -820,57 +834,10 @@ export default function Home() {
                                 Experience the difference of truly personalized travel with authentic local insights
                             </p>
                         </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Tailored for You */}
-                            <motion.div 
-                                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 }}
-                            >
-                                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                    <Heart className="w-6 h-6 text-white" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3">Tailored for You</h3>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    We go beyond generic, templated itineraries. Our AI acts as a personal local advisor, crafting hyper-personalized journeys based on your unique interests, pace, and passions.
-                                </p>
-                            </motion.div>
-
-                            {/* Hidden Gems */}
-                            <motion.div 
-                                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                            >
-                                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                    <Eye className="w-6 h-6 text-white" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3">Hidden Gems</h3>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    Our platform features "hidden gems" vetted by local experts, including invaluable "Wise Traveler Insights" on cultural etiquette and safety for authentic discovery.
-                                </p>
-                            </motion.div>
-
-                            {/* Seamless Convenience */}
-                            <motion.div 
-                                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                            >
-                                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                    <Settings2 className="w-6 h-6 text-white" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3">Seamless Convenience</h3>
-                                <p className="text-gray-600 text-sm leading-relaxed">
-                                    From initial prompt to final destination, our platform provides integrated maps and bookings for unique experiences, letting you go from discovery to action with a single tap.
-                                </p>
-                            </motion.div>
-                        </div>
-
+                        
+                        {/* Bento Grid UI */}
+                        <BentoGridWhyUs />
+                        
                         {/* Additional Features Grid */}
                         <motion.div 
                             className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6"
@@ -1048,7 +1015,7 @@ export default function Home() {
                                 <div className="space-y-8 mt-8">
                                     <div className="flex items-start gap-4">
                                         <div className="bg-amber-100 p-3 rounded-full">
-                                            <Heart className="w-6 h-6 text-amber-600" />
+                                            <Sparkle className="w-6 h-6 text-amber-600" />
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-lg mb-1">Share Your Passion</h3>
