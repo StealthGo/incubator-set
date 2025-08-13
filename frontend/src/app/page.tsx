@@ -899,20 +899,7 @@ export default function Home() {
                     </div>
                 </motion.section>
 
-                {/* Newsletter Signup Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
-                    <div className="max-w-3xl mx-auto px-6">
-                        <div className="bg-amber-50 rounded-2xl p-8 lg:p-12 flex flex-col items-center text-center border border-amber-200/80">
-                            <h2 className="text-3xl md:text-4xl font-bold text-amber-800 mb-3">Get Travel Gyaan in Your Inbox or WhatsApp!</h2>
-                            <p className="text-gray-700 mb-8 max-w-xl">Subscribe for desi travel tips, exclusive deals, and itinerary inspiration. No bakwaas, only useful gyaan!</p>
-                            <form className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
-                                <input type="email" placeholder="Your email address" className="flex-1 px-5 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900" />
-                                <button type="submit" className="px-6 py-3 rounded-full bg-amber-500 text-white font-semibold shadow-sm hover:bg-amber-600 transition-all text-base">Subscribe</button>
-                            </form>
-                            <p className="text-xs text-gray-500 mt-3">We respect your privacy. No spam, promise!</p>
-                        </div>
-                    </div>
-                </motion.section>
+
 
                 {/* Pro Features Section */}
                 <motion.section 
@@ -958,32 +945,93 @@ export default function Home() {
                 style={{ backgroundColor: '#FCFAF8' }}
             >
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
-                        <div className="col-span-2 mb-8 md:mb-0">
-                            <div className="flex items-center gap-3 mb-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+                        {/* Brand and Newsletter Section */}
+                        <div className="lg:col-span-2">
+                            <div className="flex items-center gap-3 mb-6">
                                 <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
                                     <Globe className="text-amber-600" />
                                 </div>
                                 <span className="text-xl font-bold text-gray-900 tracking-tight">The Modern <span className="text-amber-600">Chanakya</span></span>
                             </div>
-                            <p className="text-gray-500 text-base">Bharat ka apna AI-powered travel itinerary platform.</p>
-                        </div>
-                        {[{ title: 'Company', links: ['About', 'Contact', 'FAQ'] }, { title: 'Product', links: ['Personalized Trips', 'Business Solutions', 'Partners'] }, { title: 'Legal', links: ['Privacy', 'Terms'] }, { title: 'Plan', links: ['Solo Trip', 'Family Trip', 'Business Trip'] }].map(col => (
-                            <div key={col.title}>
-                                <h4 className="font-semibold text-gray-900 mb-3">{col.title}</h4>
-                                <ul className="space-y-2 text-gray-500">
-                                    {col.links.map(link => <li key={link}><a href="#" className="hover:text-amber-600 transition">{link}</a></li>)}
-                                </ul>
+                            
+                            {/* Newsletter */}
+                            <div className="mb-6">
+                                <h3 className="text-gray-900 font-semibold mb-3">Stay Connected: Join our community newsletter.</h3>
+                                <form className="flex gap-2">
+                                    <input 
+                                        type="email" 
+                                        placeholder="Enter your email" 
+                                        className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 text-sm"
+                                    />
+                                    <button 
+                                        type="submit" 
+                                        className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
+                                    >
+                                        →
+                                    </button>
+                                </form>
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Travel Services */}
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
+                            <ul className="space-y-3 text-gray-600 text-sm">
+                                <li><a href="#" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Group Travel</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Solo Adventures</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Family Trips</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Business Travel</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
+                            </ul>
+                        </div>
+
+                        {/* Resources */}
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
+                            <ul className="space-y-3 text-gray-600 text-sm">
+                                <li><a href="#" className="hover:text-amber-600 transition">Travel Guides</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Travel Tips</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Destination Insights</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Budget Planning</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Packing Lists</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Travel Stories</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Cultural Guides</a></li>
+                            </ul>
+                        </div>
+
+                        {/* Support */}
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
+                            <ul className="space-y-3 text-gray-600 text-sm">
+                                <li><a href="#" className="hover:text-amber-600 transition">Help Center</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Contact Us</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">FAQ</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
+                                <li><a href="#" className="hover:text-amber-600 transition">Feedback</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div className="flex flex-col md:flex-row items-center justify-between mt-12 pt-8 border-t border-gray-200/80">
+
+                    {/* Bottom Section */}
+                    <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-gray-200/80">
                         <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
-                        <div className="flex gap-5 text-gray-500 text-xl">
-                            <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram /></a>
-                            <a href="#" aria-label="LinkedIn" className="hover:text-amber-600 transition"><Linkedin /></a>
-                            <a href="#" aria-label="YouTube" className="hover:text-amber-600 transition"><Youtube /></a>
-                            <a href="#" aria-label="Globe" className="hover:text-amber-600 transition"><Globe /></a>
+                        <div className="flex items-center gap-6">
+                            <div className="flex gap-4 text-gray-500 text-sm">
+                                <a href="#" className="hover:text-amber-600 transition">Privacy Policy</a>
+                                <a href="#" className="hover:text-amber-600 transition">Terms of Service</a>
+                                <a href="#" className="hover:text-amber-600 transition">Cookie Policy</a>
+                            </div>
+                            <div className="flex gap-4 text-gray-500">
+                                <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
+                                <a href="#" aria-label="LinkedIn" className="hover:text-amber-600 transition"><Linkedin size={18} /></a>
+                                <a href="#" aria-label="YouTube" className="hover:text-amber-600 transition"><Youtube size={18} /></a>
+                                <a href="#" aria-label="Twitter" className="hover:text-amber-600 transition"><Globe size={18} /></a>
+                            </div>
                         </div>
                     </div>
                 </div>
