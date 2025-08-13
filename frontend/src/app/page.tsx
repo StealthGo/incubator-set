@@ -582,52 +582,146 @@ export default function Home() {
                     className="w-full py-24"
                     style={{ backgroundColor: '#FCFAF8' }}
                 >
-                    <div className="max-w-6xl mx-auto px-6">
-                        <h2 className="text-5xl font-extrabold text-gray-900 text-center mb-16">How it Works</h2>
-                        <div className="flex flex-col md:flex-row items-center justify-center w-full gap-16">
-                            <div className="flex-1 max-w-lg">
-                                <h3 className="text-4xl font-bold text-gray-900 mb-4">Start chatting<br />with us.</h3>
-                                <p className="text-lg text-gray-700 leading-relaxed">Ask us for suggestions for any destination or ask us for an entire itinerary. Be as specific as you can about the types of experiences that you like or take our quiz to determine your travel style.</p>
+                    <div className="max-w-7xl mx-auto px-6">
+                        <div className="text-center mb-20">
+                            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4">
+                                How It Works: Your Journey, <span className="text-amber-600">Unfolded</span>
+                            </h2>
+                            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                From idea to reality in three simple steps
+                            </p>
+                        </div>
+
+                        {/* Flow Diagram */}
+                        <div className="relative">
+                            {/* Desktop Layout */}
+                            <div className="hidden lg:flex items-center justify-between relative">
+                                {/* Connecting Lines */}
+                                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 -translate-y-1/2 z-0">
+                                    <div className="absolute top-1/2 left-1/3 w-3 h-3 bg-amber-500 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                                    <div className="absolute top-1/2 left-2/3 w-3 h-3 bg-amber-500 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+                                </div>
+
+                                {/* Step 1 */}
+                                <motion.div 
+                                    className="flex-1 max-w-sm relative z-10"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                >
+                                    <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center group hover:shadow-2xl transition-all duration-300">
+                                        <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                            <Heart className="w-10 h-10 text-white" />
+                                        </div>
+                                        <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 1</div>
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Unveil Your Soul</h3>
+                                        <p className="text-gray-600 leading-relaxed">
+                                            Tell us what you love (Food, History, Art) in our fun, personalized onboarding.
+                                        </p>
+                                    </div>
+                                </motion.div>
+
+                                {/* Step 2 */}
+                                <motion.div 
+                                    className="flex-1 max-w-sm relative z-10"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                >
+                                    <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center group hover:shadow-2xl transition-all duration-300">
+                                        <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                            <Settings2 className="w-10 h-10 text-white" />
+                                        </div>
+                                        <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 2</div>
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Let Chanakya Weave the Path</h3>
+                                        <p className="text-gray-600 leading-relaxed">
+                                            Our AI instantly creates a bespoke itinerary from our database of authentic gems.
+                                        </p>
+                                    </div>
+                                </motion.div>
+
+                                {/* Step 3 */}
+                                <motion.div 
+                                    className="flex-1 max-w-sm relative z-10"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.6 }}
+                                >
+                                    <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center group hover:shadow-2xl transition-all duration-300">
+                                        <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                            <MapPin className="w-10 h-10 text-white" />
+                                        </div>
+                                        <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 3</div>
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Discover & Do</h3>
+                                        <p className="text-gray-600 leading-relaxed">
+                                            Experience India effortlessly with seamless navigation and direct booking for unique local experiences.
+                                        </p>
+                                    </div>
+                                </motion.div>
                             </div>
-                            <div className="flex-1 flex flex-col items-center justify-center relative min-h-[420px]">
-                                {/* Simplified Visualizer */}
-                                <div className="relative w-[380px] h-[380px] ">
-                                    <Image src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" width={80} height={80} className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10" unoptimized />
-                                    {/* Interest Bubbles */}
-                                    {[
-                                        { item: '🏖️ Beach', top: '90%', left: '50%' },
-                                        { item: '🏛️ History', top: '65%', left: '85%' },
-                                        { item: '🍽️ Dining', top: '35%', left: '85%' },
-                                        { item: '🧖‍♀️ Spa', top: '10%', left: '50%' },
-                                        { item: '🐦 Wildlife', top: '35%', left: '15%' },
-                                        { item: '🚴‍♂️ Cycling', top: '65%', left: '15%' }
-                                    ].map((bubble, i) => (
-                                        <motion.div
-                                            key={i}
-                                            className="absolute flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-md border border-gray-100"
-                                            initial={{ opacity: 0, scale: 0.5 }}
-                                            whileInView={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: i * 0.1 + 0.2, type: 'spring', stiffness: 100 }}
-                                            style={{
-                                                top: bubble.top,
-                                                left: bubble.left,
-                                                transform: 'translate(-50%, -50%)',
-                                            }}
-                                        >
-                                            <span className="text-sm font-medium text-gray-700">{bubble.item}</span>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                                <div className="w-[380px] mt-4 bg-white rounded-2xl shadow-lg flex items-center px-3 py-2 border border-gray-200/80">
-                                    <Plus className="text-gray-400" />
-                                    <input type="text" placeholder="Ask us anything..." className="flex-1 outline-none border-none bg-transparent text-gray-700 text-base mx-2" disabled />
-                                    <Mic className="text-gray-400" />
-                                    <button className="bg-gray-800 text-white rounded-full p-2.5 ml-2 hover:bg-gray-700 transition-all">
-                                        <Send size={18} />
-                                    </button>
-                                </div>
+
+                            {/* Mobile Layout */}
+                            <div className="lg:hidden space-y-8">
+                                {[
+                                    {
+                                        icon: Heart,
+                                        step: "Step 1",
+                                        title: "Unveil Your Soul",
+                                        description: "Tell us what you love (Food, History, Art) in our fun, personalized onboarding.",
+                                        delay: 0.2
+                                    },
+                                    {
+                                        icon: Settings2,
+                                        step: "Step 2", 
+                                        title: "Let Chanakya Weave the Path",
+                                        description: "Our AI instantly creates a bespoke itinerary from our database of authentic gems.",
+                                        delay: 0.4
+                                    },
+                                    {
+                                        icon: MapPin,
+                                        step: "Step 3",
+                                        title: "Discover & Do", 
+                                        description: "Experience India effortlessly with seamless navigation and direct booking for unique local experiences.",
+                                        delay: 0.6
+                                    }
+                                ].map((item, index) => (
+                                    <motion.div
+                                        key={index}
+                                        className="relative"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: item.delay }}
+                                    >
+                                        <div className="bg-white rounded-3xl p-8 shadow-xl border border-amber-100 text-center">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                <item.icon className="w-10 h-10 text-white" />
+                                            </div>
+                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">{item.step}</div>
+                                            <h3 className="text-2xl font-bold text-gray-900 mb-4">{item.title}</h3>
+                                            <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                                        </div>
+                                        {/* Connecting Arrow for Mobile */}
+                                        {index < 2 && (
+                                            <div className="flex justify-center py-4">
+                                                <ArrowRight className="w-6 h-6 text-amber-400" />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                ))}
                             </div>
                         </div>
+
+                        {/* Call to Action */}
+                        <motion.div 
+                            className="text-center mt-16"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.8 }}
+                        >
+                            <button className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                                Start Your Journey
+                            </button>
+                        </motion.div>
                     </div>
                 </motion.section>
 
