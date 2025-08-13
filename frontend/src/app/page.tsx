@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
 import { CardCarousel } from "@/components/ui/card-carousel";
+import HoverExpand from "@/components/ui/hover-expand";
 import {
     ArrowRight,
     CheckCircle,
@@ -359,6 +360,18 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 export default function Home() {
     const router = useRouter();
     const [isSignedIn, setIsSignedIn] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    // Handle navbar scroll effect
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            setIsScrolled(scrollTop > 50);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     // Check authentication status on component mount
     useEffect(() => {
@@ -398,21 +411,6 @@ export default function Home() {
         }
     };
 
-    // Hero background carousel logic
-    const heroImages = [
-        "/1.jpg",
-        "/2.jpg",
-        "/3.jpg",
-        "/5.jpg",
-    ];
-    const [bgIndex, setBgIndex] = useState(0);
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setBgIndex((prev) => (prev + 1) % heroImages.length);
-        }, 3500);
-        return () => clearInterval(interval);
-    }, [heroImages.length]);
-
     return (
         <motion.div 
             initial={{ opacity: 0 }}
@@ -421,70 +419,94 @@ export default function Home() {
             className="min-h-screen antialiased relative overflow-x-hidden flex flex-col"
             style={{ backgroundColor: '#FCFAF8', color: '#333333' }}
         >
-            {/* Hero Background Carousel */}
-            <div className="absolute top-0 left-0 w-full h-[700px] md:h-[800px] -z-10 overflow-hidden">
-                {heroImages.map((img, i) => (
-                    <motion.div
-                        key={img}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: bgIndex === i ? 1 : 0 }}
-                        transition={{ duration: 1.2, ease: "easeInOut" }}
-                        className="absolute inset-0 w-full h-full"
-                        style={{ zIndex: bgIndex === i ? 1 : 0 }}
-                    >
-                        <Image
-                            src={img}
-                            alt="Hero background"
-                            fill
-                            className="object-cover w-full h-full"
-                            priority={i === 0}
-                            unoptimized
-                        />
-                    </motion.div>
-                ))}
-                {/* Overlay for readability */}
-                <div className="absolute inset-0 bg-black/40" />
-            </div>
+            {/* Fixed Transparent Navbar */}
+            <nav
+                className="fixed top-0 left-0 right-0 z-[9999] w-full"
+                style={{ 
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 9999
+                }}
+            >
+                <motion.div
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="max-w-7xl mx-auto px-6 py-6"
+                >
+                    <div className="flex items-center justify-between">
+                        {/* Logo/Brand */}
+                        <div className="flex items-center">
+                            <span className="text-xl font-bold text-gray-900 tracking-wide font-poppins">
+                                
+                            </span>
+                        </div>
+
+                        {/* Navigation Links */}
+                        <div className="hidden md:flex items-center space-x-8">
+                            <a href="#home" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
+                            <a href="#destinations" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">DESTINATIONS</a>
+                            <a href="#how-it-works" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
+                            <a href="#why-us" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">WHY US</a>
+                            <a href="#testimonials" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">REVIEWS</a>
+                            <a href="#contact" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
+                        </div>
+
+                        {/* CTA Button */}
+                        <div className="hidden md:flex items-center">
+                            <button className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm">
+                                PLAN MY TRIP
+                            </button>
+                        </div>
+
+                        {/* Mobile Menu Button */}
+                        <div className="md:hidden">
+                            <button className="text-gray-700 hover:text-amber-600 transition-colors duration-200">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </motion.div>
+            </nav>
 
 
 
             {/* Main Content */}
-            <main className="flex-grow pt-24">
+            <main className="flex-grow pt-24" id="home">
+
                 {/* Hero Section */}
                 <motion.section
                     initial="initial"
                     animate="animate"
                     variants={fadeInUp}
-                    className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-24 px-6 text-center"
+                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-16 px-6"
                 >
-                          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)]">
-                              Curated For You, Crafted by <span className="text-amber-400">India.</span>
+                          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight text-center">
+                              This is Our India. Unveiled. <span className="text-amber-500">An AI with human wisdom.</span>
                           </h1>
-                          <p className="text-lg text-white mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
-                                 From hidden tea estates in Assam to secret ghats in Varanasi , let Us craft your perfect journey.
+                          <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
+                                 A Journey to the Heart of a Nation Built on Stories.
                           </p>
                     
                     {/* Search Section */}
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3, duration: 0.6 }}
-                        className="w-full max-w-4xl mx-auto mb-12"
-                    >
+                    <div className="max-w-4xl mx-auto mb-12">
                         {/* Main Search Bar */}
-                        <div className="relative mb-8">
-                            {/* Search Input Container */}
-                            <div className="flex items-center bg-white rounded-3xl border-2 border-amber-300/50 p-5">
+                        <div className="relative mb-6">
+                            <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-amber-300 transition-colors">
                                 <SearchInput />
-                                <div className="flex items-center gap-3 ml-4">
+                                <div className="flex items-center gap-2 ml-4">
                                     <button 
                                         aria-label="Voice input"
-                                        className="p-2.5 rounded-full hover:bg-amber-50 transition-colors group"
+                                        className="p-2 rounded-full hover:bg-gray-100 transition-colors group"
                                     >
-                                        <Mic className="w-5 h-5 text-amber-500 group-hover:text-amber-600" />
+                                        <Mic className="w-5 h-5 text-gray-500 group-hover:text-amber-500" />
                                     </button>
                                     <button 
-                                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-3.5 transition-all duration-200 hover:scale-105"
+                                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105"
                                         aria-label="Search"
                                         onClick={() => {
                                             const input = document.querySelector<HTMLInputElement>('input[type="text"]');
@@ -520,74 +542,48 @@ export default function Home() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Quick Action Buttons */}
-                        <div className="flex flex-wrap justify-center gap-3">
-                            <motion.button 
-                                whileHover={{ scale: 1.02, y: -2 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
-                                onClick={() => handleQuickAction('Create a new trip')}
-                            >
-                                <Globe className="w-4 h-4 text-amber-600" />
-                                <span className="text-sm font-medium">Create a new trip</span>
-                            </motion.button>
-                            
-                            <motion.button 
-                                whileHover={{ scale: 1.02, y: -2 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
-                                onClick={() => handleQuickAction('Inspire me where to go')}
-                            >
-                                <MapPin className="w-4 h-4 text-amber-600" />
-                                <span className="text-sm font-medium">Inspire me</span>
-                            </motion.button>
-                            
-                            <motion.button 
-                                whileHover={{ scale: 1.02, y: -2 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="flex items-center gap-2 px-5 py-3 bg-amber-50 rounded-2xl border border-amber-200/50 text-amber-800 hover:bg-amber-100 hover:border-amber-300/70 transition-all duration-200"
-                                onClick={() => handleQuickAction('Plan weekend getaways')}
-                            >
-                                <Users className="w-4 h-4 text-amber-600" />
-                                <span className="text-sm font-medium">Weekend getaways</span>
-                            </motion.button>
+                        <div className="flex flex-wrap justify-center gap-4 mb-6">
+                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                                <span className="text-amber-500">✈️</span>
+                                Create a new trip
+                            </button>
+                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                                <span className="text-amber-500">🗺️</span>
+                                Inspire me where to go
+                            </button>
+                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                                <span className="text-amber-500">🏖️</span>
+                                Weekend getaways
+                            </button>
+                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                                <span className="text-amber-500">🏨</span>
+                                Beautiful hotel in Dubai
+                            </button>
                         </div>
-                    </motion.div>
-                    
-                    {/* Stats */}
-                    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="flex flex-col sm:flex-row gap-8 justify-center items-center w-full">
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
-                            <MapPin className="text-amber-400" />
-                            <span className="font-semibold">5,000+ <span className="font-normal text-white/80">Trips Planned</span></span>
-                        </motion.div>
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
-                            <Users className="text-amber-400" />
-                            <span className="font-semibold">2,000+ <span className="font-normal text-white/80">Happy Travellers</span></span>
-                        </motion.div>
-                        <motion.div variants={fadeInUp} className="flex items-center gap-3 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)]">
-                            <Star className="text-amber-400" />
-                            <span className="font-semibold">4.9/5 <span className="font-normal text-white/80">Avg. Rating</span></span>
-                        </motion.div>
-                    </motion.div>
+
+                        {/* See How It Works Link - removed for cleaner design */}
+                    </div>
                 </motion.section>
 
                 {/* How it Works Section */}
                 <motion.section 
+                    id="how-it-works"
                     initial="initial"
                     whileInView="animate"
                     viewport={{ once: true, amount: 0.2 }}
                     variants={fadeInUp} 
                     transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="w-full py-24"
+                    className="w-full py-16"
                     style={{ backgroundColor: '#FCFAF8' }}
                 >
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center mb-20">
-                            <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4">
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
                                 How It Works: Your Journey, <span className="text-amber-600">Unfolded</span>
                             </h2>
-                            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                                 From idea to reality in three simple steps
                             </p>
                         </div>
@@ -725,6 +721,102 @@ export default function Home() {
                     </div>
                 </motion.section>
 
+                {/* Why Us Section */}
+                <motion.section 
+                    id="why-us"
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={fadeInUp} 
+                    className="py-16"
+                >
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                                Why Choose <span className="text-amber-600">The Modern Chanakya</span>?
+                            </h2>
+                            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                                Experience the difference of truly personalized travel with authentic local insights
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Tailored for You */}
+                            <motion.div 
+                                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                            >
+                                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <Heart className="w-6 h-6 text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3">Tailored for You</h3>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    We go beyond generic, templated itineraries. Our AI acts as a personal local advisor, crafting hyper-personalized journeys based on your unique interests, pace, and passions.
+                                </p>
+                            </motion.div>
+
+                            {/* Hidden Gems */}
+                            <motion.div 
+                                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <Eye className="w-6 h-6 text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3">Hidden Gems</h3>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    Our platform features "hidden gems" vetted by local experts, including invaluable "Wise Traveler Insights" on cultural etiquette and safety for authentic discovery.
+                                </p>
+                            </motion.div>
+
+                            {/* Seamless Convenience */}
+                            <motion.div 
+                                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 group"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    <Settings2 className="w-6 h-6 text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-3">Seamless Convenience</h3>
+                                <p className="text-gray-600 text-sm leading-relaxed">
+                                    From initial prompt to final destination, our platform provides integrated maps and bookings for unique experiences, letting you go from discovery to action with a single tap.
+                                </p>
+                            </motion.div>
+                        </div>
+
+                        {/* Additional Features Grid */}
+                        <motion.div 
+                            className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6"
+                            initial={{ opacity: 0, y: 15 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-amber-600 mb-1">10,000+</div>
+                                <div className="text-gray-600 text-xs">Curated Experiences</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-amber-600 mb-1">500+</div>
+                                <div className="text-gray-600 text-xs">Local Experts</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-amber-600 mb-1">98%</div>
+                                <div className="text-gray-600 text-xs">Satisfaction Rate</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-amber-600 mb-1">24/7</div>
+                                <div className="text-gray-600 text-xs">Support Available</div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </motion.section>
+
                 {/* Get Inspired Section */}
                 <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
                     <div className="max-w-7xl mx-auto px-6">
@@ -741,7 +833,7 @@ export default function Home() {
                                 { img: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=600&q=80", title: "Jaipur", desc: "Live the royal life in Jaipur" },
                                 { img: "https://images.unsplash.com/photo-1516685018646-5499d0a7d42f?auto=format&fit=crop&w=600&q=80", title: "Goa", desc: "Unwind on Goa’s golden sands" },
                                 { img: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=600&q=80", title: "Kerala", desc: "Cruise Kerala’s tranquil backwaters" },
-                                { img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80", title: "Varanasi", desc: "Witness the Ganga Aarti" },
+                                { img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80", , desc: "Witness the Ganga Aarti" },
                                 { img: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80", title: "Leh-Ladakh", desc: "Ride the passes of Ladakh" },
                                 { img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80", title: "Rann of Kutch", desc: "Experience the Rann Utsav" },
                                 { img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80", title: "Meghalaya", desc: "Chase waterfalls in the clouds" },
@@ -833,7 +925,7 @@ export default function Home() {
                 </motion.section>
 
                 {/* Testimonials Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
+                <motion.section id="testimonials" initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-4">Travellers kya bol rahe hain?</h2>
                         <p className="text-gray-600 text-center mb-12 text-lg">1 million+ logon ne The Modern Chanakya try kiya hai aur sabko planning ka kaam asaan laga!</p>
@@ -941,6 +1033,7 @@ export default function Home() {
 
             {/* Footer */}
             <footer 
+                id="contact"
                 className="w-full border-t border-gray-200/80 pt-16 pb-8 px-6 md:px-12"
                 style={{ backgroundColor: '#FCFAF8' }}
             >

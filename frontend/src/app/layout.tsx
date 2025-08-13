@@ -1,6 +1,6 @@
 "use client";
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import UserAvatar from "./UserAvatar";
 import { useEffect, useState } from "react";
@@ -14,6 +14,17 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${poppins.variable} antialiased`}>
         <div className="relative min-h-screen">
           {loading && (
             <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 to-white transition-opacity duration-700" style={{ pointerEvents: 'all', opacity: loading ? 1 : 0 }}>
