@@ -1216,7 +1216,7 @@ export default function PreferencesPage() {
                                  )}
                                  
                                  <div className="mt-6 flex items-center gap-4 flex-wrap">
-                                     <Button variant="primary" size="default">
+                                     <Button variant="default" size="default">
                                        <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                            <MapPin className="w-4 h-4" /> Google Maps
                                        </a>
@@ -1429,7 +1429,7 @@ export default function PreferencesPage() {
                                  )}
                                  
                                  <div className="mt-6 flex items-center gap-4 flex-wrap">
-                                     <Button variant="primary" size="default">
+                                     <Button variant="default" size="default">
                                        <a href={activity.google_maps_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                            <MapPin className="w-4 h-4" /> Google Maps
                                        </a>
