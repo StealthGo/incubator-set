@@ -1464,4 +1464,7 @@ export default function PreferencesPage() {
                                             'bg-gray-100 text-gray-600'
                                           }`}>
                                             {activity.booking_priority === 'Required' ? '🎫 Booking Required' :
-                                             activity.booking_priority === 'Recommended' ? '
+                                             activity.booking_priority === 'Recommended' ? '🔖 Booking Recommended' :
+                                             '🚶 Walk-in Welcome'}
+                                          </span>
+                                     )}
