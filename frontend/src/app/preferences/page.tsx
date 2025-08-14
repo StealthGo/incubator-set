@@ -374,8 +374,21 @@ export default function PreferencesPage() {
     return user?.subscription_status === "free" && user?.free_itinerary_used === true;
   };
 
+  // Function to scroll to the bottom of chat
+  const scrollToBottom = (smooth = true) => {
+    if (chatEndRef.current) {
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ 
+          behavior: smooth ? "smooth" : "auto", 
+          block: "end" 
+        });
+      }, 50); // Small delay to ensure DOM is updated
+    }
+  };
+
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Ensure automatic scrolling to bottom when new messages arrive
+    scrollToBottom();
   }, [messages]);
 
   // Persist itinerary and conversation state to localStorage
@@ -394,6 +407,16 @@ export default function PreferencesPage() {
   useEffect(() => {
     localStorage.setItem("conversationComplete", JSON.stringify(conversationComplete));
   }, [conversationComplete]);
+
+  // Ensure chat scrolls to bottom when user logs in
+  useEffect(() => {
+    if (isLoggedIn) {
+      // Use a small timeout to ensure the DOM has updated
+      setTimeout(() => {
+        scrollToBottom(false); // Use auto instead of smooth for initial load
+      }, 100);
+    }
+  }, [isLoggedIn]);
 
   // Clear localStorage if user becomes locked
   useEffect(() => {
@@ -590,6 +613,8 @@ export default function PreferencesPage() {
     // Add typing indicator immediately (only on first attempt)
     if (retryCount === 0) {
       setMessages((msgs) => [...msgs, { sender: "system", text: "typing..." }]);
+      // Scroll to bottom to show typing indicator
+      setTimeout(() => scrollToBottom(), 0);
     }
 
     try {
@@ -2221,63 +2246,80 @@ export default function PreferencesPage() {
             </div>
           </div>
 
-          {/* Chat Messages Container */}
-          <div className="flex-1 overflow-y-auto px-3 py-2 bg-[#e5ddd5] bg-opacity-30" style={{ 
-            backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
-            backgroundSize: '60px 60px'
-          }}>
-            {/* Welcome message for non-authenticated users */}
-            {!isLoggedIn && (
-              <div className="flex justify-center items-center h-full">
-                <motion.div 
-                  className="bg-white rounded-2xl p-6 shadow-lg max-w-sm text-center mx-4"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="text-4xl mb-3">🇮🇳</div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">Welcome to The Modern Chanakya!</h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Sign in to start planning your incredible India journey!
-                  </p>
-                  <button 
-                    onClick={() => setShowSignInModal(true)}
-                    className="px-6 py-2 bg-orange-500 text-white font-medium rounded-full hover:bg-orange-600 transition-colors text-sm"
+          {/* Chat Container - Main flex container with messages and input */}
+          <div className="flex-1 flex flex-col h-full">
+            {/* Chat Background and Messages Area */}
+            <div className="flex-1 bg-[#e5ddd5] bg-opacity-30 overflow-hidden" style={{ 
+              backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
+              backgroundSize: '60px 60px',
+              minHeight: '300px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Welcome message for non-authenticated users */}
+              {!isLoggedIn && (
+                <div className="flex justify-center items-center h-full">
+                  <motion.div 
+                    className="bg-white rounded-2xl p-6 shadow-lg max-w-sm text-center mx-4"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    Start Planning
-                  </button>
-                </motion.div>
-              </div>
-            )}
-            
-            {/* Chat Messages */}
-            {isLoggedIn && (
-              <div className="space-y-1 py-2">
-                {messages.map((msg, i) => 
-                  msg.text === "typing..." ? (
-                    <TypingIndicator key={i} />
-                  ) : (
-                    <ChatBubble 
-                      key={i} 
-                      sender={msg.sender}
-                      timestamp={i === messages.length - 1 ? new Date().toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                      }) : undefined}
+                    <div className="text-4xl mb-3">🇮🇳</div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">Welcome to The Modern Chanakya!</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      Sign in to start planning your incredible India journey!
+                    </p>
+                    <button 
+                      onClick={() => setShowSignInModal(true)}
+                      className="px-6 py-2 bg-orange-500 text-white font-medium rounded-full hover:bg-orange-600 transition-colors text-sm"
                     >
-                      {msg.text}
-                    </ChatBubble>
-                  )
-                )}
-                <div ref={chatEndRef} />
-              </div>
-            )}
-          </div>
-          
-          {/* Input Area - WhatsApp Style */}
-          {isLoggedIn && (
-            <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200">
+                      Start Planning
+                    </button>
+                  </motion.div>
+                </div>
+              )}
+              
+              {/* Chat Messages */}
+              {isLoggedIn && (
+                <div 
+                  className="h-full overflow-y-auto px-3 py-2 scrollbar-thin scrollbar-track-transparent"
+                  style={{
+                    height: 'calc(100vh - 170px)', /* Adjust based on header height + input area height */
+                    overflowY: 'auto',
+                    display: 'flex', 
+                    flexDirection: 'column'
+                  }}
+                >
+                  <div className="flex-1">
+                    <div className="space-y-1 py-2">
+                      {messages.map((msg, i) => 
+                        msg.text === "typing..." ? (
+                          <TypingIndicator key={i} />
+                        ) : (
+                          <ChatBubble 
+                            key={i} 
+                            sender={msg.sender}
+                            timestamp={i === messages.length - 1 ? new Date().toLocaleTimeString('en-US', { 
+                              hour: 'numeric', 
+                              minute: '2-digit',
+                              hour12: true 
+                            }) : undefined}
+                          >
+                            {msg.text}
+                          </ChatBubble>
+                        )
+                      )}
+                      <div ref={chatEndRef} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Input Area - WhatsApp Style */}
+            {isLoggedIn && (
+              <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200 flex-shrink-0">
               {/* Quick Replies */}
               {/* @ts-ignore - We know getCurrentQuestionType returns a valid key */}
               {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
@@ -2460,6 +2502,7 @@ export default function PreferencesPage() {
               )}
             </div>
           )}
+          </div>
         </section>
 
         {/* Right: Itinerary Output Section */}
