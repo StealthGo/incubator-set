@@ -386,9 +386,12 @@ export default function PreferencesPage() {
     }
   };
 
+
+  // Always smoothly scroll to the latest chat message
   useEffect(() => {
-    // Ensure automatic scrolling to bottom when new messages arrive
-    scrollToBottom();
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
   }, [messages]);
 
   // Persist itinerary and conversation state to localStorage
@@ -2330,7 +2333,7 @@ export default function PreferencesPage() {
             
             {/* Input Area - WhatsApp Style */}
             {isLoggedIn && (
-              <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200 flex-shrink-0">
+              <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200 flex-shrink-0 sticky bottom-0 z-10">
               {/* Quick Replies */}
               {/* @ts-ignore - We know getCurrentQuestionType returns a valid key */}
               {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
