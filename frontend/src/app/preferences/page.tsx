@@ -2218,7 +2218,13 @@ export default function PreferencesPage() {
 
       <div className="flex flex-col md:flex-row w-full flex-1" style={{ height: 'calc(100vh - 81px)' }}>
         {/* Left: Chat Section - WhatsApp Style */}
-        <section className={`w-full md:w-2/5 flex flex-col bg-[#efeae2] ${showFullItinerary ? 'hidden md:flex' : ''}`}>
+        <section
+          className={`w-full md:w-2/5 flex flex-col bg-[#efeae2] transition-all duration-300 ${showFullItinerary ? 'hidden md:flex' : ''}`}
+          style={{
+            maxHeight: '100%',
+            minHeight: 0,
+          }}
+        >
           {/* Chat Header */}
           <div className="bg-[#128c7e] text-white px-4 py-3 flex items-center gap-3 shadow-sm">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -2247,15 +2253,20 @@ export default function PreferencesPage() {
           </div>
 
           {/* Chat Container - Main flex container with messages and input */}
-          <div className="flex-1 flex flex-col h-full">
+          <div className="flex-1 flex flex-col h-full min-h-0">
             {/* Chat Background and Messages Area */}
-            <div className="flex-1 bg-[#e5ddd5] bg-opacity-30 overflow-hidden" style={{ 
-              backgroundImage: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
-              backgroundSize: '60px 60px',
-              minHeight: '300px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
+            <div
+              className="flex-1 bg-[#e5ddd5] bg-opacity-30 overflow-y-auto min-h-0"
+              style={{
+                backgroundImage:
+                  "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"80\" cy=\"80\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"40\" cy=\"60\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/><circle cx=\"60\" cy=\"40\" r=\"1\" fill=\"%23f0f0f0\" opacity=\"0.3\"/></svg>')",
+                backgroundSize: '60px 60px',
+                minHeight: '300px',
+                display: 'flex',
+                flexDirection: 'column',
+                maxHeight: '100%',
+              }}
+            >
               {/* Welcome message for non-authenticated users */}
               {!isLoggedIn && (
                 <div className="flex justify-center items-center h-full">
@@ -2506,17 +2517,24 @@ export default function PreferencesPage() {
         </section>
 
         {/* Right: Itinerary Output Section */}
-        <section className={`w-full md:w-3/5 flex flex-col ${showFullItinerary ? 'w-full' : ''} h-full`}>
-            <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 bg-white">
-                <h2 className="text-xl font-bold text-gray-900">Your Itinerary</h2>
-                <button type="button" className="ml-auto px-4 py-1 rounded-full bg-orange-100 text-orange-800 font-semibold hover:bg-orange-200 transition-all text-xs flex items-center gap-1" onClick={() => setShowFullItinerary(v => !v)}>
-                  <Icon name={showFullItinerary ? "chat" : "fullscreen"} className="text-sm"/>
-                  {showFullItinerary ? "Show Chat" : "Full Page"}
-                </button>
-            </div>
-            <div className="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-8 hide-scrollbar">
-              {renderItinerary()}
-            </div>
+        <section
+          className={`w-full md:w-3/5 flex flex-col transition-all duration-300 ${showFullItinerary ? 'w-full' : ''} h-full min-h-0`}
+          style={{ maxHeight: '100%' }}
+        >
+          <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 bg-white">
+            <h2 className="text-xl font-bold text-gray-900">Your Itinerary</h2>
+            <button
+              type="button"
+              className="ml-auto px-4 py-1 rounded-full bg-orange-100 text-orange-800 font-semibold hover:bg-orange-200 transition-all text-xs flex items-center gap-1"
+              onClick={() => setShowFullItinerary((v) => !v)}
+            >
+              <Icon name={showFullItinerary ? 'chat' : 'fullscreen'} className="text-sm" />
+              {showFullItinerary ? 'Show Chat' : 'Full Page'}
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-8 hide-scrollbar min-h-0" style={{ maxHeight: '100%' }}>
+            {renderItinerary()}
+          </div>
         </section>
       </div>
 
