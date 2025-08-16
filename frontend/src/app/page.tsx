@@ -336,13 +336,13 @@ const SearchInput = () => {
     };
 
     return (
-        <form 
+        <form
             onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit(e);
-            }} 
-            className="flex-1"
-            onClick={(e) => e.stopPropagation()} // Prevent clicks on the form from triggering the parent div's onClick
+            }}
+            className="w-full h-full"
+            onClick={(e) => e.stopPropagation()}
         >
             <input
                 type="text"
@@ -350,14 +350,13 @@ const SearchInput = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onFocus={() => setIsTyping(true)}
                 onBlur={() => {
-                    // Only set isTyping to false if the input is empty
                     if (!inputValue.trim()) {
                         setIsTyping(false);
                     }
                 }}
                 placeholder={prompts[currentPromptIndex]}
-                className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
-                onClick={(e) => e.stopPropagation()} // Prevent clicks on the input from triggering the parent div's onClick
+                className="w-full h-full text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
+                onClick={(e) => e.stopPropagation()}
             />
         </form>
     );
