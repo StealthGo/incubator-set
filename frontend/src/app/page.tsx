@@ -507,7 +507,10 @@ export default function Home() {
 
                         {/* CTA Button */}
                         <div className="hidden md:flex items-center">
-                            <button className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm">
+                            <button
+                                className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
+                                onClick={() => { window.location.href = '/signin'; }}
+                            >
                                 SIGN IN
                             </button>
                         </div>
