@@ -631,19 +631,47 @@ export default function Home() {
 
                         {/* Quick Action Buttons */}
                         <div className="flex flex-wrap justify-center gap-4 mb-8">
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Create a new trip';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">✈️</span>
                                 Create a new trip
                             </button>
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Inspire me where to go';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">🗺️</span>
                                 Inspire me where to go
                             </button>
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Weekend getaways';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">🏖️</span>
                                 Weekend getaways
                             </button>
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Beautiful hotel in Dubai';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">🏨</span>
                                 Beautiful hotel in Dubai
                             </button>
