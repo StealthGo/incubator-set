@@ -397,6 +397,21 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 
 export default function Home() {
     const router = useRouter();
+    // Request geolocation permission and store current location
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    localStorage.setItem('current_location', JSON.stringify({ latitude, longitude }));
+                },
+                (error) => {
+                    // Optionally handle error or fallback
+                    console.warn('Geolocation error:', error);
+                }
+            );
+        }
+    }, []);
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
