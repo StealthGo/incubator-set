@@ -1180,13 +1180,13 @@ export default function Home() {
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
                             <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="#" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Group Travel</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Solo Adventures</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Family Trips</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Business Travel</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
+                                <li><a href="/custom-itineraries" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
+                                <li><a href="/group-travel" className="hover:text-amber-600 transition">Group Travel</a></li>
+                                <li><a href="/solo-adventures" className="hover:text-amber-600 transition">Solo Adventures</a></li>
+                                <li><a href="/family-trips" className="hover:text-amber-600 transition">Family Trips</a></li>
+                                <li><a href="/business-travel" className="hover:text-amber-600 transition">Business Travel</a></li>
+                                <li><a href="/weekend-getaways" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
+                                <li><a href="/luxury-experiences" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
                             </ul>
                         </div>
 
@@ -1194,13 +1194,13 @@ export default function Home() {
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
                             <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="#" className="hover:text-amber-600 transition">Travel Guides</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Travel Tips</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Destination Insights</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Budget Planning</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Packing Lists</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Travel Stories</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Cultural Guides</a></li>
+                                <li><a href="/travel-guides" className="hover:text-amber-600 transition">Travel Guides</a></li>
+                                <li><a href="/travel-tips" className="hover:text-amber-600 transition">Travel Tips</a></li>
+                                <li><a href="/destination-insights" className="hover:text-amber-600 transition">Destination Insights</a></li>
+                                <li><a href="/budget-planning" className="hover:text-amber-600 transition">Budget Planning</a></li>
+                                <li><a href="/packing-lists" className="hover:text-amber-600 transition">Packing Lists</a></li>
+                                <li><a href="/travel-stories" className="hover:text-amber-600 transition">Travel Stories</a></li>
+                                <li><a href="/cultural-guides" className="hover:text-amber-600 transition">Cultural Guides</a></li>
                             </ul>
                         </div>
 
@@ -1208,9 +1208,9 @@ export default function Home() {
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
                             <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="#" className="hover:text-amber-600 transition">Help Center</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Contact Us</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">FAQ</a></li>
+                                <li><a href="/help-center" className="hover:text-amber-600 transition">Help Center</a></li>
+                                <li><a href="/contact-us" className="hover:text-amber-600 transition">Contact Us</a></li>
+                                <li><a href="/faq" className="hover:text-amber-600 transition">FAQ</a></li>
                                 <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
                                 <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
                                 <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
@@ -1224,9 +1224,9 @@ export default function Home() {
                         <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
                         <div className="flex items-center gap-6">
                             <div className="flex gap-4 text-gray-500 text-sm">
-                                <a href="#" className="hover:text-amber-600 transition">Privacy Policy</a>
-                                <a href="#" className="hover:text-amber-600 transition">Terms of Service</a>
-                                <a href="#" className="hover:text-amber-600 transition">Cookie Policy</a>
+                                <a href="/privacy-policy" className="hover:text-amber-600 transition">Privacy Policy</a>
+                                <a href="/terms-of-service" className="hover:text-amber-600 transition">Terms of Service</a>
+                                <a href="/cookie-policy" className="hover:text-amber-600 transition">Cookie Policy</a>
                             </div>
                             <div className="flex gap-4 text-gray-500">
                                 <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
