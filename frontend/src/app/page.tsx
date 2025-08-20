@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -269,7 +269,38 @@ const SearchInput = () => {
     const [inputValue, setInputValue] = useState("");
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
+    const [listening, setListening] = useState(false);
+    const recognitionRef = React.useRef<any>(null);
     const router = useRouter();
+    // Voice recognition setup
+    useEffect(() => {
+        if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setInputValue(transcript);
+                setListening(false);
+            };
+            recognition.onend = () => setListening(false);
+            recognition.onerror = () => setListening(false);
+            recognitionRef.current = recognition;
+        }
+    }, []);
+
+    const handleMicClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (listening) {
+            recognitionRef.current && recognitionRef.current.stop();
+            setListening(false);
+        } else {
+            recognitionRef.current && recognitionRef.current.start();
+            setListening(true);
+        }
+    };
     
     // Check authentication status on component mount
     useEffect(() => {
@@ -341,7 +372,7 @@ const SearchInput = () => {
                 e.preventDefault();
                 handleSubmit(e);
             }}
-            className="w-full h-full"
+            className="w-full h-full flex items-center"
             onClick={(e) => e.stopPropagation()}
         >
             <input
@@ -358,6 +389,14 @@ const SearchInput = () => {
                 className="w-full h-full text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
                 onClick={(e) => e.stopPropagation()}
             />
+            <button
+                type="button"
+                aria-label={listening ? "Stop voice input" : "Voice input"}
+                className={`p-2 rounded-full ml-2 transition-colors group ${listening ? 'bg-amber-100' : 'hover:bg-gray-100'}`}
+                onClick={handleMicClick}
+            >
+                <Mic className={`w-5 h-5 ${listening ? 'text-amber-500 animate-pulse' : 'text-gray-500 group-hover:text-amber-500'}`} />
+            </button>
         </form>
     );
 };
@@ -583,16 +622,6 @@ export default function Home() {
                             >
                                 <SearchInput />
                                 <div className="flex items-center gap-2 ml-4">
-                                    <button 
-                                        aria-label="Voice input"
-                                        className="p-2 rounded-full hover:bg-gray-100 transition-colors group"
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Prevent the parent div's onClick from firing
-                                            // Voice input logic here
-                                        }}
-                                    >
-                                        <Mic className="w-5 h-5 text-gray-500 group-hover:text-amber-500" />
-                                    </button>
                                     <button 
                                         className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105"
                                         aria-label="Search"
