@@ -1,6 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://incubator-set.onrender.com',
+  // Always use deployed backend URL for all API requests
+  baseURL: 'https://incubator-set.onrender.com',
   timeout: 30000, // 30 seconds
   longTimeout: 120000, // 120 seconds (2 minutes) for complex operations
 };
