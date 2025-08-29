@@ -345,39 +345,8 @@ async def health_check():
         "message": "Server is running"
     }
 
-class Message(BaseModel):
-    sender: str
-    text: str
 
-class ChatConversationRequest(BaseModel):
-    system_prompt: str
-    conversation_history: List[Message]
-    user_name: Optional[str] = None
-
-class ItineraryRequest(BaseModel):
-    messages: List[Message]
-    current_itinerary: Optional[dict] = None
-
-
-# --- COMMENTED OUT: Chat conversation endpoint (not in use for waitlist/survey) ---
-# @app.post("/api/chat-conversation")
-# async def chat_conversation(...):
-#     ...existing code...
-
-# Initialize Groq client
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
-# @app.post("/api/generate-itinerary")
-# async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends(get_current_user)):
-#     user_name = current_user.get("name", "Traveler")
-#     user_email = current_user.get("email")
-#     subscription_status = current_user.get("subscription_status", "free")
-#     has_premium_subscription = current_user.get("has_premium_subscription", False)
-#     free_itinerary_used = current_user.get("free_itinerary_used", False)
-    
-#     # Check subscription limits for itinerary generation
-#     if not has_premium_subscription and subscription_status == "free" and free_itinerary_used:
-#         raise HTTPException(
+# --- All AI/chat/itinerary-related classes and code removed for minimal backend ---
 #             status_code=status.HTTP_403_FORBIDDEN,
 #             detail="You have already used your free itinerary. Please upgrade to premium for unlimited itinerary generation and enhanced features."
 #         )
