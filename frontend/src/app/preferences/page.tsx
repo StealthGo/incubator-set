@@ -17,6 +17,13 @@ import {
 } from "lucide-react";
 import { buildApiUrl, API_ENDPOINTS, apiRequest } from '@/lib/api';
 
+// Types and interfaces for better type safety
+interface Message {
+  sender: 'user' | 'system' | 'llm';
+  text: string;
+  timestamp?: string;
+}
+
 // Enhanced Animation variants
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -329,7 +336,7 @@ function SignInModal({ onClose, onSuccess, onUserUpdate }: { onClose: () => void
 // --- Main Page Component ---
 
 export default function PreferencesPage() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     { sender: "system", text: "Hey! 👋 Ready to explore incredible India? \n\nKahan jaana hai? Where do you want to go? 🇮🇳✨" },
   ]);
   const [input, setInput] = useState("");
@@ -341,6 +348,12 @@ export default function PreferencesPage() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
+  
+  // Enhanced Animation variants
+  const fadeInUp = {
+    initial: { opacity: 0, y: 60 },
+    animate: { opacity: 1, y: 0 }
+  };
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
   const [user, setUser] = useState<{ 
@@ -401,8 +414,11 @@ export default function PreferencesPage() {
   useEffect(() => {
     if (messages.length > 1) { // More than just the initial greeting
       localStorage.setItem("conversationMessages", JSON.stringify(messages));
+      
+      // Also save the current question type with messages to keep in sync
+      localStorage.setItem("currentQuestionType", currentQuestionType);
     }
-  }, [messages]);
+  }, [messages, currentQuestionType]);
 
   useEffect(() => {
     localStorage.setItem("conversationComplete", JSON.stringify(conversationComplete));
@@ -435,6 +451,7 @@ export default function PreferencesPage() {
     const savedItinerary = localStorage.getItem("currentItinerary");
     const savedMessages = localStorage.getItem("conversationMessages");
     const savedConversationComplete = localStorage.getItem("conversationComplete");
+    const savedQuestionType = localStorage.getItem("currentQuestionType");
 
     if (savedItinerary) {
       try {
@@ -450,6 +467,20 @@ export default function PreferencesPage() {
         const parsedMessages = JSON.parse(savedMessages);
         if (Array.isArray(parsedMessages) && parsedMessages.length > 1) {
           setMessages(parsedMessages);
+          
+          // After restoring messages, analyze the last system message to determine current state
+          const systemMessages = parsedMessages.filter(msg => msg.sender === "system");
+          const lastSystemMessage = systemMessages[systemMessages.length - 1]?.text.toLowerCase() || "";
+          const detectedType = determineQuestionTypeFromResponse(lastSystemMessage);
+          
+          // If we can detect the question type from the message content, use that
+          if (detectedType) {
+            setCurrentQuestionType(detectedType);
+          } 
+          // Otherwise use the saved question type if available
+          else if (savedQuestionType) {
+            setCurrentQuestionType(savedQuestionType);
+          }
         }
       } catch (error) {
         console.error("Error parsing saved messages:", error);
@@ -528,11 +559,32 @@ export default function PreferencesPage() {
         // If we have an initial prompt, submit it to the chat
         if (initialPrompt && !isConversing) {
           console.log("Processing initial prompt:", initialPrompt);
+          // Reset current question type to ensure we start from a clean state
+          setCurrentQuestionType("destination");
+          
           // Add user message
           setMessages(current => [...current, { sender: "user", text: initialPrompt }]);
           
           // Use handleSend to process the message properly instead of calling getLLMResponse directly
           await handleSend(undefined, initialPrompt);
+          
+          // Add a hook to ensure correct question type is set after the response is processed
+          // This helps with making sure the quick response options match the question
+          setTimeout(() => {
+            const lastSystemMessage = messages
+              .filter(msg => msg.sender === "system")
+              .slice(-1)[0]?.text.toLowerCase() || "";
+              
+            // Force update question type if message is about food preferences
+            if (lastSystemMessage.includes("food") || 
+                lastSystemMessage.includes("eat") || 
+                lastSystemMessage.includes("dietary") || 
+                lastSystemMessage.includes("vegetarian") || 
+                lastSystemMessage.includes("non-veg")) {
+              console.log("Adjusting to food_preferences question type");
+              setCurrentQuestionType("food_preferences");
+            }
+          }, 500);
         }
         
         // Mark as processed to avoid duplicates
@@ -596,6 +648,13 @@ export default function PreferencesPage() {
     setMessages((msgs) => [...msgs, { sender: "user", text: currentInput }]);
     setInput("");
 
+    // Update current question type before getting response
+    // This will be further refined after the AI responds
+    const nextQuestionType = getNextQuestionType(currentQuestionType);
+    if (nextQuestionType) {
+      setCurrentQuestionType(nextQuestionType);
+    }
+
     // Get LLM response to continue conversation
     await getLLMResponse([...messages, { sender: "user", text: currentInput }]);
   };
@@ -658,10 +717,46 @@ export default function PreferencesPage() {
         return newMsgs;
       });
       
-      // Small delay to ensure message is rendered before showing quick replies
+      // Update question type based on AI response content
+      // Delay slightly to ensure state updates properly
       setTimeout(() => {
+        // Update currentQuestionType based on the AI's last message
+        const responseText = data.response.toLowerCase();
+        
+        // Special handling for food preferences detection
+        if (responseText.includes("food") || 
+            responseText.includes("eat") || 
+            responseText.includes("dietary") || 
+            responseText.includes("vegetarian") || 
+            responseText.includes("non-veg") || 
+            responseText.includes("non veg") ||
+            responseText.includes("prefer") ||
+            responseText.includes("diet") ||
+            responseText.includes("veg") || 
+            responseText.includes("cuisine") ||
+            responseText.includes("meal") ||
+            responseText.includes("appetite") ||
+            responseText.includes("hungry") ||
+            responseText.includes("jain") ||
+            responseText.includes("allergies") ||
+            responseText.includes("🍛") ||
+            responseText.includes("🍽️") ||
+            responseText.includes("🥗") ||
+            responseText.includes("🌱") ||
+            responseText.includes("🍖")) {
+          console.log("Food preferences question detected");
+          setCurrentQuestionType("food_preferences");
+        } else {
+          // Standard question type detection
+          const updatedType = determineQuestionTypeFromResponse(responseText);
+          if (updatedType) {
+            console.log("Question type detected:", updatedType);
+            setCurrentQuestionType(updatedType);
+          }
+        }
+        
         // Check if conversation is ready for itinerary generation
-        if (data.ready_for_itinerary || data.response.toLowerCase().includes("ready to generate") || data.response.toLowerCase().includes("work my magic") || data.response.toLowerCase().includes("create your itinerary")) {
+        if (data.ready_for_itinerary || responseText.includes("ready to generate") || responseText.includes("work my magic") || responseText.includes("create your itinerary")) {
           setConversationComplete(true);
           setShowOptions(true);
         }
@@ -728,6 +823,28 @@ export default function PreferencesPage() {
     const systemMessages = messages.filter(msg => msg.sender === "system" && msg.text !== "typing...");
     const userMessages = messages.filter(msg => msg.sender === "user");
     
+    // Check the last message for content that would help determine the question type
+    if (systemMessages.length > 0 && systemMessages[systemMessages.length - 1]?.text) {
+      const lastMessage = systemMessages[systemMessages.length - 1].text.toLowerCase();
+      
+      // Force update currentQuestionType if we can better determine it from the message content
+      if (lastMessage.includes("food") || lastMessage.includes("eat") || 
+          lastMessage.includes("dietary") || lastMessage.includes("vegetarian") || 
+          lastMessage.includes("non-veg") || lastMessage.includes("prefer")) {
+        // If the message is clearly about food preferences
+        if (currentQuestionType !== "food_preferences") {
+          setTimeout(() => setCurrentQuestionType("food_preferences"), 0);
+        }
+      } else if (lastMessage.includes("who") || lastMessage.includes("coming along") || 
+          lastMessage.includes("travel with") || lastMessage.includes("solo") || 
+          lastMessage.includes("companion")) {
+        // If the message is about travelers
+        if (currentQuestionType !== "travelers") {
+          setTimeout(() => setCurrentQuestionType("travelers"), 0);
+        }
+      }
+    }
+    
     // Show quick replies only if:
     // 1. AI has sent at least one message (excluding typing indicator)
     // 2. AI has responded more recently than user (AI's turn is complete)
@@ -743,22 +860,290 @@ export default function PreferencesPage() {
     return systemMessages.length > userMessages.length || systemMessages.length === userMessages.length;
   };
 
-  // Determine current question type for quick replies based on conversation flow
+  // Helper function to get next question in sequence
+  const getNextQuestionType = (currentType: string) => {
+    const questionSequence = ["destination", "dates", "travelers", "interests", "food_preferences", "budget", "pace"];
+    const currentIndex = questionSequence.indexOf(currentType);
+    
+    if (currentIndex === -1 || currentIndex >= questionSequence.length - 1) {
+      return "destination"; // Default or loop back to start
+    }
+    
+    return questionSequence[currentIndex + 1];
+  };
+  
+  // Analyze AI response to determine question type
+  const determineQuestionTypeFromResponse = (responseText: string): string | null => {
+    // Check for destination keywords
+    if (responseText.includes("where") || 
+        responseText.includes("destination") || 
+        responseText.includes("location") || 
+        responseText.includes("place") || 
+        responseText.includes("kahan jaana") || 
+        responseText.includes("city") || 
+        responseText.includes("town") ||
+        responseText.includes("state") ||
+        responseText.includes("area") ||
+        responseText.includes("region") ||
+        responseText.includes("🇮🇳") ||
+        responseText.includes("📍") ||
+        responseText.includes("🗺️") ||
+        responseText.includes("🏙️")) {
+      return "destination";
+    }
+    
+    // Check for dates/timing keywords
+    if (responseText.includes("when") || 
+        responseText.includes("date") || 
+        responseText.includes("month") || 
+        responseText.includes("timing") || 
+        responseText.includes("season") || 
+        responseText.includes("time of year") ||
+        responseText.includes("planning") ||
+        responseText.includes("schedule") ||
+        responseText.includes("calendar") ||
+        responseText.includes("visit") ||
+        responseText.includes("trip") ||
+        responseText.includes("duration") ||
+        responseText.includes("days") ||
+        responseText.includes("📅") ||
+        responseText.includes("🗓️") ||
+        responseText.includes("⏱️") ||
+        responseText.includes("⏳") ||
+        responseText.includes("🌞") ||
+        responseText.includes("❄️") ||
+        responseText.includes("🌧️")) {
+      return "dates";
+    }
+    
+    // Check for traveler keywords
+    if (responseText.includes("who") || 
+        (responseText.includes("travel") && responseText.includes("with")) || 
+        responseText.includes("solo") || 
+        responseText.includes("family") || 
+        responseText.includes("friend") ||
+        responseText.includes("group") ||
+        responseText.includes("people") ||
+        responseText.includes("partner") ||
+        responseText.includes("spouse") ||
+        responseText.includes("children") ||
+        responseText.includes("kid") ||
+        responseText.includes("honeymoon") ||
+        responseText.includes("accompany") ||
+        responseText.includes("together") ||
+        responseText.includes("👫") ||
+        responseText.includes("👨‍👩‍👧‍👦") ||
+        responseText.includes("👥") ||
+        responseText.includes("💕") ||
+        responseText.includes("✈️")) {
+      return "travelers";
+    }
+    
+    // Check for interests keywords
+    if (responseText.includes("interest") || 
+        responseText.includes("activity") || 
+        responseText.includes("experience") || 
+        responseText.includes("like to do") ||
+        responseText.includes("enjoy") ||
+        responseText.includes("prefer") ||
+        responseText.includes("hobby") ||
+        responseText.includes("passion") ||
+        responseText.includes("adventure") ||
+        responseText.includes("sightseeing") ||
+        responseText.includes("tour") ||
+        responseText.includes("excited") ||
+        responseText.includes("excited about") ||
+        responseText.includes("🎯") ||
+        responseText.includes("🌿") ||
+        responseText.includes("🏛️") ||
+        responseText.includes("🧘‍♀️") ||
+        responseText.includes("🎭")) {
+      return "interests";
+    }
+    
+    // Check for food preferences keywords (moved to separate dedicated check)
+    if (responseText.includes("food") || 
+        responseText.includes("eat") || 
+        responseText.includes("dietary") || 
+        responseText.includes("vegetarian") || 
+        responseText.includes("cuisine") || 
+        responseText.includes("meal") ||
+        responseText.includes("veg") ||
+        responseText.includes("non-veg") ||
+        responseText.includes("🍛") ||
+        responseText.includes("🍽️") ||
+        responseText.includes("🥗") ||
+        responseText.includes("🌱") ||
+        responseText.includes("🍖")) {
+      return "food_preferences";
+    }
+    
+    // Check for budget keywords
+    if (responseText.includes("budget") || 
+        responseText.includes("spend") || 
+        responseText.includes("cost") || 
+        responseText.includes("price") || 
+        responseText.includes("expensive") || 
+        responseText.includes("cheap") ||
+        responseText.includes("luxury") ||
+        responseText.includes("affordable") ||
+        responseText.includes("economy") ||
+        responseText.includes("premium") ||
+        responseText.includes("money") ||
+        responseText.includes("financial") ||
+        responseText.includes("💸") ||
+        responseText.includes("💰") ||
+        responseText.includes("💎") ||
+        responseText.includes("💵") ||
+        responseText.includes("💳")) {
+      return "budget";
+    }
+    
+    // Check for pace keywords
+    if (responseText.includes("pace") || 
+        responseText.includes("speed") || 
+        responseText.includes("relaxed") || 
+        responseText.includes("adventure") || 
+        responseText.includes("itinerary style") ||
+        responseText.includes("fast") ||
+        responseText.includes("slow") ||
+        responseText.includes("busy") ||
+        responseText.includes("packed") ||
+        responseText.includes("leisure") ||
+        responseText.includes("relax") ||
+        responseText.includes("chill") ||
+        responseText.includes("🐌") ||
+        responseText.includes("⚖️") ||
+        responseText.includes("🏃‍♂️") ||
+        responseText.includes("🧘‍♀️")) {
+      return "pace";
+    }
+    
+    return null; // No clear type detected
+  };
+
+  // Determine current question type for quick replies based on conversation flow and content analysis
   const getCurrentQuestionType = () => {
     const userMessages = messages.filter(msg => msg.sender === "user");
+    const systemMessages = messages.filter(msg => msg.sender === "system");
     const conversationStep = userMessages.length;
     
-    // Follow the sequence: destination → dates → travelers → interests → food_preferences → budget → pace
-    switch (conversationStep) {
-      case 0: return "destination";        // First question about destination
-      case 1: return "dates";             // Second question about dates
-      case 2: return "travelers";         // Third question about travelers
-      case 3: return "interests";         // Fourth question about interests
-      case 4: return "food_preferences";  // Fifth question about food preferences
-      case 5: return "budget";            // Sixth question about budget
-      case 6: return "pace";              // Seventh question about pace
-      default: return "destination";      // Default fallback
+    // If conversation is just starting, show destination options
+    if (conversationStep === 0) return "destination";
+    
+    // Get the last system message to analyze content
+    const lastSystemMessage = systemMessages[systemMessages.length - 1]?.text.toLowerCase() || "";
+    
+    // Check for keyword patterns to determine the current conversation stage
+    if (lastSystemMessage.includes("where") || lastSystemMessage.includes("destination") || lastSystemMessage.includes("location") || lastSystemMessage.includes("place") || lastSystemMessage.includes("kahan jaana")) {
+      return "destination";
     }
+    
+    if (lastSystemMessage.includes("when") || lastSystemMessage.includes("date") || lastSystemMessage.includes("month") || lastSystemMessage.includes("timing") || lastSystemMessage.includes("season") || lastSystemMessage.includes("time of year")) {
+      return "dates";
+    }
+    
+    if (lastSystemMessage.includes("who") || lastSystemMessage.includes("travel") && lastSystemMessage.includes("with") || lastSystemMessage.includes("solo") || lastSystemMessage.includes("family") || lastSystemMessage.includes("friend")) {
+      return "travelers";
+    }
+    
+    if (lastSystemMessage.includes("interest") || lastSystemMessage.includes("activity") || lastSystemMessage.includes("experience") || lastSystemMessage.includes("like to do")) {
+      return "interests";
+    }
+    
+    if (lastSystemMessage.includes("food") || lastSystemMessage.includes("eat") || 
+        lastSystemMessage.includes("dietary") || lastSystemMessage.includes("vegetarian") || 
+        lastSystemMessage.includes("cuisine") || lastSystemMessage.includes("meal") ||
+        lastSystemMessage.includes("non-veg") || lastSystemMessage.includes("prefer")) {
+      return "food_preferences";
+    }
+    
+    if (lastSystemMessage.includes("budget") || lastSystemMessage.includes("spend") || lastSystemMessage.includes("cost") || lastSystemMessage.includes("price") || lastSystemMessage.includes("expensive") || lastSystemMessage.includes("cheap")) {
+      return "budget";
+    }
+    
+    if (lastSystemMessage.includes("pace") || lastSystemMessage.includes("speed") || lastSystemMessage.includes("relaxed") || lastSystemMessage.includes("adventure") || lastSystemMessage.includes("itinerary style")) {
+      return "pace";
+    }
+    
+    // Fallback to the sequence-based approach if content analysis doesn't yield a result
+    switch (conversationStep) {
+      case 1: return "dates";
+      case 2: return "travelers";
+      case 3: return "interests";
+      case 4: return "food_preferences";
+      case 5: return "budget";
+      case 6: return "pace";
+      default: return "destination";
+    }
+  };
+
+  // Helper function to extract user preferences from messages
+  const extractUserPreferences = (messageList: Message[]) => {
+    const userMessages = messageList.filter(msg => msg.sender === "user");
+    const systemMessages = messageList.filter(msg => msg.sender === "system");
+    
+    // Simple extraction - index-based with fallbacks
+    const destination = userMessages.length > 0 && userMessages[0] ? userMessages[0].text : "Not specified";
+    const dates = userMessages.length > 1 && userMessages[1] ? userMessages[1].text : "Not specified";
+    
+    // Analyze content of remaining messages
+    let travelers = "Not specified";
+    let interests = "Not specified";
+    let food_preferences = "Not specified";
+    let budget = "Not specified";
+    let pace = "Not specified";
+    
+    // Check for emojis and keywords to better classify messages
+    for (let i = 2; i < userMessages.length; i++) {
+      const userMsg = userMessages[i];
+      if (!userMsg) continue;
+      
+      const msg = userMsg.text.toLowerCase();
+      
+      // Check for emojis in the message
+      if (msg.includes("✈️") || msg.includes("👫") || msg.includes("👨‍👩‍👧‍👦") || 
+          msg.includes("👥") || msg.includes("💕") || msg.includes("solo") || 
+          msg.includes("partner") || msg.includes("family") || msg.includes("friend")) {
+        travelers = userMsg.text;
+      } else if (msg.includes("🍖") || msg.includes("🥗") || msg.includes("🍽️") || 
+                msg.includes("🌱") || msg.includes("vegetarian") || msg.includes("vegan") || 
+                msg.includes("food")) {
+        food_preferences = userMsg.text;
+      } else if (msg.includes("🍛") || msg.includes("🏛️") || msg.includes("🌿") || 
+                msg.includes("🙏") || msg.includes("🧘‍♀️") || msg.includes("culture") || 
+                msg.includes("heritage") || msg.includes("nature")) {
+        interests = userMsg.text;
+      } else if (msg.includes("💸") || msg.includes("💰") || msg.includes("💎") || 
+                msg.includes("budget") || msg.includes("luxury") || msg.includes("comfort")) {
+        budget = userMsg.text;
+      } else if (msg.includes("🐌") || msg.includes("⚖️") || msg.includes("🏃‍♂️") || 
+                msg.includes("relaxed") || msg.includes("adventure") || msg.includes("balanced")) {
+        pace = userMsg.text;
+      }
+    }
+    
+    // Fallback to index-based if we couldn't classify
+    if (travelers === "Not specified" && userMessages.length > 2 && userMessages[2]) 
+      travelers = userMessages[2].text;
+    if (interests === "Not specified" && userMessages.length > 3 && userMessages[3]) 
+      interests = userMessages[3].text;
+    if (food_preferences === "Not specified" && userMessages.length > 4 && userMessages[4]) 
+      food_preferences = userMessages[4].text;
+    if (budget === "Not specified" && userMessages.length > 5 && userMessages[5]) 
+      budget = userMessages[5].text;
+    if (pace === "Not specified" && userMessages.length > 6 && userMessages[6]) 
+      pace = userMessages[6].text;
+    
+    return {
+      destination,
+      dates,
+      travelers,
+      interests,
+      food_preferences,
+      budget,
+      pace
+    };
   };
 
   const handleGenerate = async (followUpPrompt?: string, retryCount = 0) => {
@@ -781,6 +1166,10 @@ export default function PreferencesPage() {
           : "Creating your hyper-detailed travel itinerary with local insights...";
       setMessages((msgs) => [...msgs, { sender: "llm", text: generatingMessage }]);
     }
+
+    // Extract key information from messages for debugging
+    const extractedInfo = extractUserPreferences(messages);
+    console.log("Extracted preferences:", extractedInfo);
 
     const requestBody = {
       messages: followUpPrompt ? [...messages, { sender: 'user', text: followUpPrompt }] : messages,
@@ -856,7 +1245,52 @@ export default function PreferencesPage() {
         throw new Error(`API error: ${res.statusText} (${res.status})`);
       }
 
-      const data = await res.json();
+      // Try to parse JSON response safely
+      let data;
+      try {
+        const responseText = await res.text();
+        console.log("Raw API response:", responseText.substring(0, 100) + "...");
+        
+        // Check if response is empty
+        if (!responseText || responseText.trim() === '') {
+          throw new Error("Empty response received from API");
+        }
+        
+        try {
+          // First attempt to parse the response directly
+          data = JSON.parse(responseText);
+        } catch (initialParseError) {
+          console.error("Initial JSON parsing failed:", initialParseError);
+          
+          // Try to extract JSON from the response if it might be wrapped in other content
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            try {
+              data = JSON.parse(jsonMatch[0]);
+              console.log("Successfully extracted JSON from response");
+            } catch (extractError) {
+              console.error("Failed to extract valid JSON:", extractError);
+              throw new Error("Failed to parse server response. The data format was unexpected.");
+            }
+          } else {
+            throw new Error("No valid JSON data found in the server response.");
+          }
+        }
+      } catch (parseError) {
+        console.error("Error parsing JSON response:", parseError);
+        throw new Error("Failed to parse server response. Please try again.");
+      }
+      
+      // Validate that we have the expected data structure
+      if (!data || typeof data !== 'object') {
+        throw new Error("Invalid response format from server");
+      }
+      
+      // Check for complete itinerary data
+      if (!data.itinerary || typeof data.itinerary !== 'object') {
+        throw new Error("Incomplete itinerary data received");
+      }
+
       setItinerary(data.itinerary);
       setMessages((msgs) => [
         ...msgs,
@@ -873,6 +1307,20 @@ export default function PreferencesPage() {
       }
     } catch (err: unknown) {
       console.error("Error generating itinerary:", err);
+      
+      // Try to get more information about the error response if possible
+      if (err instanceof Error) {
+        try {
+          // Log additional details to help debugging
+          console.log("Error details:", { 
+            message: err.message,
+            stack: err.stack,
+            name: err.name
+          });
+        } catch (logErr) {
+          console.error("Error while logging error details:", logErr);
+        }
+      }
       
       // Check for model overload errors or server errors in the error message
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -918,7 +1366,7 @@ export default function PreferencesPage() {
         }
         
         // Add appropriate error message based on the error type
-        if (isModelOverloaded) {
+        if (isServerIssue) {
           newMsgs.push({ 
             sender: "llm", 
             text: "I'm sorry, our servers are currently very busy. Please try again in a few minutes." 
@@ -2323,15 +2771,17 @@ export default function PreferencesPage() {
             {isLoggedIn && (
               <div className="bg-[#f0f0f0] px-4 py-3 border-t border-gray-200 flex-shrink-0">
               {/* Quick Replies */}
-              {/* @ts-ignore - We know getCurrentQuestionType returns a valid key */}
-              {!itinerary && shouldShowQuickReplies() && smartQuickReplies[getCurrentQuestionType()]?.length > 0 && (
+              {!itinerary && shouldShowQuickReplies() && currentQuestionType && 
+               ((currentQuestionType in smartQuickReplies) ? 
+                 (smartQuickReplies[currentQuestionType as keyof typeof smartQuickReplies] && 
+                  smartQuickReplies[currentQuestionType as keyof typeof smartQuickReplies].length > 0) : false) && (
                 <motion.div 
                   className="flex flex-wrap gap-2 mb-3"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {smartQuickReplies[getCurrentQuestionType()]?.map((option: string) => (
+                  {((currentQuestionType && smartQuickReplies[currentQuestionType as keyof typeof smartQuickReplies]) || []).map((option: string) => (
                     <motion.button 
                       key={option} 
                       type="button" 

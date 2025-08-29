@@ -1,0 +1,426 @@
+# Simplified app.py for Itinerary Generation
+import json
+import os
+from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional
+from google import genai
+from google.genai import types
+import motor.motor_asyncio
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "https://www.tmchanakya.com", "https://tmchanakya.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# MongoDB setup
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
+client_mongo = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
+db = client_mongo["user_database"]
+users_collection = db["users"]
+itineraries_collection = db["itineraries"]
+
+# Authentication setup
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecret")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+
+# Initialize Gemini client
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Pydantic models
+class UserIn(BaseModel):
+    name: str
+    email: str
+    password: str
+
+class UserOut(BaseModel):
+    email: str
+    name: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class Message(BaseModel):
+    sender: str  # "user" or "system"
+    text: str
+
+class ChatConversationRequest(BaseModel):
+    conversation_history: List[Message]
+    system_prompt: str
+    user_name: Optional[str] = None
+
+class ItineraryRequest(BaseModel):
+    messages: List[Message]
+
+# Authentication functions
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/signin")
+
+async def get_user(email: str):
+    return await users_collection.find_one({"email": email})
+
+async def authenticate_user(email: str, password: str):
+    user = await get_user(email)
+    if not user or not verify_password(password, user["hashed_password"]):
+        return False
+    return user
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    user = await get_user(email)
+    if user is None:
+        raise credentials_exception
+    return user
+
+# Routes
+@app.post("/api/signup", response_model=Token)
+async def signup(user: UserIn):
+    # Check if user already exists
+    if await users_collection.find_one({"email": user.email}):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create new user
+    hashed_password = get_password_hash(user.password)
+    await users_collection.insert_one({
+        "name": user.name,
+        "email": user.email,
+        "hashed_password": hashed_password,
+        "created_at": datetime.datetime.now(datetime.timezone.utc)
+    })
+    
+    # Create access token
+    access_token = create_access_token(data={"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/api/signin", response_model=Token)
+async def signin(form_data: OAuth2PasswordRequestForm = Depends()):
+    # Authenticate user
+    user = await authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Create access token
+    access_token = create_access_token(data={"sub": user["email"]})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/api/me", response_model=UserOut)
+async def get_me(current_user: dict = Depends(get_current_user)):
+    return {"email": current_user["email"], "name": current_user["name"]}
+
+@app.post("/api/chat-conversation")
+async def chat_conversation(request: ChatConversationRequest, current_user: dict = Depends(get_current_user)):
+    """Simple chat conversation handler focused on collecting travel preferences"""
+    try:
+        # Convert conversation history to text format
+        conversation_text = ""
+        for msg in request.conversation_history:
+            if msg.sender == "user":
+                conversation_text += f"User: {msg.text}\n"
+            elif msg.sender == "system":
+                conversation_text += f"Assistant: {msg.text}\n"
+        
+        # Create the prompt for conversational response
+        prompt = f"""
+{request.system_prompt}
+
+CONVERSATION SO FAR:
+{conversation_text}
+
+USER NAME: {request.user_name or current_user.get('name', 'there')}
+
+Based on the conversation above, respond as "The Modern Chanakya" with the next appropriate message.
+
+CONVERSATION FLOW (6 questions maximum):
+1. Destination in India (where do you want to go?)
+2. Travel dates (when are you planning to go?)  
+3. Who's traveling (solo/family/friends?)
+4. Food preferences (vegetarian/non-vegetarian/vegan?)
+5. Main interests (culture, adventure, nature, etc.)
+6. Budget range (budget/mid-range/luxury?)
+
+After getting answers to these 6 questions, indicate readiness to generate an itinerary.
+
+IMPORTANT: 
+- Keep responses short and conversational
+- Ask ONE clear question at a time
+- Use emojis naturally
+- After 5-6 exchanges, if you have destination + dates + basic preferences, say "Perfect! I have all the information I need now. Ready to generate your personalized itinerary?"
+"""
+
+        # Generate response using Gemini
+        response = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=150,  # Short responses
+            )
+        )
+        
+        ai_response = response.text.strip()
+        
+        # Check if we have enough information to suggest itinerary generation
+        conversation_length = len(request.conversation_history)
+        user_messages = [msg.text for msg in request.conversation_history if msg.sender == "user"]
+        
+        # Determine if ready for itinerary
+        ready_for_itinerary = (
+            conversation_length >= 12 or  # After 6 back-and-forth exchanges (12 messages total)
+            "ready to generate" in ai_response.lower() or 
+            "create your itinerary" in ai_response.lower() or
+            "i have all the information" in ai_response.lower() or
+            len(user_messages) >= 6  # User has answered 6 questions
+        )
+        
+        return {
+            "response": ai_response,
+            "ready_for_itinerary": ready_for_itinerary
+        }
+        
+    except Exception as e:
+        print(f"Error in chat conversation: {e}")
+        return {
+            "response": "I'm having a moment of wanderlust distraction! 😅 Could you repeat that? I want to make sure I get every detail right for your perfect trip!",
+            "ready_for_itinerary": False
+        }
+
+@app.post("/api/generate-itinerary")
+async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends(get_current_user)):
+    """Simple itinerary generation based on collected preferences"""
+    user_name = current_user.get("name", "Traveler")
+    user_email = current_user.get("email")
+    
+    # Extract user preferences from messages
+    user_messages = [m.text for m in req.messages if m.sender == "user"]
+    
+    # Extract preferences based on position in conversation
+    destination = user_messages[0] if len(user_messages) > 0 else "Not specified"
+    dates = user_messages[1] if len(user_messages) > 1 else "Not specified"
+    travelers = user_messages[2] if len(user_messages) > 2 else "Not specified"
+    food_preferences = user_messages[3] if len(user_messages) > 3 else "Not specified"
+    interests = user_messages[4] if len(user_messages) > 4 else "Not specified"
+    budget = user_messages[5] if len(user_messages) > 5 else "Not specified"
+    
+    # Create the system prompt for itinerary generation
+    system_prompt = f"""
+You are 'The Modern Chanakya', an elite travel strategist based in India. Generate a complete travel itinerary in JSON format.
+
+**USER'S TRAVEL PREFERENCES:**
+- Name: {user_name}
+- Destination: {destination}
+- Dates: {dates}
+- Travelers: {travelers}
+- Food Preferences: {food_preferences}
+- Interests: {interests}
+- Budget: {budget}
+
+**JSON STRUCTURE REQUIREMENTS:**
+- Create a valid JSON object with the following structure
+- The response MUST be valid JSON that can be parsed with JSON.parse()
+- Do NOT include any explanatory text or code blocks around the JSON
+
+{{
+  "destination_name": "{destination}",
+  "trip_title": "A catchy title for the trip",
+  "trip_overview": "A brief 2-3 sentence overview of what makes this trip special",
+  "dates": "{dates}",
+  "daily_itinerary": [
+    {{
+      "day": 1,
+      "date": "First day of trip",
+      "activities": [
+        {{
+          "time": "Morning",
+          "activity": "Activity name",
+          "description": "Brief description of the activity",
+          "location": "Location name and address"
+        }},
+        {{
+          "time": "Afternoon",
+          "activity": "Activity name",
+          "description": "Brief description of the activity",
+          "location": "Location name and address"
+        }},
+        {{
+          "time": "Evening",
+          "activity": "Activity name",
+          "description": "Brief description of the activity",
+          "location": "Location name and address"
+        }}
+      ],
+      "meals": [
+        {{
+          "meal": "Breakfast",
+          "recommendation": "Restaurant or food recommendation"
+        }},
+        {{
+          "meal": "Lunch",
+          "recommendation": "Restaurant or food recommendation"
+        }},
+        {{
+          "meal": "Dinner",
+          "recommendation": "Restaurant or food recommendation"
+        }}
+      ]
+    }}
+  ],
+  "travel_tips": [
+    "Tip 1",
+    "Tip 2",
+    "Tip 3"
+  ]
+}}
+
+You MUST include at least 3 days in the itinerary with morning, afternoon, and evening activities for each day.
+Make sure your response is ONLY valid JSON with no additional text.
+"""
+
+    try:
+        # Generate the itinerary using Gemini
+        response = client.models.generate_content(
+            model='gemini-1.5-pro',
+            contents=system_prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                system="You are an expert travel planner. Your responses must be valid JSON only.",
+            )
+        )
+        
+        # Get the raw response text
+        llm_reply = response.text.strip()
+        
+        # Clean up the response if it contains markdown code blocks
+        if llm_reply.startswith("```json"):
+            llm_reply = llm_reply[7:]  # Remove ```json
+        if llm_reply.startswith("```"):
+            llm_reply = llm_reply[3:]   # Remove ```
+        if llm_reply.endswith("```"):
+            llm_reply = llm_reply[:-3]  # Remove trailing ```
+        llm_reply = llm_reply.strip()
+        
+        # Parse the JSON response
+        try:
+            itinerary_data = json.loads(llm_reply)
+        except json.JSONDecodeError:
+            # Try to extract valid JSON if parsing fails
+            import re
+            json_match = re.search(r'(\{.*\})', llm_reply, re.DOTALL)
+            if json_match:
+                potential_json = json_match.group(1)
+                itinerary_data = json.loads(potential_json)
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to generate a valid itinerary. Please try again."
+                )
+        
+        # Save the itinerary to the database
+        itinerary_id = await itineraries_collection.insert_one({
+            "user_email": user_email,
+            "user_name": user_name,
+            "destination": destination,
+            "dates": dates,
+            "travelers": travelers,
+            "food_preferences": food_preferences,
+            "interests": interests,
+            "budget": budget,
+            "itinerary_data": itinerary_data,
+            "created_at": datetime.datetime.now(datetime.timezone.utc)
+        })
+        
+        return {
+            "itinerary": itinerary_data,
+            "itinerary_id": str(itinerary_id.inserted_id),
+            "llm_message": "Your itinerary is ready! Check it out."
+        }
+        
+    except Exception as e:
+        print(f"Error generating itinerary: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to generate itinerary. Please try again."
+        )
+
+@app.get("/api/itinerary/{itinerary_id}")
+async def get_itinerary(itinerary_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific itinerary by ID"""
+    from bson import ObjectId
+    
+    try:
+        # Find the itinerary in the database
+        itinerary = await itineraries_collection.find_one({"_id": ObjectId(itinerary_id)})
+        
+        if not itinerary:
+            raise HTTPException(status_code=404, detail="Itinerary not found")
+        
+        # Check if the user has access to this itinerary
+        if itinerary["user_email"] != current_user["email"]:
+            raise HTTPException(status_code=403, detail="You don't have access to this itinerary")
+        
+        return {
+            "itinerary": itinerary["itinerary_data"],
+            "created_at": itinerary["created_at"],
+            "destination": itinerary["destination"],
+            "dates": itinerary["dates"]
+        }
+        
+    except Exception as e:
+        print(f"Error getting itinerary: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve itinerary."
+        )
+
+# Health check endpoint
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok", "message": "Service is running"}
+
+# For local testing
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

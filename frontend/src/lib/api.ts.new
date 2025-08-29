@@ -18,7 +18,6 @@ export const API_ENDPOINTS = {
   // Itinerary endpoints
   generateItinerary: '/api/generate-itinerary',
   getItinerary: (id: string) => `/api/itinerary/${id}`,
-  myItineraries: '/api/my-itineraries',
 };
 
 // Helper function to build complete API URLs
@@ -49,12 +48,11 @@ export const apiRequest = async (
     let timeoutDuration = API_CONFIG.timeout;
     
     // Use longer timeout for complex operations like itinerary generation
-    if (endpoint === API_ENDPOINTS.generateItinerary ||
-        endpoint.includes('generate-itinerary')) {
+    if (endpoint === API_ENDPOINTS.generateItinerary) {
       timeoutDuration = API_CONFIG.longTimeout;
     }
     
-    // Add timeout for fetch requests (not natively supported in fetch)
+    // Add timeout for fetch requests
     const abortController = new AbortController();
     const timeoutId = setTimeout(() => abortController.abort(), timeoutDuration);
     
@@ -67,18 +65,18 @@ export const apiRequest = async (
       const response = await fetch(url, fetchOptions);
       clearTimeout(timeoutId);
       
-      // Log specific error details for debugging server errors
+      // Log server errors for debugging
       if (response.status >= 500) {
         console.error(`Server error for ${endpoint}:`, {
           status: response.status,
           statusText: response.statusText,
-          url: response.url
         });
       }
       
       return response;
     } catch (error) {
       clearTimeout(timeoutId);
+      
       const fetchError = error as { name: string };
       if (fetchError?.name === 'AbortError') {
         console.error(`Request timeout for ${endpoint} after ${timeoutDuration}ms`);

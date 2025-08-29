@@ -3,8 +3,7 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
-from google import genai
-from google.genai import types
+from groq import Groq
 import os
 from dotenv import load_dotenv
 import motor.motor_asyncio
@@ -898,17 +897,33 @@ Keep it snappy and WhatsApp-friendly! No long paragraphs.
 IMPORTANT: Keep responses under 100 words. Be conversational, not formal.
 """
 
-        # Generate response using Gemini
-        response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=0.8,
-                max_output_tokens=150,  # Reduced for shorter responses
-            )
-        )
+        # Generate response using Groq
+        print("Calling Groq API for chat response...")
         
-        ai_response = response.text.strip()
+        try:
+            completion = client.chat.completions.create(
+                model="openai/gpt-oss-20b",  # Using openai/gpt-oss-20b model
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.8,
+                max_completion_tokens=150,  # Reduced for shorter responses
+                top_p=1,
+                reasoning_effort="medium",
+                stream=False,
+                stop=None
+            )
+            
+            print("Groq API call successful")
+            ai_response = completion.choices[0].message.content.strip()
+            print(f"Response length: {len(ai_response)} characters")
+        except Exception as api_error:
+            print(f"Groq API error: {api_error}")
+            # Fall back to a default response if API call fails
+            ai_response = "Hey! 👋 I'd love to help plan your trip to India! Where would you like to visit? From the mountains of Himachal to the beaches of Goa, I can help you discover the perfect destination!"
         
         # Update message count for free users
         if not has_premium_subscription:
@@ -944,15 +959,16 @@ IMPORTANT: Keep responses under 100 words. Be conversational, not formal.
         
     except Exception as e:
         print(f"Error in chat conversation: {e}")
+        # Better fallback message that won't confuse users
         return {
-            "response": "I'm having a moment of wanderlust distraction! 😅 Could you repeat that? I want to make sure I get every detail right for your perfect trip!",
+            "response": "Hey! 👋 Ready to explore incredible India? Kahan jaana hai? Where do you want to go?",
             "ready_for_itinerary": False,
             "subscription_required": False,
             "limit_reached": False
         }
 
-# Initialize Gemini client
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# Initialize Groq client
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 @app.post("/api/generate-itinerary")
 async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends(get_current_user)):
@@ -980,24 +996,80 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
             return user_messages[position]
         return "Not specified"
     
-    def extract_answer_by_keywords(keywords):
-        """Fallback method using keywords"""
-        for m in reversed(req.messages):
-            if m.sender == "user":
-                for kw in keywords:
-                    if kw.lower() in m.text.lower():
-                        return m.text
-        return "Not specified"
-
-    # Extract answers - try position first, then keywords as fallback
-    destination = extract_answer_by_position(0) or extract_answer_by_keywords(["destination", "city", "country", "place", "go to"])
-    dates = extract_answer_by_position(1) or extract_answer_by_keywords(["dates", "planning for", "when"])
-    travelers = extract_answer_by_position(2) or extract_answer_by_keywords(["travelers", "coming along", "with", "who"])
-    interests = extract_answer_by_position(3) or extract_answer_by_keywords(["interests", "excited about", "like", "enjoy"])
-    food_preferences = extract_answer_by_position(4) or extract_answer_by_keywords(["vegetarian", "non-vegetarian", "vegan", "jain", "food", "dietary", "eat"])
-    budget = extract_answer_by_position(5) or extract_answer_by_keywords(["budget", "cost", "spend"])
-    pace = extract_answer_by_position(6) or extract_answer_by_keywords(["pace", "speed", "relaxed", "packed", "balanced"])
+    def extract_answer_by_keywords(keywords, text_to_search):
+        """Check if any keywords are in the text"""
+        text_to_search = text_to_search.lower()
+        for kw in keywords:
+            if kw.lower() in text_to_search:
+                return True
+        return False
     
+    def classify_message_by_content(message_text):
+        """Attempt to classify a message based on its content"""
+        message_text = message_text.lower()
+        
+        food_keywords = ["vegetarian", "non-vegetarian", "vegan", "food", "eat", "dietary", "meal", "cuisine"]
+        traveler_keywords = ["solo", "partner", "family", "friend", "group", "people", "travelers", "honeymoon"]
+        budget_keywords = ["budget", "luxury", "comfort", "spend", "cost", "cheap", "expensive", "price"]
+        interest_keywords = ["culture", "adventure", "nature", "heritage", "spiritual", "wellness", "activity", "interest"]
+        
+        if any(emoji in message_text for emoji in ["🍖", "🥗", "🍽️", "🌱", "🍛"]) or extract_answer_by_keywords(food_keywords, message_text):
+            return "food_preferences"
+        elif any(emoji in message_text for emoji in ["✈️", "👫", "👨‍👩‍👧‍👦", "👥", "💕"]) or extract_answer_by_keywords(traveler_keywords, message_text):
+            return "travelers"
+        elif any(emoji in message_text for emoji in ["💸", "💰", "💎", "🎯", "💼"]) or extract_answer_by_keywords(budget_keywords, message_text):
+            return "budget"
+        elif any(emoji in message_text for emoji in ["🍛", "🏛️", "🌿", "🙏", "🧘‍♀️", "🎭"]) or extract_answer_by_keywords(interest_keywords, message_text):
+            return "interests"
+        
+        return None
+    
+    # Initialize default values
+    destination = "Not specified"
+    dates = "Not specified"
+    travelers = "Not specified"
+    interests = "Not specified" 
+    food_preferences = "Not specified"
+    budget = "Not specified"
+    pace = "Not specified"
+    
+    # First, try to extract in sequence
+    user_messages = [m.text for m in req.messages if m.sender == "user"]
+    if len(user_messages) > 0:
+        destination = user_messages[0]
+    if len(user_messages) > 1:
+        dates = user_messages[1]
+    
+    # Then try to classify the remaining messages by content
+    classified_messages = {}
+    for i, msg in enumerate(user_messages):
+        if i <= 1:  # Skip the first two (destination, dates) which we've already extracted
+            continue
+            
+        msg_type = classify_message_by_content(msg)
+        if msg_type:
+            classified_messages[msg_type] = msg
+    
+    # Use the classified messages or fall back to positional values
+    travelers = classified_messages.get("travelers", travelers)
+    if len(user_messages) > 2 and "travelers" not in classified_messages:
+        travelers = user_messages[2]
+        
+    interests = classified_messages.get("interests", interests)
+    if len(user_messages) > 3 and "interests" not in classified_messages:
+        interests = user_messages[3]
+        
+    food_preferences = classified_messages.get("food_preferences", food_preferences)
+    if len(user_messages) > 4 and "food_preferences" not in classified_messages:
+        food_preferences = user_messages[4]
+        
+    budget = classified_messages.get("budget", budget)
+    if len(user_messages) > 5 and "budget" not in classified_messages:
+        budget = user_messages[5]
+        
+    if len(user_messages) > 6:
+        pace = user_messages[6]
+        
     current_location = "Raghogarh-Vijaypur, Madhya Pradesh"
 
     # Debug print to see what we extracted
@@ -1006,6 +1078,12 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
 
     system_prompt_content = f"""
 You are 'The Modern Chanakya', an elite, AI-powered travel strategist based in India. Your tone is sophisticated, knowledgeable, and reassuring. You create hyper-detailed, premium travel itineraries that are so comprehensive and convenient, users would pay for them.
+
+**JSON GENERATION INSTRUCTIONS**
+You are an expert JSON generator. Your response must always follow valid JSON format.
+Never include any explanatory text outside the JSON object.
+Always verify your output is a valid, parseable JSON before responding.
+Your output must be valid JSON that can be parsed by standard JSON parsers.
 
 Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVENIENCE. Every field must be filled with rich, detailed, and actionable information that makes travel effortless.
 
@@ -1269,37 +1347,40 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
     "souvenir_shopping_plan": "Strategic shopping guide to avoid last-minute rush"
   }}
 }}
+
+FINAL REMINDER: You MUST respond ONLY with a valid JSON object. Do NOT include any explanatory text, markdown formatting, or content before or after the JSON. Your response should start with '{' and end with '}' with no other characters outside of those.
+
+IMPORTANT: Valid JSON requires:
+1. All keys are double-quoted
+2. All string values are double-quoted
+3. No trailing commas in arrays or objects
+4. No comments
+5. No formatting or markdown code blocks
 """
 
     try:
-        # Use the new Google GenAI library with gemini-2.5-pro
-        model = "gemini-2.5-pro"
-        contents = [
-            types.Content(
-                role="user",
-                parts=[
-                    types.Part.from_text(text=system_prompt_content),
-                ],
-            ),
-        ]
+        # Use Groq API instead of Gemini
+        model = "openai/gpt-oss-20b"
         
-        generate_content_config = types.GenerateContentConfig(
-            thinking_config=types.ThinkingConfig(
-                thinking_budget=-1,
-            ),
-        )
-
-        # Generate content using streaming
-        response_chunks = []
-        for chunk in client.models.generate_content_stream(
+        # Generate content using Groq
+        completion = client.chat.completions.create(
             model=model,
-            contents=contents,
-            config=generate_content_config,
-        ):
-            if chunk.text:
-                response_chunks.append(chunk.text)
-
-        llm_reply = "".join(response_chunks)
+            messages=[
+                {
+                    "role": "user",
+                    "content": system_prompt_content
+                }
+            ],
+            temperature=0.6,
+            max_completion_tokens=26571,
+            top_p=1,
+            reasoning_effort="medium",
+            stream=False,
+            response_format={"type": "json_object"},
+            stop=None
+        )
+        
+        llm_reply = completion.choices[0].message.content
         
         # Clean up the response - remove markdown code blocks if present
         llm_reply = llm_reply.strip()
@@ -1311,17 +1392,138 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
             llm_reply = llm_reply[:-3]  # Remove trailing ```
         llm_reply = llm_reply.strip()
         
-        # Try to parse JSON response
+        # Debug log
+        print(f"Response length: {len(llm_reply)}")
+        print(f"Response first 200 chars: {llm_reply[:200] if llm_reply else 'EMPTY'}")
+        
+        # Check if response is empty
+        if not llm_reply:
+            print("Empty response from Gemini API")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="The AI service returned an empty response. Please try again."
+                # set(destination)
+            )
+        
+        # Try to parse JSON response with comprehensive error handling
         try:
-            itinerary_data = json.loads(llm_reply)
+            # Try parsing as is first
+            try:
+                itinerary_data = json.loads(llm_reply)
+            except json.JSONDecodeError:
+                # If failed, try multiple strategies to extract valid JSON
+                
+                # Strategy 1: Find JSON between curly braces
+                import re
+                json_match = re.search(r'(\{.*\})', llm_reply, re.DOTALL)
+                if json_match:
+                    potential_json = json_match.group(1)
+                    try:
+                        itinerary_data = json.loads(potential_json)
+                        print("Successfully extracted JSON using regex pattern")
+                    except json.JSONDecodeError:
+                        # If still failing, try more aggressive cleanup
+                        raise
+                else:
+                    # Strategy 2: Try to find the first opening brace and last closing brace
+                    first_brace = llm_reply.find('{')
+                    last_brace = llm_reply.rfind('}')
+                    
+                    if first_brace != -1 and last_brace != -1 and first_brace < last_brace:
+                        try:
+                            potential_json = llm_reply[first_brace:last_brace+1]
+                            itinerary_data = json.loads(potential_json)
+                            print("Successfully extracted JSON using brace positions")
+                        except json.JSONDecodeError:
+                            # All strategies failed
+                            raise
+                    else:
+                        # No valid JSON structure found
+                        raise
+                    
         except json.JSONDecodeError as json_error:
             print(f"JSON parsing error: {json_error}")
             print(f"Raw response: {llm_reply}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="The AI response was not in the expected format. Please try again."
-            )
+            
+                # Attempt to retry once with a more explicit JSON format instruction
+            try:
+                retry_prompt = """IMPORTANT: You must return ONLY a valid, parseable JSON object with no additional text, markdown formatting, or explanations.
+
+Your response MUST:
+1. Start with a single opening curly brace '{'
+2. End with a single closing curly brace '}'
+3. Contain properly formatted JSON with quoted keys and values
+4. Not include any text, comments, markdown code blocks, or explanations outside the JSON object
+5. Not include any special characters like ```json or ``` anywhere in the response
+6. Ensure all string values and keys are properly enclosed in double quotes
+7. Check that all arrays and objects have matching brackets and no trailing commas
+
+I need the complete, well-formed JSON itinerary structure exactly as requested.
+
+Here is the prompt again:
+""" + system_prompt_content
+                
+                # Generate content again using Groq
+                retry_completion = client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": retry_prompt
+                        }
+                    ],
+                    temperature=0.5,  # Even lower temperature for more consistent JSON
+                    max_completion_tokens=26571,
+                    top_p=1,
+                    reasoning_effort="high",
+                    stream=False,
+                    response_format={"type": "json_object"},
+                    stop=None
+                )
+                
+                retry_llm_reply = retry_completion.choices[0].message.content.strip()
+                
+                # Apply more aggressive cleanup to the retry response
+                if retry_llm_reply.startswith("```json"):
+                    retry_llm_reply = retry_llm_reply[7:]
+                if retry_llm_reply.startswith("```"):
+                    retry_llm_reply = retry_llm_reply[3:]
+                if retry_llm_reply.endswith("```"):
+                    retry_llm_reply = retry_llm_reply[:-3]
+                retry_llm_reply = retry_llm_reply.strip()
+                
+                # Find JSON content within the response if there's any extra text
+                first_brace = retry_llm_reply.find('{')
+                last_brace = retry_llm_reply.rfind('}')
+                
+                if first_brace != -1 and last_brace != -1 and first_brace < last_brace:
+                    retry_llm_reply = retry_llm_reply[first_brace:last_brace+1]
+                
+                # Try to parse the retry response
+                itinerary_data = json.loads(retry_llm_reply)
+                print("Successfully parsed JSON from retry attempt")
+                
+            except Exception as retry_error:
+                print(f"Retry failed: {retry_error}")
+                # Log the raw response for debugging
+                try:
+                    print(f"Retry raw response first 200 chars: {retry_llm_reply[:200] if retry_llm_reply else 'EMPTY'}")
+                except:
+                    pass
+                
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="The AI response could not be properly formatted. Please try again with different preferences."
+                )
         
+
+        # --- PATCH: Ensure destination_name and personalized_title are always set ---
+        # Use extracted destination if LLM output is missing or empty for these fields
+        if not itinerary_data.get("destination_name") or itinerary_data.get("destination_name") in [None, "", "undefined"]:
+            itinerary_data["destination_name"] = destination if destination and destination != "Not specified" else "India"
+        if not itinerary_data.get("personalized_title") or itinerary_data.get("personalized_title") in [None, "", "undefined"]:
+            itinerary_data["personalized_title"] = f"Trip to {itinerary_data['destination_name']}"
+
         llm_message = "Your premium itinerary is ready. Every detail has been crafted for your journey."
 
         # Store the itinerary in the database
@@ -1338,6 +1540,7 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
             "itinerary_data": itinerary_data,
             "created_at": datetime.datetime.now(datetime.timezone.utc),
             "updated_at": datetime.datetime.now(datetime.timezone.utc)
+
         }
         
         # Insert the itinerary into the database with error handling
@@ -1384,7 +1587,7 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
             detail="Request was cancelled. Please try again."
         )
     except Exception as e:
-        print(f"Error calling Gemini API or parsing JSON: {e}")
+        print(f"Error calling Groq API or parsing JSON: {e}")
         error_detail = str(e)
         
         # Check if it's a quota error
@@ -1393,10 +1596,72 @@ Generate a complete travel plan in JSON format optimized for MAXIMUM USER CONVEN
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="API quota exceeded. Please try again in a few minutes or upgrade your plan."
             )
+            
+        # Instead of failing, return a basic itinerary
+        print("Returning fallback itinerary")
         
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while crafting your plan: {error_detail}"
-        )
+        # Create a basic itinerary with the data we have
+        destination_name = destination if destination != "Not specified" else "India"
+        itinerary_data = {
+            "hero_image_url": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
+            "destination_name": destination_name,
+            "personalized_title": f"Your {destination_name} Adventure",
+            "trip_overview": {
+                "destination_insights": "Experience the beauty and culture of India with this sample itinerary.",
+                "weather_during_visit": "Please check current weather forecasts before traveling.",
+                "seasonal_context": "India's climate varies significantly by region and season.",
+                "local_customs_to_know": ["Remove shoes before entering temples", "Dress modestly at religious sites"]
+            },
+            "daily_itinerary": [
+                {
+                    "date": "Day 1",
+                    "day_number": "Day 1",
+                    "theme": "Exploring the Local Culture",
+                    "breakfast": {
+                        "restaurant": "Local Restaurant",
+                        "dish": "Traditional Indian Breakfast",
+                        "estimated_cost": "₹200-300"
+                    },
+                    "morning_activities": [
+                        {
+                            "activity": "Visit a Local Landmark",
+                            "location": "City Center",
+                            "duration": "2 hours"
+                        }
+                    ],
+                    "lunch": {
+                        "restaurant": "Authentic Indian Restaurant",
+                        "dish": "Regional Thali",
+                        "estimated_cost": "₹400-600"
+                    },
+                    "afternoon_activities": [
+                        {
+                            "activity": "Cultural Tour",
+                            "location": "Heritage Area",
+                            "duration": "3 hours"
+                        }
+                    ],
+                    "evening_snacks": {
+                        "dish": "Street Food Snacks",
+                        "place": "Local Market",
+                        "estimated_cost": "₹100-200"
+                    },
+                    "dinner": {
+                        "restaurant": "Premium Dining Experience",
+                        "dish": "Chef's Special",
+                        "estimated_cost": "₹800-1200"
+                    }
+                }
+            ]
+        }
+        
+        # Add more user-specific details if available
+        if travelers != "Not specified":
+            itinerary_data["trip_overview"]["travel_party"] = f"Tailored for {travelers}"
+        
+        if food_preferences != "Not specified":
+            itinerary_data["trip_overview"]["food_note"] = f"Includes {food_preferences} food options"
+            
+        return {"itinerary": itinerary_data, "llm_message": "Here's a sample itinerary to get you started. For a fully personalized plan, please try again with more specific preferences."}
 
     return {"itinerary": itinerary_data, "llm_message": llm_message}
