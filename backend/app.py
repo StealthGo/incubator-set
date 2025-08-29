@@ -396,119 +396,119 @@ class ItineraryRequest(BaseModel):
 # Initialize Groq client
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-@app.post("/api/generate-itinerary")
-async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends(get_current_user)):
-    user_name = current_user.get("name", "Traveler")
-    user_email = current_user.get("email")
-    subscription_status = current_user.get("subscription_status", "free")
-    has_premium_subscription = current_user.get("has_premium_subscription", False)
-    free_itinerary_used = current_user.get("free_itinerary_used", False)
+# @app.post("/api/generate-itinerary")
+# async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends(get_current_user)):
+#     user_name = current_user.get("name", "Traveler")
+#     user_email = current_user.get("email")
+#     subscription_status = current_user.get("subscription_status", "free")
+#     has_premium_subscription = current_user.get("has_premium_subscription", False)
+#     free_itinerary_used = current_user.get("free_itinerary_used", False)
     
-    # Check subscription limits for itinerary generation
-    if not has_premium_subscription and subscription_status == "free" and free_itinerary_used:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You have already used your free itinerary. Please upgrade to premium for unlimited itinerary generation and enhanced features."
-        )
+#     # Check subscription limits for itinerary generation
+#     if not has_premium_subscription and subscription_status == "free" and free_itinerary_used:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="You have already used your free itinerary. Please upgrade to premium for unlimited itinerary generation and enhanced features."
+#         )
 
-    # Extract answers based on the sequence of system questions
-    # The frontend asks questions in a specific order
-    system_questions_order = ["destination", "dates", "travelers", "interests", "food_preferences", "budget", "pace", "aboutYou"]
+#     # Extract answers based on the sequence of system questions
+#     # The frontend asks questions in a specific order
+#     system_questions_order = ["destination", "dates", "travelers", "interests", "food_preferences", "budget", "pace", "aboutYou"]
     
-    def extract_answer_by_position(position):
-        """Extract user answer at a specific position in the conversation"""
-        user_messages = [m.text for m in req.messages if m.sender == "user"]
-        if position < len(user_messages):
-            return user_messages[position]
-        return "Not specified"
+#     def extract_answer_by_position(position):
+#         """Extract user answer at a specific position in the conversation"""
+#         user_messages = [m.text for m in req.messages if m.sender == "user"]
+#         if position < len(user_messages):
+#             return user_messages[position]
+#         return "Not specified"
     
-    def extract_answer_by_keywords(keywords, text_to_search):
-        """Check if any keywords are in the text"""
-        text_to_search = text_to_search.lower()
-        for kw in keywords:
-            if kw.lower() in text_to_search:
-                return True
-        return False
+#     def extract_answer_by_keywords(keywords, text_to_search):
+#         """Check if any keywords are in the text"""
+#         text_to_search = text_to_search.lower()
+#         for kw in keywords:
+#             if kw.lower() in text_to_search:
+#                 return True
+#         return False
     
-    def classify_message_by_content(message_text):
-        """Attempt to classify a message based on its content"""
-        message_text = message_text.lower()
+#     def classify_message_by_content(message_text):
+#         """Attempt to classify a message based on its content"""
+#         message_text = message_text.lower()
         
-        food_keywords = ["vegetarian", "non-vegetarian", "vegan", "food", "eat", "dietary", "meal", "cuisine"]
-        traveler_keywords = ["solo", "partner", "family", "friend", "group", "people", "travelers", "honeymoon"]
-        budget_keywords = ["budget", "luxury", "comfort", "spend", "cost", "cheap", "expensive", "price"]
-        interest_keywords = ["culture", "adventure", "nature", "heritage", "spiritual", "wellness", "activity", "interest"]
+#         food_keywords = ["vegetarian", "non-vegetarian", "vegan", "food", "eat", "dietary", "meal", "cuisine"]
+#         traveler_keywords = ["solo", "partner", "family", "friend", "group", "people", "travelers", "honeymoon"]
+#         budget_keywords = ["budget", "luxury", "comfort", "spend", "cost", "cheap", "expensive", "price"]
+#         interest_keywords = ["culture", "adventure", "nature", "heritage", "spiritual", "wellness", "activity", "interest"]
         
-        if any(emoji in message_text for emoji in ["🍖", "🥗", "🍽️", "🌱", "🍛"]) or extract_answer_by_keywords(food_keywords, message_text):
-            return "food_preferences"
-        elif any(emoji in message_text for emoji in ["✈️", "👫", "👨‍👩‍👧‍👦", "👥", "💕"]) or extract_answer_by_keywords(traveler_keywords, message_text):
-            return "travelers"
-        elif any(emoji in message_text for emoji in ["💸", "💰", "💎", "🎯", "💼"]) or extract_answer_by_keywords(budget_keywords, message_text):
-            return "budget"
-        elif any(emoji in message_text for emoji in ["🍛", "🏛️", "🌿", "🙏", "🧘‍♀️", "🎭"]) or extract_answer_by_keywords(interest_keywords, message_text):
-            return "interests"
+#         if any(emoji in message_text for emoji in ["🍖", "🥗", "🍽️", "🌱", "🍛"]) or extract_answer_by_keywords(food_keywords, message_text):
+#             return "food_preferences"
+#         elif any(emoji in message_text for emoji in ["✈️", "👫", "👨‍👩‍👧‍👦", "👥", "💕"]) or extract_answer_by_keywords(traveler_keywords, message_text):
+#             return "travelers"
+#         elif any(emoji in message_text for emoji in ["💸", "💰", "💎", "🎯", "💼"]) or extract_answer_by_keywords(budget_keywords, message_text):
+#             return "budget"
+#         elif any(emoji in message_text for emoji in ["🍛", "🏛️", "🌿", "🙏", "🧘‍♀️", "🎭"]) or extract_answer_by_keywords(interest_keywords, message_text):
+#             return "interests"
         
-        return None
+#         return None
     
-    # Initialize default values
-    destination = "Not specified"
-    dates = "Not specified"
-    travelers = "Not specified"
-    interests = "Not specified" 
-    food_preferences = "Not specified"
-    budget = "Not specified"
-    pace = "Not specified"
+#     # Initialize default values
+#     destination = "Not specified"
+#     dates = "Not specified"
+#     travelers = "Not specified"
+#     interests = "Not specified" 
+#     food_preferences = "Not specified"
+#     budget = "Not specified"
+#     pace = "Not specified"
     
-    # First, try to extract in sequence
-    user_messages = [m.text for m in req.messages if m.sender == "user"]
-    if len(user_messages) > 0:
-        destination = user_messages[0]
-    if len(user_messages) > 1:
-        dates = user_messages[1]
+#     # First, try to extract in sequence
+#     user_messages = [m.text for m in req.messages if m.sender == "user"]
+#     if len(user_messages) > 0:
+#         destination = user_messages[0]
+#     if len(user_messages) > 1:
+#         dates = user_messages[1]
     
-    # Then try to classify the remaining messages by content
-    classified_messages = {}
-    for i, msg in enumerate(user_messages):
+#     # Then try to classify the remaining messages by content
+#     classified_messages = {}
+#     for i, msg in enumerate(user_messages):
 
-        # --- COMMENTED OUT: Itinerary generation endpoint (not in use for waitlist/survey) ---
-        # @app.post("/api/generate-itinerary")
-        # async def generate_itinerary(...):
-        #     ...existing code...
-        if not itinerary_data.get("personalized_title") or itinerary_data.get("personalized_title") in [None, "", "undefined"]:
-            itinerary_data["personalized_title"] = f"Trip to {itinerary_data['destination_name']}"
+#         # --- COMMENTED OUT: Itinerary generation endpoint (not in use for waitlist/survey) ---
+#         # @app.post("/api/generate-itinerary")
+#         # async def generate_itinerary(...):
+#         #     ...existing code...
+#         if not itinerary_data.get("personalized_title") or itinerary_data.get("personalized_title") in [None, "", "undefined"]:
+#             itinerary_data["personalized_title"] = f"Trip to {itinerary_data['destination_name']}"
 
-        llm_message = "Your premium itinerary is ready. Every detail has been crafted for your journey."
+#         llm_message = "Your premium itinerary is ready. Every detail has been crafted for your journey."
 
-        # Store the itinerary in the database
-        itinerary_document = {
-            "user_email": current_user.get("email"),
-            "user_name": current_user.get("name"),
-            "destination": destination,
-            "dates": dates,
-            "travelers": travelers,
-            "food_preferences": food_preferences,
-            "interests": interests,
-            "budget": budget,
-            "pace": pace,
-            "itinerary_data": itinerary_data,
-            "created_at": datetime.datetime.now(datetime.timezone.utc),
-            "updated_at": datetime.datetime.now(datetime.timezone.utc)
+#         # Store the itinerary in the database
+#         itinerary_document = {
+#             "user_email": current_user.get("email"),
+#             "user_name": current_user.get("name"),
+#             "destination": destination,
+#             "dates": dates,
+#             "travelers": travelers,
+#             "food_preferences": food_preferences,
+#             "interests": interests,
+#             "budget": budget,
+#             "pace": pace,
+#             "itinerary_data": itinerary_data,
+#             "created_at": datetime.datetime.now(datetime.timezone.utc),
+#             "updated_at": datetime.datetime.now(datetime.timezone.utc)
 
-        }
+#         }
         
-    # Insert the itinerary into the database (code commented out, not in use)
-    # result = await itineraries_collection.insert_one(itinerary_document)
-    # itinerary_id = str(result.inserted_id)
-    # itinerary_data["itinerary_id"] = itinerary_id
-    # if not has_premium_subscription and subscription_status == "free":
-    #     await users_collection.update_one(
-    #         {"email": user_email},
-    #         {"$set": {"free_itinerary_used": True}, "$inc": {"itineraries_created": 1}}
-    #     )
-    # else:
-    #     await users_collection.update_one(
-    #         {"email": user_email},
-    #         {"$inc": {"itineraries_created": 1}}
-    #     )
+#     # Insert the itinerary into the database (code commented out, not in use)
+#     # result = await itineraries_collection.insert_one(itinerary_document)
+#     # itinerary_id = str(result.inserted_id)
+#     # itinerary_data["itinerary_id"] = itinerary_id
+#     # if not has_premium_subscription and subscription_status == "free":
+#     #     await users_collection.update_one(
+#     #         {"email": user_email},
+#     #         {"$set": {"free_itinerary_used": True}, "$inc": {"itineraries_created": 1}}
+#     #     )
+#     # else:
+#     #     await users_collection.update_one(
+#     #         {"email": user_email},
+#     #         {"$inc": {"itineraries_created": 1}}
+#     #     )
 
-    # --- REMOVED stray except/finally blocks after commenting out code ---
+#     # --- REMOVED stray except/finally blocks after commenting out code ---
