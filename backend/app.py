@@ -1,9 +1,9 @@
+
 import json
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
-from groq import Groq
+from typing import Optional
 import os
 from dotenv import load_dotenv
 import motor.motor_asyncio
@@ -11,41 +11,14 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import datetime
-from bson import ObjectId
 import asyncio
 import httpx
-from fastapi import BackgroundTasks
 from contextlib import asynccontextmanager
-import razorpay
-import stripe
-import hmac
-import hashlib
 
 load_dotenv()
 
-# Payment configuration
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
-RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
-# Initialize payment clients (with error handling for missing dependencies)
-razorpay_client = None
-stripe_client = None
-
-try:
-    if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
-        razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
-except Exception as e:
-    print(f"Razorpay initialization failed: {e}")
-
-try:
-    if STRIPE_SECRET_KEY:
-        stripe.api_key = STRIPE_SECRET_KEY
-        stripe_client = stripe
-except Exception as e:
-    print(f"Stripe initialization failed: {e}")
+# --- Payment and AI-related configuration removed for minimal waitlist/survey backend ---
 
 # Keep-alive configuration
 RENDER_SERVICE_URL = os.getenv("RENDER_SERVICE_URL", "http://localhost:8000")
@@ -113,9 +86,7 @@ client_mongo = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
 db = client_mongo["user_database"]
 
 users_collection = db["users"]
-itineraries_collection = db["itineraries"]
-payments_collection = db["payments"]
-# New collection for survey responses
+# Only survey collection is used for survey responses
 survey_collection = db["survey_responses"]
 class SurveyResponse(BaseModel):
     step_1: str
