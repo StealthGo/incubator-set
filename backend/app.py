@@ -496,125 +496,19 @@ async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends
 
         }
         
-        # Insert the itinerary into the database with error handling
-        try:
-            result = await itineraries_collection.insert_one(itinerary_document)
-            itinerary_id = str(result.inserted_id)
-            
-            # Add the ID to the response
-            itinerary_data["itinerary_id"] = itinerary_id
-            
-            # Update user's subscription status if they used their free itinerary
-            if not has_premium_subscription and subscription_status == "free":
-                await users_collection.update_one(
-                    {"email": user_email},
-                    {
-                        "$set": {"free_itinerary_used": True},
-                        "$inc": {"itineraries_created": 1}
-                    }
-                )
-            else:
-                # For premium users, just increment the counter
-                await users_collection.update_one(
-                    {"email": user_email},
-                    {"$inc": {"itineraries_created": 1}}
-                )
-                
-        except asyncio.CancelledError:
-            # Handle cancellation gracefully
-            raise HTTPException(
-                status_code=status.HTTP_408_REQUEST_TIMEOUT,
-                detail="Request was cancelled. Please try again."
-            )
-        except Exception as db_error:
-            print(f"Database error: {db_error}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to save itinerary. Please try again."
-            )
+    # Insert the itinerary into the database (code commented out, not in use)
+    # result = await itineraries_collection.insert_one(itinerary_document)
+    # itinerary_id = str(result.inserted_id)
+    # itinerary_data["itinerary_id"] = itinerary_id
+    # if not has_premium_subscription and subscription_status == "free":
+    #     await users_collection.update_one(
+    #         {"email": user_email},
+    #         {"$set": {"free_itinerary_used": True}, "$inc": {"itineraries_created": 1}}
+    #     )
+    # else:
+    #     await users_collection.update_one(
+    #         {"email": user_email},
+    #         {"$inc": {"itineraries_created": 1}}
+    #     )
 
-    except asyncio.CancelledError:
-        # Handle cancellation at the top level
-        raise HTTPException(
-            status_code=status.HTTP_408_REQUEST_TIMEOUT,
-            detail="Request was cancelled. Please try again."
-        )
-    except Exception as e:
-        print(f"Error calling Groq API or parsing JSON: {e}")
-        error_detail = str(e)
-        
-        # Check if it's a quota error
-        if "quota" in error_detail.lower() or "429" in error_detail:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="API quota exceeded. Please try again in a few minutes or upgrade your plan."
-            )
-            
-        # Instead of failing, return a basic itinerary
-        print("Returning fallback itinerary")
-        
-        # Create a basic itinerary with the data we have
-        destination_name = destination if destination != "Not specified" else "India"
-        itinerary_data = {
-            "hero_image_url": "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&h=900&fit=crop",
-            "destination_name": destination_name,
-            "personalized_title": f"Your {destination_name} Adventure",
-            "trip_overview": {
-                "destination_insights": "Experience the beauty and culture of India with this sample itinerary.",
-                "weather_during_visit": "Please check current weather forecasts before traveling.",
-                "seasonal_context": "India's climate varies significantly by region and season.",
-                "local_customs_to_know": ["Remove shoes before entering temples", "Dress modestly at religious sites"]
-            },
-            "daily_itinerary": [
-                {
-                    "date": "Day 1",
-                    "day_number": "Day 1",
-                    "theme": "Exploring the Local Culture",
-                    "breakfast": {
-                        "restaurant": "Local Restaurant",
-                        "dish": "Traditional Indian Breakfast",
-                        "estimated_cost": "₹200-300"
-                    },
-                    "morning_activities": [
-                        {
-                            "activity": "Visit a Local Landmark",
-                            "location": "City Center",
-                            "duration": "2 hours"
-                        }
-                    ],
-                    "lunch": {
-                        "restaurant": "Authentic Indian Restaurant",
-                        "dish": "Regional Thali",
-                        "estimated_cost": "₹400-600"
-                    },
-                    "afternoon_activities": [
-                        {
-                            "activity": "Cultural Tour",
-                            "location": "Heritage Area",
-                            "duration": "3 hours"
-                        }
-                    ],
-                    "evening_snacks": {
-                        "dish": "Street Food Snacks",
-                        "place": "Local Market",
-                        "estimated_cost": "₹100-200"
-                    },
-                    "dinner": {
-                        "restaurant": "Premium Dining Experience",
-                        "dish": "Chef's Special",
-                        "estimated_cost": "₹800-1200"
-                    }
-                }
-            ]
-        }
-        
-        # Add more user-specific details if available
-        if travelers != "Not specified":
-            itinerary_data["trip_overview"]["travel_party"] = f"Tailored for {travelers}"
-        
-        if food_preferences != "Not specified":
-            itinerary_data["trip_overview"]["food_note"] = f"Includes {food_preferences} food options"
-            
-        return {"itinerary": itinerary_data, "llm_message": "Here's a sample itinerary to get you started. For a fully personalized plan, please try again with more specific preferences."}
-
-    return {"itinerary": itinerary_data, "llm_message": llm_message}
+    # --- REMOVED stray except/finally blocks after commenting out code ---
