@@ -68,56 +68,6 @@ export default function ComingSoon() {
     </div>
   );
 }
-
-{/* Floating Action Elements */}
-<div className="fixed bottom-8 right-8 z-20">
-  <div className="bg-white rounded-full p-4 shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 cursor-pointer group">
-    <div className="relative">
-      <Plane className="w-6 h-6 text-blue-600 group-hover:text-blue-700 transition-colors" />
-      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-    </div>
-  </div>
-</div>
-
-{/* Progress Indicator */}
-<div className="mt-8 slide-in" style={{ animationDelay: "2.1s" }}>
-  <div className="bg-white/70 rounded-full px-6 py-3 shadow-lg border border-white/30">
-    <div className="flex items-center space-x-2 text-sm text-gray-600">
-      <div className="flex space-x-1">
-        {[1, 2, 3, 4, 5].map((step) => (
-          <div
-            key={step}
-            className={`w-2 h-2 rounded-full transition-all duration-500 ${
-              step <= 3 ? 'bg-blue-500' : 'bg-gray-300'
-            }`}
-          />
-        ))}
-      </div>
-      <span className="font-medium">60% Complete</span>
-    </div>
-  </div>
-</div>
-
-{/* Newsletter Signup Success Animation */}
-{isSubscribed && (
-  <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 fade-in-up">
-    <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center">
-      <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <h3 className="text-2xl font-bold text-gray-800 mb-2">Welcome to Wanderlust!</h3>
-      <p className="text-gray-600 mb-4">You're now on our exclusive early access list.</p>
-      <div className="flex items-center justify-center space-x-2 text-blue-600">
-        <Plane className="w-4 h-4" />
-        <span className="text-sm font-medium">Taking you to our survey...</span>
-      </div>
-    </div>
-  </div>
-)}
-
-{/* Decorative Elements */}
 <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
   <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-200/30 to-transparent rounded-full -translate-y-32 translate-x-32"></div>
   <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-teal-200/20 to-transparent rounded-full translate-y-48 -translate-x-48"></div>
