@@ -307,42 +307,19 @@ const SearchInput = () => {
         }
     }, [inputValue, prompts.length, isTyping]);
 
+    // Waitlist: All prompt submissions go to coming soon
+    // Prompt bar: always go to coming soon page
     const handleSubmit = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        const query = inputValue || prompts[currentPromptIndex];
-        if (query) {
-            // Re-check authentication status at the time of submission
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-            const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-            const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
-            
-            const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
-            console.log('Form submit auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
-            
-            if (isAuthenticated) {
-                // User is signed in, redirect directly to preferences
-                console.log('Redirecting to preferences with query:', query);
-                router.push(`/preferences?prompt=${encodeURIComponent(query)}`);
-            } else {
-                // Store the query in localStorage to use after sign-in
-                console.log('Redirecting to signin, storing query:', query);
-                localStorage.setItem('pendingQuery', query);
-                // Redirect to sign-in page
-                router.push('/signin');
-            }
-        }
+        router.push('/coming-soon');
     };
 
+    // ...existing code before...
     return (
         <form 
-            onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit(e);
-            }} 
+            onSubmit={handleSubmit}
             className="flex-1"
-            onClick={(e) => e.stopPropagation()} // Prevent clicks on the form from triggering the parent div's onClick
+            onClick={(e) => e.stopPropagation()}
         >
             <input
                 type="text"
@@ -350,14 +327,11 @@ const SearchInput = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onFocus={() => setIsTyping(true)}
                 onBlur={() => {
-                    // Only set isTyping to false if the input is empty
-                    if (!inputValue.trim()) {
-                        setIsTyping(false);
-                    }
+                    if (!inputValue.trim()) setIsTyping(false);
                 }}
                 placeholder={prompts[currentPromptIndex]}
                 className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
-                onClick={(e) => e.stopPropagation()} // Prevent clicks on the input from triggering the parent div's onClick
+                onClick={(e) => e.stopPropagation()}
             />
         </form>
     );
@@ -400,6 +374,9 @@ export default function Home() {
     const router = useRouter();
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    // Add inputValue state for prompt bar
+    const [inputValue, setInputValue] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
 
     // Handle navbar scroll effect
     useEffect(() => {
@@ -434,20 +411,8 @@ export default function Home() {
         const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
         const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
         
-        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
-        console.log('Quick action auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
-        
-        if (isAuthenticated) {
-            // User is signed in, redirect directly to preferences
-            console.log('Redirecting to preferences with query:', query);
-            router.push(`/preferences?prompt=${encodeURIComponent(query)}`);
-        } else {
-            // Store the query in localStorage to use after sign-in
-            console.log('Redirecting to signin, storing query:', query);
-            localStorage.setItem('pendingQuery', query);
-            // Redirect to sign-in page
-            router.push('/signin');
-        }
+    // Always route to coming soon page for now
+    router.push('/coming-soon');
     };
 
     return (
@@ -496,8 +461,11 @@ export default function Home() {
 
                         {/* CTA Button */}
                         <div className="hidden md:flex items-center">
-                            <button className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm">
-                                PLAN MY TRIP
+                            <button
+                                className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
+                                onClick={() => router.push('/waitlist-survey')}
+                            >
+                                Join the Waitlist
                             </button>
                         </div>
 
@@ -580,36 +548,17 @@ export default function Home() {
                                         <Mic className="w-5 h-5 text-gray-500 group-hover:text-amber-500" />
                                     </button>
                                     <button 
-                                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105"
+                                        className={`bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         aria-label="Search"
+                                        disabled={!inputValue.trim()}
                                         onClick={(e) => {
-                                            e.stopPropagation(); // Prevent the parent div's onClick from firing
+                                            e.stopPropagation();
                                             const input = document.querySelector<HTMLInputElement>('input[type="text"]');
                                             const value = input?.value || "";
                                             const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
-                                            if (query) {
-                                                // Check if user is signed in with correct token key
-                                                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                                                const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-                                                const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-                                                const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-                                                const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
-                                                
-                                                const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
-                                                console.log('Send button auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
-                                                
-                                                if (isAuthenticated) {
-                                                    // User is signed in, redirect directly to preferences
-                                                    console.log('Redirecting to preferences with query:', query);
-                                                    window.location.href = `/preferences?prompt=${encodeURIComponent(query)}`;
-                                                } else {
-                                                    // Store the query in localStorage to use after sign-in
-                                                    console.log('Redirecting to signin, storing query:', query);
-                                                    localStorage.setItem('pendingQuery', query);
-                                                    // Redirect to sign-in page
-                                                    window.location.href = '/signin';
-                                                }
-                                            }
+                                            if (!query.trim()) return;
+                                            // Always route to coming soon page for now
+                                            window.location.href = '/coming-soon';
                                         }}
                                     >
                                         <Send className="w-5 h-5" />
