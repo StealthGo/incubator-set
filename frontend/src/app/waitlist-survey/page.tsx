@@ -85,10 +85,10 @@ export default function WaitlistSurvey() {
 		if (step === 4) {
 			// Submit form: send data to backend
 			const surveyData = {
-				frustration: selected === "Other" ? other : selected,
-				likelihood: slider,
-				price: selected,
-				idea: text,
+				step_1: selected === "Other" ? other : selected,
+				step_2: slider,
+				step_3: selected,
+				step_4: text,
 				email: email,
 			};
 			try {
