@@ -347,18 +347,12 @@ const SearchInput = () => {
 
     // ...existing code before...
     return (
-<<<<<<< HEAD
-        <form 
-            onSubmit={handleSubmit}
-            className="flex-1"
-=======
         <form
             onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit(e);
             }}
             className="w-full h-full flex items-center"
->>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
             onClick={(e) => e.stopPropagation()}
         >
             <input
@@ -367,19 +361,12 @@ const SearchInput = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onFocus={() => setIsTyping(true)}
                 onBlur={() => {
-<<<<<<< HEAD
-                    if (!inputValue.trim()) setIsTyping(false);
-                }}
-                placeholder={prompts[currentPromptIndex]}
-                className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
-=======
                     if (!inputValue.trim()) {
                         setIsTyping(false);
                     }
                 }}
                 placeholder={prompts[currentPromptIndex]}
                 className="w-full h-full text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
->>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
                 onClick={(e) => e.stopPropagation()}
             />
             <button
@@ -532,15 +519,9 @@ export default function Home() {
                         <div className="hidden md:flex items-center">
                             <button
                                 className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
-<<<<<<< HEAD
                                 onClick={() => router.push('/waitlist-survey')}
                             >
                                 Join the Waitlist
-=======
-                                onClick={() => { window.location.href = '/signin'; }}
-                            >
-                                SIGN IN
->>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
                             </button>
                         </div>
 
@@ -613,7 +594,6 @@ export default function Home() {
                                 <SearchInput />
                                 <div className="flex items-center gap-2 ml-4">
                                     <button 
-<<<<<<< HEAD
                                         aria-label="Voice input"
                                         className="p-2 rounded-full hover:bg-gray-100 transition-colors group"
                                         onClick={(e) => {
@@ -625,9 +605,6 @@ export default function Home() {
                                     </button>
                                     <button 
                                         className={`bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
-=======
-                                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105"
->>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
                                         aria-label="Search"
                                         disabled={!inputValue.trim()}
                                         onClick={(e) => {
@@ -1155,23 +1132,6 @@ export default function Home() {
                 </motion.section>
 
             {/* Footer */}
-            <footer 
-                id="contact"
-                className="w-full border-t border-gray-200/80 pt-16 pb-8 px-6 md:px-12"
-                style={{ backgroundColor: '#FCFAF8' }}
-            >
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
-                        {/* Brand and Newsletter Section */}
-                        <div className="lg:col-span-2">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                                    <Globe className="text-amber-600" />
-                                </div>
-                                <span className="text-xl font-bold text-gray-900 tracking-tight">The Modern <span className="text-amber-600">Chanakya</span></span>
-                            </div>
-                            
-                            {/* Newsletter */}
                             <div className="mb-6">
                                 <h3 className="text-gray-900 font-semibold mb-3">Stay Connected: Join our community newsletter.</h3>
                                 <form className="flex gap-2">
