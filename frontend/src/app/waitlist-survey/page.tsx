@@ -60,7 +60,7 @@ export default function WaitlistSurvey() {
 	const [showThanks, setShowThanks] = useState(false);
 	const router = useRouter();
 
-	const handleNext = (e) => {
+	const handleNext = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setError("");
 
@@ -83,12 +83,25 @@ export default function WaitlistSurvey() {
 		}
 
 		if (step === 4) {
-			// Submit form
+			// Submit form: send data to backend
+			const surveyData = {
+				frustration: selected === "Other" ? other : selected,
+				likelihood: slider,
+				price: selected,
+				idea: text,
+				email: email,
+			};
+			try {
+				await fetch("https://incubator-set.onrender.com/api/survey", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(surveyData),
+				});
+			} catch (err) {
+				console.error("Failed to submit survey:", err);
+			}
 			setShowThanks(true);
 			setTimeout(() => {
-				// You can add form submission logic here
-				console.log("Survey completed");
-				// Redirect to landing page after showing thank you message
 				router.push("/");
 			}, 2000);
 			return;
