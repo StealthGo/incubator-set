@@ -822,9 +822,9 @@ export default function PreferencesPage() {
           setIsGenerating(false);
           return;
         }
-        if (res.status === 503) {
-          // Service unavailable / model overloaded
-          const MAX_RETRIES = 2;
+        if (res.status === 503 || res.status === 500) {
+          // Service unavailable / model overloaded / server error
+          const MAX_RETRIES = 3;
           if (retryCount < MAX_RETRIES) {
             // Update the generating message to show retry status
             setMessages((msgs) => {
@@ -847,13 +847,13 @@ export default function PreferencesPage() {
             // Max retries exceeded
             setMessages((msgs) => [
               ...msgs,
-              { sender: "llm", text: "I'm sorry, our servers are currently overloaded. Please try generating your itinerary again in a few minutes." },
+              { sender: "llm", text: "I'm sorry, our servers are currently experiencing issues. Please try generating your itinerary again in a few minutes." },
             ]);
             setIsGenerating(false);
             return;
           }
         }
-        throw new Error(`API error: ${res.statusText}`);
+        throw new Error(`API error: ${res.statusText} (${res.status})`);
       }
 
       const data = await res.json();
@@ -874,15 +874,17 @@ export default function PreferencesPage() {
     } catch (err: unknown) {
       console.error("Error generating itinerary:", err);
       
-      // Check for model overload errors in the error message
+      // Check for model overload errors or server errors in the error message
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      const isModelOverloaded = 
+      const isServerIssue = 
         errorMessage.includes('overloaded') || 
         errorMessage.includes('503') || 
-        errorMessage.includes('unavailable');
+        errorMessage.includes('500') || 
+        errorMessage.includes('unavailable') || 
+        errorMessage.includes('server error');
       
-      // Handle model overload errors with retry logic
-      if (isModelOverloaded && retryCount < 2) {
+      // Handle server issues with retry logic
+      if (isServerIssue && retryCount < 3) {
         // Update the generating message to show retry status
         setMessages((msgs) => {
           const newMsgs = [...msgs];
