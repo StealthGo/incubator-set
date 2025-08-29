@@ -27,17 +27,17 @@ function SignInInner({ router }: { router: ReturnType<typeof useRouter> }) {
     setError("");
     setSuccess("");
     try {
-      const form = new URLSearchParams();
-      form.append("username", email);
-      form.append("password", password);
       const res = await fetch(buildApiUrl(API_ENDPOINTS.signin), {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: form.toString(),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: email,
+          password: password
+        }),
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.detail || "Sign in failed");
+        setError(data.error || "Sign in failed");
         setLoading(false);
         return;
       }
