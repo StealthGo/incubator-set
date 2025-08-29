@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -269,7 +269,38 @@ const SearchInput = () => {
     const [inputValue, setInputValue] = useState("");
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
+    const [listening, setListening] = useState(false);
+    const recognitionRef = React.useRef<any>(null);
     const router = useRouter();
+    // Voice recognition setup
+    useEffect(() => {
+        if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setInputValue(transcript);
+                setListening(false);
+            };
+            recognition.onend = () => setListening(false);
+            recognition.onerror = () => setListening(false);
+            recognitionRef.current = recognition;
+        }
+    }, []);
+
+    const handleMicClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (listening) {
+            recognitionRef.current && recognitionRef.current.stop();
+            setListening(false);
+        } else {
+            recognitionRef.current && recognitionRef.current.start();
+            setListening(true);
+        }
+    };
     
     // Check authentication status on component mount
     useEffect(() => {
@@ -316,9 +347,18 @@ const SearchInput = () => {
 
     // ...existing code before...
     return (
+<<<<<<< HEAD
         <form 
             onSubmit={handleSubmit}
             className="flex-1"
+=======
+        <form
+            onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(e);
+            }}
+            className="w-full h-full flex items-center"
+>>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
             onClick={(e) => e.stopPropagation()}
         >
             <input
@@ -327,12 +367,29 @@ const SearchInput = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onFocus={() => setIsTyping(true)}
                 onBlur={() => {
+<<<<<<< HEAD
                     if (!inputValue.trim()) setIsTyping(false);
                 }}
                 placeholder={prompts[currentPromptIndex]}
                 className="flex-1 text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
+=======
+                    if (!inputValue.trim()) {
+                        setIsTyping(false);
+                    }
+                }}
+                placeholder={prompts[currentPromptIndex]}
+                className="w-full h-full text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
+>>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
                 onClick={(e) => e.stopPropagation()}
             />
+            <button
+                type="button"
+                aria-label={listening ? "Stop voice input" : "Voice input"}
+                className={`p-2 rounded-full ml-2 transition-colors group ${listening ? 'bg-amber-100' : 'hover:bg-gray-100'}`}
+                onClick={handleMicClick}
+            >
+                <Mic className={`w-5 h-5 ${listening ? 'text-amber-500 animate-pulse' : 'text-gray-500 group-hover:text-amber-500'}`} />
+            </button>
         </form>
     );
 };
@@ -372,6 +429,21 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 
 export default function Home() {
     const router = useRouter();
+    // Request geolocation permission and store current location
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    localStorage.setItem('current_location', JSON.stringify({ latitude, longitude }));
+                },
+                (error) => {
+                    // Optionally handle error or fallback
+                    console.warn('Geolocation error:', error);
+                }
+            );
+        }
+    }, []);
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     // Add inputValue state for prompt bar
@@ -453,9 +525,6 @@ export default function Home() {
                             <a href="#home" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
                             <a href="#how-it-works" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
                             <a href="#why-us" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">WHY US</a>
-                            <a href="#get-inspired" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">INSPIRED</a>
-                            <a href="#itineraries" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">ITINERARIES</a>
-                            <a href="#testimonials" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">TESTIMONIALS</a>
                             <a href="#contact" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
                         </div>
 
@@ -463,9 +532,15 @@ export default function Home() {
                         <div className="hidden md:flex items-center">
                             <button
                                 className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
+<<<<<<< HEAD
                                 onClick={() => router.push('/waitlist-survey')}
                             >
                                 Join the Waitlist
+=======
+                                onClick={() => { window.location.href = '/signin'; }}
+                            >
+                                SIGN IN
+>>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
                             </button>
                         </div>
 
@@ -538,6 +613,7 @@ export default function Home() {
                                 <SearchInput />
                                 <div className="flex items-center gap-2 ml-4">
                                     <button 
+<<<<<<< HEAD
                                         aria-label="Voice input"
                                         className="p-2 rounded-full hover:bg-gray-100 transition-colors group"
                                         onClick={(e) => {
@@ -549,6 +625,9 @@ export default function Home() {
                                     </button>
                                     <button 
                                         className={`bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+=======
+                                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105"
+>>>>>>> f54e695188dda83ea8667fda643fe6c87be7644c
                                         aria-label="Search"
                                         disabled={!inputValue.trim()}
                                         onClick={(e) => {
@@ -569,19 +648,47 @@ export default function Home() {
 
                         {/* Quick Action Buttons */}
                         <div className="flex flex-wrap justify-center gap-4 mb-8">
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Create a new trip';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">✈️</span>
                                 Create a new trip
                             </button>
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Inspire me where to go';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">🗺️</span>
                                 Inspire me where to go
                             </button>
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Weekend getaways';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">🏖️</span>
                                 Weekend getaways
                             </button>
-                            <button className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors">
+                            <button
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                onClick={() => {
+                                    const query = 'Beautiful hotel in Dubai';
+                                    localStorage.setItem('pendingQuery', query);
+                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                }}
+                            >
                                 <span className="text-amber-500">🏨</span>
                                 Beautiful hotel in Dubai
                             </button>
@@ -1087,13 +1194,13 @@ export default function Home() {
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
                             <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="#" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Group Travel</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Solo Adventures</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Family Trips</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Business Travel</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
+                                <li><a href="/custom-itineraries" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
+                                <li><a href="/group-travel" className="hover:text-amber-600 transition">Group Travel</a></li>
+                                <li><a href="/solo-adventures" className="hover:text-amber-600 transition">Solo Adventures</a></li>
+                                <li><a href="/family-trips" className="hover:text-amber-600 transition">Family Trips</a></li>
+                                <li><a href="/business-travel" className="hover:text-amber-600 transition">Business Travel</a></li>
+                                <li><a href="/weekend-getaways" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
+                                <li><a href="/luxury-experiences" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
                             </ul>
                         </div>
 
@@ -1101,13 +1208,13 @@ export default function Home() {
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
                             <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="#" className="hover:text-amber-600 transition">Travel Guides</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Travel Tips</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Destination Insights</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Budget Planning</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Packing Lists</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Travel Stories</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Cultural Guides</a></li>
+                                <li><a href="/travel-guides" className="hover:text-amber-600 transition">Travel Guides</a></li>
+                                <li><a href="/travel-tips" className="hover:text-amber-600 transition">Travel Tips</a></li>
+                                <li><a href="/destination-insights" className="hover:text-amber-600 transition">Destination Insights</a></li>
+                                <li><a href="/budget-planning" className="hover:text-amber-600 transition">Budget Planning</a></li>
+                                <li><a href="/packing-lists" className="hover:text-amber-600 transition">Packing Lists</a></li>
+                                <li><a href="/travel-stories" className="hover:text-amber-600 transition">Travel Stories</a></li>
+                                <li><a href="/cultural-guides" className="hover:text-amber-600 transition">Cultural Guides</a></li>
                             </ul>
                         </div>
 
@@ -1115,9 +1222,9 @@ export default function Home() {
                         <div>
                             <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
                             <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="#" className="hover:text-amber-600 transition">Help Center</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Contact Us</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">FAQ</a></li>
+                                <li><a href="/help-center" className="hover:text-amber-600 transition">Help Center</a></li>
+                                <li><a href="/contact-us" className="hover:text-amber-600 transition">Contact Us</a></li>
+                                <li><a href="/faq" className="hover:text-amber-600 transition">FAQ</a></li>
                                 <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
                                 <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
                                 <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
@@ -1131,9 +1238,9 @@ export default function Home() {
                         <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
                         <div className="flex items-center gap-6">
                             <div className="flex gap-4 text-gray-500 text-sm">
-                                <a href="#" className="hover:text-amber-600 transition">Privacy Policy</a>
-                                <a href="#" className="hover:text-amber-600 transition">Terms of Service</a>
-                                <a href="#" className="hover:text-amber-600 transition">Cookie Policy</a>
+                                <a href="/privacy-policy" className="hover:text-amber-600 transition">Privacy Policy</a>
+                                <a href="/terms-of-service" className="hover:text-amber-600 transition">Terms of Service</a>
+                                <a href="/cookie-policy" className="hover:text-amber-600 transition">Cookie Policy</a>
                             </div>
                             <div className="flex gap-4 text-gray-500">
                                 <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
