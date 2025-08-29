@@ -1107,111 +1107,103 @@ export default function Home() {
 
             </main>
                             {/* FAQ Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
-                    <div className="max-w-3xl mx-auto px-6">
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-10">FAQs – Sawal Jo Aksar Puchte Hain</h2>
-                        <div className="space-y-4">
-                            <Accordion
-                                question="How does The Modern Chanakya work?"
-                                answer="Bilkul simple hai! Bas apni preferences batao, aur hum aapke liye ek dum personalized itinerary bana denge – Indian style mein, with all the local masala."
-                            />
-                            <Accordion
-                                question="Is The Modern Chanakya free?"
-                                answer="Haanji, abhi ke liye bilkul free hai! Aap jitni chahe itineraries bana sakte ho, bina kisi charge ke."
-                            />
-                            <Accordion
-                                question="Can I get itineraries for my family or group?"
-                                answer="Bilkul! Family trip ho ya dosto ke saath masti, bas preferences mein batao kaun jaa raha hai, aur itinerary usi hisaab se milegi."
-                            />
-                            <Accordion
-                                question="How do I get support if I’m stuck?"
-                                answer="Koi dikkat aaye? Hum yahin hain! Niche contact section ya WhatsApp pe message karo, jaldi reply milega."
-                            />
-                        </div>
-                    </div>
-                </motion.section>
+                            <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
+                                <div className="max-w-3xl mx-auto px-6">
+                                    <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-10">FAQs – Sawal Jo Aksar Puchte Hain</h2>
+                                    <div className="space-y-4">
+                                        <Accordion
+                                            question="How does The Modern Chanakya work?"
+                                            answer="Bilkul simple hai! Bas apni preferences batao, aur hum aapke liye ek dum personalized itinerary bana denge – Indian style mein, with all the local masala."
+                                        />
+                                        <Accordion
+                                            question="Is The Modern Chanakya free?"
+                                            answer="Haanji, abhi ke liye bilkul free hai! Aap jitni chahe itineraries bana sakte ho, bina kisi charge ke."
+                                        />
+                                        <Accordion
+                                            question="Can I get itineraries for my family or group?"
+                                            answer="Bilkul! Family trip ho ya dosto ke saath masti, bas preferences mein batao kaun jaa raha hai, aur itinerary usi hisaab se milegi."
+                                        />
+                                        <Accordion
+                                            question="How do I get support if I’m stuck?"
+                                            answer="Koi dikkat aaye? Hum yahin hain! Niche contact section ya WhatsApp pe message karo, jaldi reply milega."
+                                        />
+                                    </div>
+                                </div>
+                            </motion.section>
 
-            {/* Footer */}
-                            <div className="mb-6">
-                                <h3 className="text-gray-900 font-semibold mb-3">Stay Connected: Join our community newsletter.</h3>
-                                <form className="flex gap-2">
-                                    <input 
-                                        type="email" 
-                                        placeholder="Enter your email" 
-                                        className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 text-sm"
-                                    />
-                                    <button 
-                                        type="submit" 
-                                        className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
-                                    >
-                                        →
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-
-                        {/* Travel Services */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
-                            <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="/custom-itineraries" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
-                                <li><a href="/group-travel" className="hover:text-amber-600 transition">Group Travel</a></li>
-                                <li><a href="/solo-adventures" className="hover:text-amber-600 transition">Solo Adventures</a></li>
-                                <li><a href="/family-trips" className="hover:text-amber-600 transition">Family Trips</a></li>
-                                <li><a href="/business-travel" className="hover:text-amber-600 transition">Business Travel</a></li>
-                                <li><a href="/weekend-getaways" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
-                                <li><a href="/luxury-experiences" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
-                            </ul>
-                        </div>
-
-                        {/* Resources */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
-                            <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="/travel-guides" className="hover:text-amber-600 transition">Travel Guides</a></li>
-                                <li><a href="/travel-tips" className="hover:text-amber-600 transition">Travel Tips</a></li>
-                                <li><a href="/destination-insights" className="hover:text-amber-600 transition">Destination Insights</a></li>
-                                <li><a href="/budget-planning" className="hover:text-amber-600 transition">Budget Planning</a></li>
-                                <li><a href="/packing-lists" className="hover:text-amber-600 transition">Packing Lists</a></li>
-                                <li><a href="/travel-stories" className="hover:text-amber-600 transition">Travel Stories</a></li>
-                                <li><a href="/cultural-guides" className="hover:text-amber-600 transition">Cultural Guides</a></li>
-                            </ul>
-                        </div>
-
-                        {/* Support */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
-                            <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="/help-center" className="hover:text-amber-600 transition">Help Center</a></li>
-                                <li><a href="/contact-us" className="hover:text-amber-600 transition">Contact Us</a></li>
-                                <li><a href="/faq" className="hover:text-amber-600 transition">FAQ</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Feedback</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Bottom Section */}
-                    <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-gray-200/80">
-                        <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
-                        <div className="flex items-center gap-6">
-                            <div className="flex gap-4 text-gray-500 text-sm">
-                                <a href="/privacy-policy" className="hover:text-amber-600 transition">Privacy Policy</a>
-                                <a href="/terms-of-service" className="hover:text-amber-600 transition">Terms of Service</a>
-                                <a href="/cookie-policy" className="hover:text-amber-600 transition">Cookie Policy</a>
-                            </div>
-                            <div className="flex gap-4 text-gray-500">
-                                <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
-                                <a href="#" aria-label="LinkedIn" className="hover:text-amber-600 transition"><Linkedin size={18} /></a>
-                                <a href="#" aria-label="YouTube" className="hover:text-amber-600 transition"><Youtube size={18} /></a>
-                                <a href="#" aria-label="Twitter" className="hover:text-amber-600 transition"><Globe size={18} /></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </motion.div>
-    );
-}
+                            {/* Footer */}
+                            <footer className="bg-white border-t border-gray-200/80 mt-12">
+                                <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-12">
+                                    <div className="mb-6 md:col-span-1">
+                                        <h3 className="text-gray-900 font-semibold mb-3">Stay Connected: Join our community newsletter.</h3>
+                                        <form className="flex gap-2">
+                                            <input 
+                                                type="email" 
+                                                placeholder="Enter your email" 
+                                                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 text-sm"
+                                            />
+                                            <button 
+                                                type="submit" 
+                                                className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
+                                            >
+                                                →
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
+                                        <ul className="space-y-3 text-gray-600 text-sm">
+                                            <li><a href="/custom-itineraries" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
+                                            <li><a href="/group-travel" className="hover:text-amber-600 transition">Group Travel</a></li>
+                                            <li><a href="/solo-adventures" className="hover:text-amber-600 transition">Solo Adventures</a></li>
+                                            <li><a href="/family-trips" className="hover:text-amber-600 transition">Family Trips</a></li>
+                                            <li><a href="/business-travel" className="hover:text-amber-600 transition">Business Travel</a></li>
+                                            <li><a href="/weekend-getaways" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
+                                            <li><a href="/luxury-experiences" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
+                                        <ul className="space-y-3 text-gray-600 text-sm">
+                                            <li><a href="/travel-guides" className="hover:text-amber-600 transition">Travel Guides</a></li>
+                                            <li><a href="/travel-tips" className="hover:text-amber-600 transition">Travel Tips</a></li>
+                                            <li><a href="/destination-insights" className="hover:text-amber-600 transition">Destination Insights</a></li>
+                                            <li><a href="/budget-planning" className="hover:text-amber-600 transition">Budget Planning</a></li>
+                                            <li><a href="/packing-lists" className="hover:text-amber-600 transition">Packing Lists</a></li>
+                                            <li><a href="/travel-stories" className="hover:text-amber-600 transition">Travel Stories</a></li>
+                                            <li><a href="/cultural-guides" className="hover:text-amber-600 transition">Cultural Guides</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
+                                        <ul className="space-y-3 text-gray-600 text-sm">
+                                            <li><a href="/help-center" className="hover:text-amber-600 transition">Help Center</a></li>
+                                            <li><a href="/contact-us" className="hover:text-amber-600 transition">Contact Us</a></li>
+                                            <li><a href="/faq" className="hover:text-amber-600 transition">FAQ</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">Feedback</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="max-w-7xl mx-auto px-6 pt-8 flex flex-col md:flex-row items-center justify-between border-t border-gray-200/80">
+                                    <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
+                                    <div className="flex items-center gap-6">
+                                        <div className="flex gap-4 text-gray-500 text-sm">
+                                            <a href="/privacy-policy" className="hover:text-amber-600 transition">Privacy Policy</a>
+                                            <a href="/terms-of-service" className="hover:text-amber-600 transition">Terms of Service</a>
+                                            <a href="/cookie-policy" className="hover:text-amber-600 transition">Cookie Policy</a>
+                                        </div>
+                                        <div className="flex gap-4 text-gray-500">
+                                            <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
+                                            <a href="#" aria-label="LinkedIn" className="hover:text-amber-600 transition"><Linkedin size={18} /></a>
+                                            <a href="#" aria-label="YouTube" className="hover:text-amber-600 transition"><Youtube size={18} /></a>
+                                            <a href="#" aria-label="Twitter" className="hover:text-amber-600 transition"><Globe size={18} /></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </footer>
+                        </motion.div>
+                    );
+                }
