@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+// ...existing code...
 
 const steps = [
 	{
@@ -49,6 +48,21 @@ const steps = [
 	}
 ];
 
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Mic } from "lucide-react";
+
+const prompts = [
+	"Create a 7-day Paris itinerary",
+	"Plan a weekend getaway to Goa",
+	"Best temples to visit in Varanasi",
+	"Romantic honeymoon in Kerala",
+	"Adventure trip to Leh-Ladakh",
+	"Family vacation in Rajasthan",
+	"Budget backpacking in Himachal",
+	"Luxury stay in Mumbai hotels"
+];
+
 export default function WaitlistSurvey() {
 	const [step, setStep] = useState(0);
 	const [selected, setSelected] = useState("");
@@ -58,7 +72,59 @@ export default function WaitlistSurvey() {
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState("");
 	const [showThanks, setShowThanks] = useState(false);
+	const [inputValue, setInputValue] = useState("");
+	const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
+	const [isTyping, setIsTyping] = useState(false);
+	const [listening, setListening] = useState(false);
+	const recognitionRef = React.useRef<any>(null);
 	const router = useRouter();
+
+	React.useEffect(() => {
+		if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+			const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+			const recognition = new SpeechRecognition();
+			recognition.continuous = false;
+			recognition.interimResults = false;
+			recognition.lang = 'en-US';
+			recognition.onresult = (event: any) => {
+				const transcript = event.results[0][0].transcript;
+				setInputValue(transcript);
+				setListening(false);
+			};
+			recognition.onend = () => setListening(false);
+			recognition.onerror = () => setListening(false);
+			recognitionRef.current = recognition;
+		}
+	}, []);
+
+	React.useEffect(() => {
+		if (!inputValue && !isTyping) {
+					const interval = setInterval(() => {
+						setCurrentPromptIndex((prev: number) => (prev + 1) % prompts.length);
+					}, 3000);
+			return () => clearInterval(interval);
+		}
+	}, [inputValue, isTyping]);
+
+	const handleMicClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (listening) {
+			recognitionRef.current && recognitionRef.current.stop();
+			setListening(false);
+		} else {
+			recognitionRef.current && recognitionRef.current.start();
+			setListening(true);
+		}
+	};
+
+		const handlePromptSubmit = (e?: React.FormEvent) => {
+			if (e) e.preventDefault();
+			// For survey, just set the input as the first answer and go to next step
+			setSelected((inputValue ?? prompts[currentPromptIndex]) || "");
+			setStep(1);
+			setInputValue("");
+			setIsTyping(false);
+		};
 
 	const handleNext = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -118,6 +184,43 @@ export default function WaitlistSurvey() {
 	};
 
 	return (
+		<div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFAF8] px-4">
+			{/* Prompt bar at the top, styled like landing page */}
+			{step === 0 && !showThanks && (
+				<form
+					onSubmit={handlePromptSubmit}
+					className="w-full max-w-xl flex items-center bg-white rounded-full shadow-md px-6 py-3 mb-8 border border-amber-100"
+					onClick={e => e.stopPropagation()}
+				>
+					<input
+						type="text"
+						value={inputValue}
+						onChange={e => setInputValue(e.target.value)}
+						onFocus={() => setIsTyping(true)}
+						onBlur={() => { if (!inputValue.trim()) setIsTyping(false); }}
+						placeholder={prompts[currentPromptIndex]}
+						className="flex-1 text-lg text-amber-500 placeholder-amber-400 bg-transparent border-none outline-none px-2 py-1"
+						onClick={e => e.stopPropagation()}
+					/>
+					<button
+						type="button"
+						aria-label={listening ? "Stop voice input" : "Voice input"}
+						className={`p-2 rounded-full ml-2 transition-colors group ${listening ? 'bg-amber-100' : 'hover:bg-gray-100'}`}
+						onClick={handleMicClick}
+					>
+						<Mic className={`w-5 h-5 ${listening ? 'text-amber-500 animate-pulse' : 'text-gray-500 group-hover:text-amber-500'}`} />
+					</button>
+					<button
+						type="submit"
+						className="ml-2 bg-amber-400 hover:bg-amber-500 text-white rounded-full p-2 transition"
+						aria-label="Submit prompt"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+							<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+						</svg>
+					</button>
+				</form>
+			)}
 		<div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFAF8] px-4">
 			{showThanks ? (
 				<div className="flex items-center justify-center">
@@ -321,4 +424,5 @@ export default function WaitlistSurvey() {
 			)}
 		</div>
 	);
+	</div>
 }

@@ -369,6 +369,7 @@ const SearchInput = () => {
                 className="w-full h-full text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
                 onClick={(e) => e.stopPropagation()}
             />
+            {/* Only one mic button retained, duplicate removed */}
             <button
                 type="button"
                 aria-label={listening ? "Stop voice input" : "Voice input"}
