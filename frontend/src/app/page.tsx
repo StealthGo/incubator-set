@@ -631,7 +631,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Create a new trip';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">✈️</span>
@@ -642,7 +642,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Inspire me where to go';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">🗺️</span>
@@ -653,7 +653,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Weekend getaways';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">🏖️</span>
@@ -664,7 +664,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Beautiful hotel in Dubai';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">🏨</span>
