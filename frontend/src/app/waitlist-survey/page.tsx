@@ -1,5 +1,8 @@
 "use client";
-// ...existing code...
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Mic } from "lucide-react";
 
 const steps = [
 	{
@@ -48,10 +51,6 @@ const steps = [
 	}
 ];
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Mic } from "lucide-react";
-
 const prompts = [
 	"Create a 7-day Paris itinerary",
 	"Plan a weekend getaway to Goa",
@@ -99,9 +98,9 @@ export default function WaitlistSurvey() {
 
 	React.useEffect(() => {
 		if (!inputValue && !isTyping) {
-					const interval = setInterval(() => {
-						setCurrentPromptIndex((prev: number) => (prev + 1) % prompts.length);
-					}, 3000);
+			const interval = setInterval(() => {
+				setCurrentPromptIndex((prev: number) => (prev + 1) % prompts.length);
+			}, 3000);
 			return () => clearInterval(interval);
 		}
 	}, [inputValue, isTyping]);
@@ -117,14 +116,14 @@ export default function WaitlistSurvey() {
 		}
 	};
 
-		const handlePromptSubmit = (e?: React.FormEvent) => {
-			if (e) e.preventDefault();
-			// For survey, just set the input as the first answer and go to next step
-			setSelected((inputValue ?? prompts[currentPromptIndex]) || "");
-			setStep(1);
-			setInputValue("");
-			setIsTyping(false);
-		};
+	const handlePromptSubmit = (e?: React.FormEvent) => {
+		if (e) e.preventDefault();
+		// For survey, just set the input as the first answer and go to next step
+		setSelected((inputValue ?? prompts[currentPromptIndex]) || "");
+		setStep(1);
+		setInputValue("");
+		setIsTyping(false);
+	};
 
 	const handleNext = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -221,7 +220,7 @@ export default function WaitlistSurvey() {
 					</button>
 				</form>
 			)}
-		<div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFAF8] px-4">
+			
 			{showThanks ? (
 				<div className="flex items-center justify-center">
 					<div className="bg-gradient-to-br from-amber-100 via-white to-amber-200 rounded-3xl shadow-2xl p-10 text-center max-w-sm border-2 border-amber-300">
@@ -424,5 +423,4 @@ export default function WaitlistSurvey() {
 			)}
 		</div>
 	);
-	</div>
 }
