@@ -410,6 +410,15 @@ const Accordion = ({ question, answer }: AccordionProps) => {
 
 export default function Home() {
     const router = useRouter();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [mobileMenuOpen]);
     // Request geolocation permission and store current location
     useEffect(() => {
         if (typeof window !== 'undefined' && 'geolocation' in navigator) {
@@ -494,11 +503,9 @@ export default function Home() {
                     className="max-w-7xl mx-auto px-6 py-6"
                 >
                     <div className="flex items-center justify-between">
-                        {/* Logo/Brand */}
                         <div className="flex items-center">
                             <a href="/" className="flex items-center gap-2">
-                                <Image src="/logo.jpg" alt="Modern Chanakya Logo" width={36} height={36} className="w-9 h-9" />
-
+                                <span className="text-xl font-bold text-[#37C2C4] tracking-wide font-poppins">The Modern Chanakya</span>
                             </a>
                         </div>
 
@@ -523,11 +530,53 @@ export default function Home() {
 
                         {/* Mobile Menu Button */}
                         <div className="md:hidden">
-                            <button className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button
+                                className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200"
+                                aria-label="Open menu"
+                                onClick={() => setMobileMenuOpen(true)}
+                            >
+                                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
                             </button>
+                            {mobileMenuOpen && (
+                                <>
+                                    {/* Backdrop */}
+                                    <div className="fixed inset-0 bg-black bg-opacity-40 z-[99998]" onClick={() => setMobileMenuOpen(false)}></div>
+                                    {/* Slide-in Menu */}
+                                    <div className="fixed top-0 right-0 h-full w-4/5 max-w-xs bg-white z-[99999] shadow-xl flex flex-col pt-8 pb-6 px-6 animate-slidein">
+                                        <button
+                                            className="self-end text-gray-500 hover:text-[#37C2C4] text-3xl mb-8"
+                                            aria-label="Close menu"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            &times;
+                                        </button>
+                                        <nav className="flex flex-col gap-6 mt-2">
+                                            <a href="#home" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>HOME</a>
+                                            <a href="#how-it-works" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>HOW IT WORKS</a>
+                                            <a href="#why-us" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>WHY US</a>
+                                            <a href="#contribute" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>CREATE WITH US</a>
+                                            <a href="#contact" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>SUPPORT</a>
+                                        </nav>
+                                        <button
+                                            className="bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white px-6 py-3 rounded-full font-bold text-lg mt-8 shadow w-full"
+                                            onClick={() => { setMobileMenuOpen(false); router.push('/waitlist-survey'); }}
+                                        >
+                                            Join the Waitlist
+                                        </button>
+                                    </div>
+                                    <style jsx>{`
+                                        @keyframes slidein {
+                                            from { transform: translateX(100%); }
+                                            to { transform: translateX(0); }
+                                        }
+                                        .animate-slidein {
+                                            animation: slidein 0.3s cubic-bezier(0.4,0,0.2,1);
+                                        }
+                                    `}</style>
+                                </>
+                            )}
                         </div>
                     </div>
                 </motion.div>
@@ -543,13 +592,14 @@ export default function Home() {
                     initial="initial"
                     animate="animate"
                     variants={fadeInUp}
-                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-14 px-6 mb-2"
+                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-5 px-2 md:py-14 md:px-6 mb-2"
                 >
-                          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                              Discover India, <span className="text-[#37C2C4]">Your Way.</span>
+                          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight flex items-center justify-center gap-4">
+                              <Image src="/logo.png" alt="Modern Chanakya Logo" width={32} height={32} className="w-8 h-8 inline-block mr-2" />
+                              <span className="block md:inline text-xl md:text-6xl font-bold">Discover India, <span className="text-[#37C2C4]">Your Way.</span></span>
                           </h1>
                           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
-                                 AI-powered travel assistant, tailored for you.
+                                 <span className="block md:inline text-sm md:text-lg mb-2">AI-powered travel assistant, tailored for you.</span>
                           </p>
                         <div className="inline-block px-5.5 py-2.5 rounded-full bg-[#37C2C4]/10 text-[#37C2C4] font-bold text-xl mb-6" style={{ letterSpacing: '0.05em' }}>
                             Coming Soon
@@ -558,7 +608,7 @@ export default function Home() {
                     {/* Search Section */}
                     <div className="max-w-4xl mx-auto mb-16">
                         {/* Main Search Bar */}
-                        <div className="relative mb-8">
+                        <div className="relative mb-6">
                             <div 
                                 className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-[#37C2C4] transition-colors cursor-pointer"
                                 onClick={() => {
@@ -625,7 +675,7 @@ export default function Home() {
                         {/* Quick Action Buttons */}
                         <div className="flex flex-wrap justify-center gap-4 mb-8">
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
                                 onClick={() => {
                                     const query = 'Create a new trip';
                                     localStorage.setItem('pendingQuery', query);
@@ -636,7 +686,7 @@ export default function Home() {
                                 Create a new trip
                             </button>
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
                                 onClick={() => {
                                     const query = 'Inspire me where to go';
                                     localStorage.setItem('pendingQuery', query);
@@ -647,7 +697,7 @@ export default function Home() {
                                 Inspire me where to go
                             </button>
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
                                 onClick={() => {
                                     const query = 'Weekend getaways';
                                     localStorage.setItem('pendingQuery', query);
@@ -658,7 +708,7 @@ export default function Home() {
                                 Weekend getaways
                             </button>
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
                                 onClick={() => {
                                     const query = 'Beautiful hotel in Dubai';
                                     localStorage.setItem('pendingQuery', query);
