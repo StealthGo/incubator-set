@@ -20,7 +20,7 @@ export default function TermsOfService() {
       <h2 style={{marginTop: '2rem', fontWeight: 600}}>Changes to Terms</h2>
       <p>We may update these Terms from time to time. Continued use of our services means you accept the revised terms.</p>
       <h2 style={{marginTop: '2rem', fontWeight: 600}}>Contact Us</h2>
-      <p>If you have questions about these Terms, please contact us at <a href="mailto:support@example.com" style={{color:'#d97706'}}>support@example.com</a>.</p>
+  <p>If you have questions about these Terms, please contact us at <a href="mailto:humans@tmchanakya.com" style={{color:'#37C2C4'}}>humans@tmchanakya.com</a>.</p>
     </div>
   );
 }

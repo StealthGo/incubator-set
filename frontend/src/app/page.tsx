@@ -319,7 +319,7 @@ const SearchInput = () => {
     }, []);
     
     const prompts = [
-        "Create a 7-day Paris itinerary",
+        "Plan a Spritual Journey for me",
         "Plan a weekend getaway to Goa", 
         "Best temples to visit in Varanasi",
         "Romantic honeymoon in Kerala",
@@ -506,7 +506,8 @@ export default function Home() {
                             <a href="#home" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
                             <a href="#how-it-works" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
                             <a href="#why-us" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">WHY US</a>
-                            <a href="#contact" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
+                            <a href="#Create With us" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">CREATE WITH US</a>
+                            <a href="#Support" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
                         </div>
 
                         {/* CTA Button */}
@@ -541,14 +542,17 @@ export default function Home() {
                     initial="initial"
                     animate="animate"
                     variants={fadeInUp}
-                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-20 px-6"
+                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-14 px-6 mb-2"
                 >
                           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                               Discover India, <span className="text-[#37C2C4]">Your Way.</span>
                           </h1>
                           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
-                                 AI-powered itineraries, tailored for you.
+                                 AI-powered travel assistant, tailored for you.
                           </p>
+                        <div className="inline-block px-5.5 py-2.5 rounded-full bg-[#37C2C4]/10 text-[#37C2C4] font-bold text-xl mb-6" style={{ letterSpacing: '0.05em' }}>
+                            Coming Soon
+                        </div>
                     
                     {/* Search Section */}
                     <div className="max-w-4xl mx-auto mb-16">
@@ -661,38 +665,63 @@ export default function Home() {
                                 }}
                             >
                                 <span className="text-[#37C2C4]">🏨</span>
-                                Beautiful hotel in Dubai
+                                Beautiful stays
                             </button>
                         </div>
 
                         {/* See How It Works Link - removed for cleaner design */}
                     </div>
                 </motion.section>
-
-                {/* Problems Travellers Face Section (Bento Grid Style) */}
+                                {/* Why Us Section */}
                 <motion.section 
-                    id="traveller-problems"
+                    id="why-us"
                     initial="initial"
                     whileInView="animate"
                     viewport={{ once: true, amount: 0.2 }}
                     variants={fadeInUp} 
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="w-full py-16"
-                    style={{ backgroundColor: '#FCFAF8' }}
+                    className="pt-8 pb-16"
                 >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: '#37C2C4' }}>
-                                Problems Current Travellers Face
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                                Why Choose <span style={{ color: '#37C2C4' }}>The Modern Chanakya</span>?
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                                Real issues and frustrations experienced by modern explorers
+                                Experience the difference of truly personalized travel with authentic local insights
                             </p>
                         </div>
-                        <BentoGridProblems />
+                        
+                        {/* Bento Grid UI */}
+                        <BentoGridWhyUs />
+                        
+                        {/* Additional Features Grid */}
+                        <motion.div 
+                            className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6"
+                            initial={{ opacity: 0, y: 15 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <div className="text-center">
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>10,000+</div>
+                                <div className="text-gray-600 text-xs">Curated Experiences</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>500+</div>
+                                <div className="text-gray-600 text-xs">Local Experts</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>98%</div>
+                                <div className="text-gray-600 text-xs">Satisfaction Rate</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>24/7</div>
+                                <div className="text-gray-600 text-xs">Support Available</div>
+                            </div>
+                        </motion.div>
                     </div>
                 </motion.section>
 
+               
                 {/* How it Works Section */}
                 <motion.section 
                     id="how-it-works"
@@ -877,55 +906,31 @@ export default function Home() {
                     </div>
                 </motion.section>
 
-                {/* Why Us Section */}
+
+                 {/* Problems Travellers Face Section (Bento Grid Style) */}
                 <motion.section 
-                    id="why-us"
+                    id="traveller-problems"
                     initial="initial"
                     whileInView="animate"
                     viewport={{ once: true, amount: 0.2 }}
                     variants={fadeInUp} 
-                    className="py-16"
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="w-full py-16"
+                    style={{ backgroundColor: '#FCFAF8' }}
                 >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Why Choose <span style={{ color: '#37C2C4' }}>The Modern Chanakya</span>?
+                            <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: '#37C2C4' }}>
+                                Problems Current Travellers Face
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                                Experience the difference of truly personalized travel with authentic local insights
+                                Real issues and frustrations experienced by modern explorers
                             </p>
                         </div>
-                        
-                        {/* Bento Grid UI */}
-                        <BentoGridWhyUs />
-                        
-                        {/* Additional Features Grid */}
-                        <motion.div 
-                            className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6"
-                            initial={{ opacity: 0, y: 15 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                        >
-                            <div className="text-center">
-                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>10,000+</div>
-                                <div className="text-gray-600 text-xs">Curated Experiences</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>500+</div>
-                                <div className="text-gray-600 text-xs">Local Experts</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>98%</div>
-                                <div className="text-gray-600 text-xs">Satisfaction Rate</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>24/7</div>
-                                <div className="text-gray-600 text-xs">Support Available</div>
-                            </div>
-                        </motion.div>
+                        <BentoGridProblems />
                     </div>
                 </motion.section>
-                
+
                 {/* Get Inspired Section */}
                 {/* <motion.section 
                     id="get-inspired"
@@ -1149,77 +1154,11 @@ export default function Home() {
                                 </div>
                             </motion.section>
 
-                            {/* Footer */}
+                            {/* Footer - Only support email */}
                             <footer className="bg-white border-t border-gray-200/80 mt-12">
-                                <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-12">
-                                    <div className="mb-6 md:col-span-1">
-                                        <h3 className="text-gray-900 font-semibold mb-3">Stay Connected: Join our community newsletter.</h3>
-                                        <form className="flex gap-2">
-                                            <input 
-                                                type="email" 
-                                                placeholder="Enter your email" 
-                                                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 text-gray-900 text-sm" style={{ boxShadow: '0 0 0 2px #37C2C4' }}
-                                            />
-                                            <button 
-                                                type="submit" 
-                                                className="px-4 py-2 bg-[#37C2C4] text-white rounded-lg hover:bg-[#37C2C4]/80 transition-colors text-sm font-medium"
-                                            >
-                                                →
-                                            </button>
-                                        </form>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
-                                        <ul className="space-y-3 text-gray-600 text-sm">
-                                            <li><a href="/custom-itineraries" className="hover:text-[#37C2C4] transition">Custom Itineraries</a></li>
-                                            <li><a href="/group-travel" className="hover:text-[#37C2C4] transition">Group Travel</a></li>
-                                            <li><a href="/solo-adventures" className="hover:text-[#37C2C4] transition">Solo Adventures</a></li>
-                                            <li><a href="/family-trips" className="hover:text-[#37C2C4] transition">Family Trips</a></li>
-                                            <li><a href="/business-travel" className="hover:text-[#37C2C4] transition">Business Travel</a></li>
-                                            <li><a href="/weekend-getaways" className="hover:text-[#37C2C4] transition">Weekend Getaways</a></li>
-                                            <li><a href="/luxury-experiences" className="hover:text-[#37C2C4] transition">Luxury Experiences</a></li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
-                                        <ul className="space-y-3 text-gray-600 text-sm">
-                                            <li><a href="/travel-guides" className="hover:text-[#37C2C4] transition">Travel Guides</a></li>
-                                            <li><a href="/travel-tips" className="hover:text-[#37C2C4] transition">Travel Tips</a></li>
-                                            <li><a href="/destination-insights" className="hover:text-[#37C2C4] transition">Destination Insights</a></li>
-                                            <li><a href="/budget-planning" className="hover:text-[#37C2C4] transition">Budget Planning</a></li>
-                                            <li><a href="/packing-lists" className="hover:text-[#37C2C4] transition">Packing Lists</a></li>
-                                            <li><a href="/travel-stories" className="hover:text-[#37C2C4] transition">Travel Stories</a></li>
-                                            <li><a href="/cultural-guides" className="hover:text-[#37C2C4] transition">Cultural Guides</a></li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
-                                        <ul className="space-y-3 text-gray-600 text-sm">
-                                            <li><a href="/help-center" className="hover:text-[#37C2C4] transition">Help Center</a></li>
-                                            <li><a href="/contact-us" className="hover:text-[#37C2C4] transition">Contact Us</a></li>
-                                            <li><a href="/faq" className="hover:text-[#37C2C4] transition">FAQ</a></li>
-                                            <li><a href="#" className="hover:text-[#37C2C4] transition">Live Chat</a></li>
-                                            <li><a href="#" className="hover:text-[#37C2C4] transition">WhatsApp Support</a></li>
-                                            <li><a href="#" className="hover:text-[#37C2C4] transition">Community Forum</a></li>
-                                            <li><a href="#" className="hover:text-[#37C2C4] transition">Feedback</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div className="max-w-7xl mx-auto px-6 pt-8 flex flex-col md:flex-row items-center justify-between border-t border-gray-200/80">
-                                    <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
-                                    <div className="flex items-center gap-6">
-                                        <div className="flex gap-4 text-gray-500 text-sm">
-                                            <a href="/privacy-policy" className="hover:text-[#37C2C4] transition">Privacy Policy</a>
-                                            <a href="/terms-of-service" className="hover:text-[#37C2C4] transition">Terms of Service</a>
-                                            <a href="/cookie-policy" className="hover:text-[#37C2C4] transition">Cookie Policy</a>
-                                        </div>
-                                        <div className="flex gap-4 text-gray-500">
-                                            <a href="#" aria-label="Instagram" className="hover:text-[#37C2C4] transition"><Instagram size={18} /></a>
-                                            <a href="#" aria-label="LinkedIn" className="hover:text-[#37C2C4] transition"><Linkedin size={18} /></a>
-                                            <a href="#" aria-label="YouTube" className="hover:text-[#37C2C4] transition"><Youtube size={18} /></a>
-                                            <a href="#" aria-label="Twitter" className="hover:text-[#37C2C4] transition"><Globe size={18} /></a>
-                                        </div>
-                                    </div>
+                                <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center justify-center">
+                                    <p className="text-gray-500 text-sm mb-4">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
+                                    <a href="mailto:humans@tmchanakya.com" className="text-[#37C2C4] font-medium text-sm">humans@tmchanakya.com</a>
                                 </div>
                             </footer>
                         </motion.div>

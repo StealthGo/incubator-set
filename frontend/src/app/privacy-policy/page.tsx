@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
         <li>Request a copy of your data</li>
       </ul>
       <h2 style={{marginTop: '2rem', fontWeight: 600}}>Contact Us</h2>
-      <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:support@example.com" style={{color:'#d97706'}}>support@example.com</a>.</p>
+  <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:humans@tmchanakya.com" style={{color:'#37C2C4'}}>humans@tmchanakya.com</a>.</p>
     </div>
   );
 }

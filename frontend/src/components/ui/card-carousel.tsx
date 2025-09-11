@@ -109,7 +109,7 @@ export const CardCarousel: React.FC<CardCarouselProps> = ({
             return (
               <motion.div
                 key={`${card.originalIndex}-${position}`}
-                className="absolute cursor-pointer"
+                className="absolute cursor-default"
                 initial={false}
                 animate={{
                   x: translateX,
