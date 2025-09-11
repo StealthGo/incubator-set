@@ -104,6 +104,8 @@ export const CardCarousel: React.FC<CardCarouselProps> = ({
             const rotateY = position * -15; // Slight rotation for depth
             const translateZ = isCenter ? 0 : -50;
 
+            // Only pass CarouselImage props to CarouselCard
+            const { position: cardPosition, originalIndex, ...carouselImageProps } = card;
             return (
               <motion.div
                 key={`${card.originalIndex}-${position}`}
@@ -127,13 +129,7 @@ export const CardCarousel: React.FC<CardCarouselProps> = ({
                 onClick={() => !isCenter && goToSlide(card.originalIndex)}
                 whileHover={!isCenter ? { scale: scale * 1.05 } : {}}
               >
-                {card.href && isCenter ? (
-                  <a href={card.href} className="block">
-                    <CarouselCard image={card} isCenter={isCenter} />
-                  </a>
-                ) : (
-                  <CarouselCard image={card} isCenter={isCenter} />
-                )}
+                <CarouselCard image={carouselImageProps} isCenter={isCenter} />
               </motion.div>
             );
           })}

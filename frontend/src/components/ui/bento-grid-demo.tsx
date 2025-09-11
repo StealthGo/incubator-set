@@ -35,31 +35,69 @@ const Skeleton = ({ src }: { src: string }) => (
 
 const items = [
   {
-    title: "Tailored for You",
+    title: "group and collaborate feature",
     description: "We go beyond generic, templated itineraries. Our AI acts as a personal local advisor, crafting hyper-personalized journeys based on your unique interests.",
-    header: <Skeleton src="/1.jpg" />,
+    header: <Skeleton src="/11.jpg" />,
     className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Briefcase className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Hidden Gems",
+    title: "Ignite your wanderlust feature",
     description: "Our platform features 'hidden gems' vetted by local experts, including invaluable 'Wise Traveler Insights' on cultural etiquette and safety.",
-    header: <Skeleton src="/2.jpg" />,
+    header: <Skeleton src="/12.jpg" />,
     className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Sparkle className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Seamless Convenience",
+    title: "Personalised discovery feature",
     description: "From initial prompt to final destination, our platform provides integrated maps and bookings for unique experiences with just a single tap.",
-    header: <Skeleton src="/3.jpg" />,
+    header: <Skeleton src="/13.jpg" />,
     className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <CalendarDays className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Community Driven",
+    title: "Smart savings",
     description: "Join our community of 'Lorekeepers' to earn recognition and rewards for contributing unique, unbookable hidden gems and wise traveler tips.",
-    header: <Skeleton src="/4.jpg" />,
+    header: <Skeleton src="/14.jpg" />,
     className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Users className="h-5 w-5 text-amber-500" />,
   },
+    {
+    title: "Smarter Routes, Deeper Discoveries",
+    description: "We go beyond generic, templated itineraries. Our AI acts as a personal local advisor, crafting hyper-personalized journeys based on your unique interests.",
+    header: <Skeleton src="/15.jpg" />,
+    className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
+    icon: <Briefcase className="h-5 w-5 text-amber-500" />,
+  },
+  {
+    title: "Hidden treasures",
+    description: "Our platform features 'hidden gems' vetted by local experts, including invaluable 'Wise Traveler Insights' on cultural etiquette and safety.",
+    header: <Skeleton src="/16.jpg" />,
+    className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
+    icon: <Sparkle className="h-5 w-5 text-amber-500" />,
+  },
+  {
+    title: "Guidance from Those Who Know",
+    description: "From initial prompt to final destination, our platform provides integrated maps and bookings for unique experiences with just a single tap.",
+    header: <Skeleton src="/17.jpg" />,
+    className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
+    icon: <CalendarDays className="h-5 w-5 text-amber-500" />,
+  },
+  {
+    title: "Seamless convenience",
+    description: "Join our community of 'Lorekeepers' to earn recognition and rewards for contributing unique, unbookable hidden gems and wise traveler tips.",
+    header: <Skeleton src="/18.jpg" />,
+    className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
+    icon: <Users className="h-5 w-5 text-amber-500" />,
+  },
+
+
+
+
+
+
+
+
+
+
 ];
