@@ -60,8 +60,8 @@ import img4Light from '../../public/WhatsApp Image 2025-08-13 at 17.13.54_5e0a84
 const imageLinks = {
     delhi: "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=600&q=80",
     kerala: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80",
-    goa: "https://images.unsplash.com/photo-1590372728453-75b2a4a28965?auto=format&fit=crop&w=600&q=80",
-    varanasi: "https://images.unsplash.com/photo-1561361533-ebb46a782e30?auto=format&fit=crop&w=600&q=80",
+    goa: "/goa.jpeg", // Updated to use the public folder image
+    varanasi: "https://upload.wikimedia.org/wikipedia/commons/0/04/Ahilya_Ghat_by_the_Ganges%2C_Varanasi.jpg",
     userAmit: "https://randomuser.me/api/portraits/men/32.jpg",
     userPriya: "https://randomuser.me/api/portraits/women/44.jpg",
     userRahul: "https://randomuser.me/api/portraits/men/46.jpg",
@@ -947,7 +947,7 @@ export default function Home() {
                 </motion.section>
                 
                 {/* Get Inspired Section */}
-                <motion.section 
+                {/* <motion.section 
                     id="get-inspired"
                     initial="initial" 
                     whileInView="animate" 
@@ -985,7 +985,7 @@ export default function Home() {
                             </button>
                         </div>
                     </div>
-                </motion.section>
+                </motion.section> */}
                 
                 {/* Indian Itineraries Section */}
                 <motion.section 
