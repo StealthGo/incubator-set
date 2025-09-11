@@ -1,0 +1,84 @@
+# Simplified Travel Itinerary Generator
+
+This is a simplified version of the travel itinerary generation application with a clean, focused workflow.
+
+## Features
+
+- User authentication (sign up, sign in)
+- Chat-based travel preference collection
+- AI-generated personalized travel itineraries
+- Simple and intuitive UI
+
+## Workflow
+
+1. User signs up/logs in
+2. User enters the preferences page
+3. AI asks a series of 6 questions:
+   - Destination in India
+   - Travel dates
+   - Who's traveling
+   - Food preferences
+   - Interests
+   - Budget
+4. User can respond via text input or quick reply buttons
+5. After collecting all preferences, the "Generate Itinerary" button appears
+6. User clicks the button to generate a personalized itinerary
+7. The itinerary is displayed on the right side of the screen
+
+## Backend API Endpoints
+
+- `/api/signup` - Create a new user account
+- `/api/signin` - Log in to an existing account
+- `/api/me` - Get current user information
+- `/api/chat-conversation` - Chat with the AI to collect preferences
+- `/api/generate-itinerary` - Generate an itinerary based on collected preferences
+- `/api/itinerary/{itinerary_id}` - Get a previously generated itinerary
+
+## Frontend Pages
+
+- `/signin` - Sign in page
+- `/signup` - Sign up page
+- `/preferences` - Main page for chat and itinerary generation
+
+## How to Test
+
+1. Start the backend server:
+   ```
+   cd backend
+   pip install -r requirements.txt
+   python app.py
+   ```
+
+2. Start the frontend development server:
+   ```
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. Open your browser to `http://localhost:3000`
+4. Sign up or sign in
+5. Chat with the AI to share your travel preferences
+6. Generate your itinerary
+
+## Environment Variables
+
+Backend (`.env` file):
+```
+MONGODB_URI=mongodb://localhost:27017
+JWT_SECRET_KEY=your_secret_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Frontend (`.env.local` file):
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+## Notes
+
+- This is a simplified version focused on the core functionality
+- The application follows a sequential question flow to ensure all necessary information is collected
+- The itinerary generation is based on the responses provided in the chat
+- Quick reply buttons are provided for convenience but not required
+- The "Generate Itinerary" button appears after the user has provided at least 6 responses

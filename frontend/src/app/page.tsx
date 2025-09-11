@@ -338,34 +338,14 @@ const SearchInput = () => {
         }
     }, [inputValue, prompts.length, isTyping]);
 
+    // Waitlist: All prompt submissions go to coming soon
+    // Prompt bar: always go to coming soon page
     const handleSubmit = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        const query = inputValue || prompts[currentPromptIndex];
-        if (query) {
-            // Re-check authentication status at the time of submission
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-            const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-            const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
-            
-            const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
-            console.log('Form submit auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
-            
-            if (isAuthenticated) {
-                // User is signed in, redirect directly to preferences
-                console.log('Redirecting to preferences with query:', query);
-                router.push(`/preferences?prompt=${encodeURIComponent(query)}`);
-            } else {
-                // Store the query in localStorage to use after sign-in
-                console.log('Redirecting to signin, storing query:', query);
-                localStorage.setItem('pendingQuery', query);
-                // Redirect to sign-in page
-                router.push('/signin');
-            }
-        }
+        router.push('/coming-soon');
     };
 
+    // ...existing code before...
     return (
         <form
             onSubmit={(e) => {
@@ -389,6 +369,7 @@ const SearchInput = () => {
                 className="w-full h-full text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
                 onClick={(e) => e.stopPropagation()}
             />
+            {/* Only one mic button retained, duplicate removed */}
             <button
                 type="button"
                 aria-label={listening ? "Stop voice input" : "Voice input"}
@@ -453,6 +434,9 @@ export default function Home() {
     }, []);
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    // Add inputValue state for prompt bar
+    const [inputValue, setInputValue] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
 
     // Handle navbar scroll effect
     useEffect(() => {
@@ -487,20 +471,8 @@ export default function Home() {
         const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
         const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
         
-        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
-        console.log('Quick action auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
-        
-        if (isAuthenticated) {
-            // User is signed in, redirect directly to preferences
-            console.log('Redirecting to preferences with query:', query);
-            router.push(`/preferences?prompt=${encodeURIComponent(query)}`);
-        } else {
-            // Store the query in localStorage to use after sign-in
-            console.log('Redirecting to signin, storing query:', query);
-            localStorage.setItem('pendingQuery', query);
-            // Redirect to sign-in page
-            router.push('/signin');
-        }
+    // Always route to coming soon page for now
+    router.push('/coming-soon');
     };
 
     return (
@@ -548,9 +520,9 @@ export default function Home() {
                         <div className="hidden md:flex items-center">
                             <button
                                 className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
-                                onClick={() => { window.location.href = '/signin'; }}
+                                onClick={() => router.push('/waitlist-survey')}
                             >
-                                SIGN IN
+                                Join the Waitlist
                             </button>
                         </div>
 
@@ -623,36 +595,27 @@ export default function Home() {
                                 <SearchInput />
                                 <div className="flex items-center gap-2 ml-4">
                                     <button 
-                                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105"
-                                        aria-label="Search"
+                                        aria-label="Voice input"
+                                        className="p-2 rounded-full hover:bg-gray-100 transition-colors group"
                                         onClick={(e) => {
                                             e.stopPropagation(); // Prevent the parent div's onClick from firing
+                                            // Voice input logic here
+                                        }}
+                                    >
+                                        <Mic className="w-5 h-5 text-gray-500 group-hover:text-amber-500" />
+                                    </button>
+                                    <button 
+                                        className={`bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        aria-label="Search"
+                                        disabled={!inputValue.trim()}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
                                             const input = document.querySelector<HTMLInputElement>('input[type="text"]');
                                             const value = input?.value || "";
                                             const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
-                                            if (query) {
-                                                // Check if user is signed in with correct token key
-                                                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                                                const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-                                                const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-                                                const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-                                                const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
-                                                
-                                                const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
-                                                console.log('Send button auth check:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
-                                                
-                                                if (isAuthenticated) {
-                                                    // User is signed in, redirect directly to preferences
-                                                    console.log('Redirecting to preferences with query:', query);
-                                                    window.location.href = `/preferences?prompt=${encodeURIComponent(query)}`;
-                                                } else {
-                                                    // Store the query in localStorage to use after sign-in
-                                                    console.log('Redirecting to signin, storing query:', query);
-                                                    localStorage.setItem('pendingQuery', query);
-                                                    // Redirect to sign-in page
-                                                    window.location.href = '/signin';
-                                                }
-                                            }
+                                            if (!query.trim()) return;
+                                            // Always route to coming soon page for now
+                                            window.location.href = '/coming-soon';
                                         }}
                                     >
                                         <Send className="w-5 h-5" />
@@ -668,7 +631,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Create a new trip';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">✈️</span>
@@ -679,7 +642,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Inspire me where to go';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">🗺️</span>
@@ -690,7 +653,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Weekend getaways';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">🏖️</span>
@@ -701,7 +664,7 @@ export default function Home() {
                                 onClick={() => {
                                     const query = 'Beautiful hotel in Dubai';
                                     localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/preferences?prompt=' + encodeURIComponent(query);
+                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
                                 <span className="text-amber-500">🏨</span>
@@ -1145,128 +1108,103 @@ export default function Home() {
 
             </main>
                             {/* FAQ Section */}
-                <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
-                    <div className="max-w-3xl mx-auto px-6">
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-10">FAQs – Sawal Jo Aksar Puchte Hain</h2>
-                        <div className="space-y-4">
-                            <Accordion
-                                question="How does The Modern Chanakya work?"
-                                answer="Bilkul simple hai! Bas apni preferences batao, aur hum aapke liye ek dum personalized itinerary bana denge – Indian style mein, with all the local masala."
-                            />
-                            <Accordion
-                                question="Is The Modern Chanakya free?"
-                                answer="Haanji, abhi ke liye bilkul free hai! Aap jitni chahe itineraries bana sakte ho, bina kisi charge ke."
-                            />
-                            <Accordion
-                                question="Can I get itineraries for my family or group?"
-                                answer="Bilkul! Family trip ho ya dosto ke saath masti, bas preferences mein batao kaun jaa raha hai, aur itinerary usi hisaab se milegi."
-                            />
-                            <Accordion
-                                question="How do I get support if I’m stuck?"
-                                answer="Koi dikkat aaye? Hum yahin hain! Niche contact section ya WhatsApp pe message karo, jaldi reply milega."
-                            />
-                        </div>
-                    </div>
-                </motion.section>
-
-            {/* Footer */}
-            <footer 
-                id="contact"
-                className="w-full border-t border-gray-200/80 pt-16 pb-8 px-6 md:px-12"
-                style={{ backgroundColor: '#FCFAF8' }}
-            >
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
-                        {/* Brand and Newsletter Section */}
-                        <div className="lg:col-span-2">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                                    <Globe className="text-amber-600" />
+                            <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
+                                <div className="max-w-3xl mx-auto px-6">
+                                    <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-10">FAQs – Sawal Jo Aksar Puchte Hain</h2>
+                                    <div className="space-y-4">
+                                        <Accordion
+                                            question="How does The Modern Chanakya work?"
+                                            answer="Bilkul simple hai! Bas apni preferences batao, aur hum aapke liye ek dum personalized itinerary bana denge – Indian style mein, with all the local masala."
+                                        />
+                                        <Accordion
+                                            question="Is The Modern Chanakya free?"
+                                            answer="Haanji, abhi ke liye bilkul free hai! Aap jitni chahe itineraries bana sakte ho, bina kisi charge ke."
+                                        />
+                                        <Accordion
+                                            question="Can I get itineraries for my family or group?"
+                                            answer="Bilkul! Family trip ho ya dosto ke saath masti, bas preferences mein batao kaun jaa raha hai, aur itinerary usi hisaab se milegi."
+                                        />
+                                        <Accordion
+                                            question="How do I get support if I’m stuck?"
+                                            answer="Koi dikkat aaye? Hum yahin hain! Niche contact section ya WhatsApp pe message karo, jaldi reply milega."
+                                        />
+                                    </div>
                                 </div>
-                                <span className="text-xl font-bold text-gray-900 tracking-tight">The Modern <span className="text-amber-600">Chanakya</span></span>
-                            </div>
-                            
-                            {/* Newsletter */}
-                            <div className="mb-6">
-                                <h3 className="text-gray-900 font-semibold mb-3">Stay Connected: Join our community newsletter.</h3>
-                                <form className="flex gap-2">
-                                    <input 
-                                        type="email" 
-                                        placeholder="Enter your email" 
-                                        className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 text-sm"
-                                    />
-                                    <button 
-                                        type="submit" 
-                                        className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
-                                    >
-                                        →
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                            </motion.section>
 
-                        {/* Travel Services */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
-                            <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="/custom-itineraries" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
-                                <li><a href="/group-travel" className="hover:text-amber-600 transition">Group Travel</a></li>
-                                <li><a href="/solo-adventures" className="hover:text-amber-600 transition">Solo Adventures</a></li>
-                                <li><a href="/family-trips" className="hover:text-amber-600 transition">Family Trips</a></li>
-                                <li><a href="/business-travel" className="hover:text-amber-600 transition">Business Travel</a></li>
-                                <li><a href="/weekend-getaways" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
-                                <li><a href="/luxury-experiences" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
-                            </ul>
-                        </div>
-
-                        {/* Resources */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
-                            <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="/travel-guides" className="hover:text-amber-600 transition">Travel Guides</a></li>
-                                <li><a href="/travel-tips" className="hover:text-amber-600 transition">Travel Tips</a></li>
-                                <li><a href="/destination-insights" className="hover:text-amber-600 transition">Destination Insights</a></li>
-                                <li><a href="/budget-planning" className="hover:text-amber-600 transition">Budget Planning</a></li>
-                                <li><a href="/packing-lists" className="hover:text-amber-600 transition">Packing Lists</a></li>
-                                <li><a href="/travel-stories" className="hover:text-amber-600 transition">Travel Stories</a></li>
-                                <li><a href="/cultural-guides" className="hover:text-amber-600 transition">Cultural Guides</a></li>
-                            </ul>
-                        </div>
-
-                        {/* Support */}
-                        <div>
-                            <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
-                            <ul className="space-y-3 text-gray-600 text-sm">
-                                <li><a href="/help-center" className="hover:text-amber-600 transition">Help Center</a></li>
-                                <li><a href="/contact-us" className="hover:text-amber-600 transition">Contact Us</a></li>
-                                <li><a href="/faq" className="hover:text-amber-600 transition">FAQ</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
-                                <li><a href="#" className="hover:text-amber-600 transition">Feedback</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Bottom Section */}
-                    <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-gray-200/80">
-                        <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
-                        <div className="flex items-center gap-6">
-                            <div className="flex gap-4 text-gray-500 text-sm">
-                                <a href="/privacy-policy" className="hover:text-amber-600 transition">Privacy Policy</a>
-                                <a href="/terms-of-service" className="hover:text-amber-600 transition">Terms of Service</a>
-                                <a href="/cookie-policy" className="hover:text-amber-600 transition">Cookie Policy</a>
-                            </div>
-                            <div className="flex gap-4 text-gray-500">
-                                <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
-                                <a href="#" aria-label="LinkedIn" className="hover:text-amber-600 transition"><Linkedin size={18} /></a>
-                                <a href="#" aria-label="YouTube" className="hover:text-amber-600 transition"><Youtube size={18} /></a>
-                                <a href="#" aria-label="Twitter" className="hover:text-amber-600 transition"><Globe size={18} /></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </motion.div>
-    );
-}
+                            {/* Footer */}
+                            <footer className="bg-white border-t border-gray-200/80 mt-12">
+                                <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-12">
+                                    <div className="mb-6 md:col-span-1">
+                                        <h3 className="text-gray-900 font-semibold mb-3">Stay Connected: Join our community newsletter.</h3>
+                                        <form className="flex gap-2">
+                                            <input 
+                                                type="email" 
+                                                placeholder="Enter your email" 
+                                                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 text-sm"
+                                            />
+                                            <button 
+                                                type="submit" 
+                                                className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
+                                            >
+                                                →
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
+                                        <ul className="space-y-3 text-gray-600 text-sm">
+                                            <li><a href="/custom-itineraries" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
+                                            <li><a href="/group-travel" className="hover:text-amber-600 transition">Group Travel</a></li>
+                                            <li><a href="/solo-adventures" className="hover:text-amber-600 transition">Solo Adventures</a></li>
+                                            <li><a href="/family-trips" className="hover:text-amber-600 transition">Family Trips</a></li>
+                                            <li><a href="/business-travel" className="hover:text-amber-600 transition">Business Travel</a></li>
+                                            <li><a href="/weekend-getaways" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
+                                            <li><a href="/luxury-experiences" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
+                                        <ul className="space-y-3 text-gray-600 text-sm">
+                                            <li><a href="/travel-guides" className="hover:text-amber-600 transition">Travel Guides</a></li>
+                                            <li><a href="/travel-tips" className="hover:text-amber-600 transition">Travel Tips</a></li>
+                                            <li><a href="/destination-insights" className="hover:text-amber-600 transition">Destination Insights</a></li>
+                                            <li><a href="/budget-planning" className="hover:text-amber-600 transition">Budget Planning</a></li>
+                                            <li><a href="/packing-lists" className="hover:text-amber-600 transition">Packing Lists</a></li>
+                                            <li><a href="/travel-stories" className="hover:text-amber-600 transition">Travel Stories</a></li>
+                                            <li><a href="/cultural-guides" className="hover:text-amber-600 transition">Cultural Guides</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
+                                        <ul className="space-y-3 text-gray-600 text-sm">
+                                            <li><a href="/help-center" className="hover:text-amber-600 transition">Help Center</a></li>
+                                            <li><a href="/contact-us" className="hover:text-amber-600 transition">Contact Us</a></li>
+                                            <li><a href="/faq" className="hover:text-amber-600 transition">FAQ</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
+                                            <li><a href="#" className="hover:text-amber-600 transition">Feedback</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="max-w-7xl mx-auto px-6 pt-8 flex flex-col md:flex-row items-center justify-between border-t border-gray-200/80">
+                                    <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
+                                    <div className="flex items-center gap-6">
+                                        <div className="flex gap-4 text-gray-500 text-sm">
+                                            <a href="/privacy-policy" className="hover:text-amber-600 transition">Privacy Policy</a>
+                                            <a href="/terms-of-service" className="hover:text-amber-600 transition">Terms of Service</a>
+                                            <a href="/cookie-policy" className="hover:text-amber-600 transition">Cookie Policy</a>
+                                        </div>
+                                        <div className="flex gap-4 text-gray-500">
+                                            <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
+                                            <a href="#" aria-label="LinkedIn" className="hover:text-amber-600 transition"><Linkedin size={18} /></a>
+                                            <a href="#" aria-label="YouTube" className="hover:text-amber-600 transition"><Youtube size={18} /></a>
+                                            <a href="#" aria-label="Twitter" className="hover:text-amber-600 transition"><Globe size={18} /></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </footer>
+                        </motion.div>
+                    );
+                }
