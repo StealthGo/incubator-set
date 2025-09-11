@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Mic } from "lucide-react";
+// import { Mic } from "lucide-react";
 
 const steps = [
 	{
@@ -74,27 +74,27 @@ export default function WaitlistSurvey() {
 	const [inputValue, setInputValue] = useState("");
 	const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
 	const [isTyping, setIsTyping] = useState(false);
-	const [listening, setListening] = useState(false);
-	const recognitionRef = React.useRef<any>(null);
+	// const [listening, setListening] = useState(false);
+	// const recognitionRef = React.useRef<any>(null);
 	const router = useRouter();
 
 	React.useEffect(() => {
-		if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-			const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-			const recognition = new SpeechRecognition();
-			recognition.continuous = false;
-			recognition.interimResults = false;
-			recognition.lang = 'en-US';
-			recognition.onresult = (event: any) => {
-				const transcript = event.results[0][0].transcript;
-				setInputValue(transcript);
-				setListening(false);
-			};
-			recognition.onend = () => setListening(false);
-			recognition.onerror = () => setListening(false);
-			recognitionRef.current = recognition;
+		if (!inputValue && !isTyping) {
+			const interval = setInterval(() => {
+				setCurrentPromptIndex((prev: number) => (prev + 1) % prompts.length);
+			}, 3000);
+			return () => clearInterval(interval);
 		}
-	}, []);
+	}, [inputValue, isTyping]);
+	//             const transcript = event.results[0][0].transcript;
+	//             setInputValue(transcript);
+	//             setListening(false);
+	//         };
+	//         recognition.onend = () => setListening(false);
+	//         recognition.onerror = () => setListening(false);
+	//         recognitionRef.current = recognition;
+	//     }
+	// }, []);
 
 	React.useEffect(() => {
 		if (!inputValue && !isTyping) {
@@ -105,16 +105,16 @@ export default function WaitlistSurvey() {
 		}
 	}, [inputValue, isTyping]);
 
-	const handleMicClick = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (listening) {
-			recognitionRef.current && recognitionRef.current.stop();
-			setListening(false);
-		} else {
-			recognitionRef.current && recognitionRef.current.start();
-			setListening(true);
-		}
-	};
+	// const handleMicClick = (e: React.MouseEvent) => {
+	//     e.stopPropagation();
+	//     if (listening) {
+	//         recognitionRef.current && recognitionRef.current.stop();
+	//         setListening(false);
+	//     } else {
+	//         recognitionRef.current && recognitionRef.current.start();
+	//         setListening(true);
+	//     }
+	// };
 
 	const handlePromptSubmit = (e?: React.FormEvent) => {
 		if (e) e.preventDefault();

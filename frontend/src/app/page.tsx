@@ -370,15 +370,7 @@ const SearchInput = () => {
                 className="w-full h-full text-lg text-gray-800 placeholder-[#37C2C4] bg-transparent border-none outline-none px-3 py-1 cursor-text"
                 onClick={(e) => e.stopPropagation()}
             />
-            {/* Only one mic button retained, duplicate removed */}
-            <button
-                type="button"
-                aria-label={listening ? "Stop voice input" : "Voice input"}
-                className={`p-2 rounded-full ml-2 transition-colors group ${listening ? 'bg-[#37C2C4]/20' : 'hover:bg-gray-100'}`}
-                onClick={handleMicClick}
-            >
-                <Mic className={`w-5 h-5 ${listening ? 'animate-pulse' : 'text-gray-500 group-hover:text-[#37C2C4]'}`} style={{ color: listening ? '#37C2C4' : undefined }} />
-            </button>
+            {/* Microphone icons removed as requested */}
         </form>
     );
 };
