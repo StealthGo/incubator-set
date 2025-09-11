@@ -551,7 +551,7 @@ export default function Home() {
                                  AI-powered travel assistant, tailored for you.
                           </p>
                         <div className="inline-block px-5.5 py-2.5 rounded-full bg-[#37C2C4]/10 text-[#37C2C4] font-bold text-xl mb-6" style={{ letterSpacing: '0.05em' }}>
-                            Coming Soon
+                            Coming Soon...
                         </div>
                     
                     {/* Search Section */}
@@ -684,7 +684,7 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Why Choose <span style={{ color: '#37C2C4' }}>The Modern Chanakya</span>?
+                                Aapke Liye, <span style={{ color: '#37C2C4' }}>Humne Banya hai</span>
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                                 Experience the difference of truly personalized travel with authentic local insights
@@ -921,7 +921,7 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: '#37C2C4' }}>
-                                Problems Current Travellers Face
+                                Travel ka tension? Chalo, ab hum dekhte hain
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                                 Real issues and frustrations experienced by modern explorers
