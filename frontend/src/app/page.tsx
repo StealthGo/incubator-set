@@ -496,9 +496,10 @@ export default function Home() {
                     <div className="flex items-center justify-between">
                         {/* Logo/Brand */}
                         <div className="flex items-center">
-                            <span className="text-xl font-bold text-gray-900 tracking-wide font-poppins">
-                                
-                            </span>
+                            <a href="/" className="flex items-center gap-2">
+                                <Image src="/logo.jpg" alt="Modern Chanakya Logo" width={36} height={36} className="w-9 h-9" />
+
+                            </a>
                         </div>
 
                         {/* Navigation Links */}
@@ -506,8 +507,8 @@ export default function Home() {
                             <a href="#home" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
                             <a href="#how-it-works" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
                             <a href="#why-us" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">WHY US</a>
-                            <a href="#Create With us" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">CREATE WITH US</a>
-                            <a href="#Support" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
+                            <a href="#contribute" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm"> CREATE WITH US</a>
+                            <a href="#contact" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">SUPPORT</a>
                         </div>
 
                         {/* CTA Button */}
@@ -684,7 +685,7 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Aapke Liye, <span style={{ color: '#37C2C4' }}>Humne Banya hai</span>
+                                Aapke Liye, <span style={{ color: '#37C2C4' }}>Humne Banaya hai</span>
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                                 Experience the difference of truly personalized travel with authentic local insights
@@ -702,11 +703,11 @@ export default function Home() {
                             transition={{ delay: 0.4 }}
                         >
                             <div className="text-center">
-                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>10,000+</div>
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>500+</div>
                                 <div className="text-gray-600 text-xs">Curated Experiences</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>500+</div>
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>100+</div>
                                 <div className="text-gray-600 text-xs">Local Experts</div>
                             </div>
                             <div className="text-center">
@@ -899,9 +900,9 @@ export default function Home() {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.8 }}
                         >
-                            <button className="bg-[#37C2C4] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#37C2C4]/80 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                            {/* <button className="bg-[#37C2C4] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#37C2C4]/80 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                 Start Your Journey
-                            </button>
+                            </button> */}
                         </motion.div>
                     </div>
                 </motion.section>
@@ -1044,12 +1045,14 @@ export default function Home() {
                 <motion.section id="testimonials" initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
                     <div className="max-w-7xl mx-auto px-6">
                         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center mb-4">Travellers kya bol rahe hain?</h2>
-                        <p className="text-gray-600 text-center mb-12 text-lg">1 million+ logon ne The Modern Chanakya try kiya hai aur sabko planning ka kaam asaan laga!</p>
+                        <p className="text-gray-600 text-center mb-12 text-lg">1000+ logon ne The Modern Chanakya try kiya hai aur sabko planning ka kaam asaan laga!</p>
                         <MarqueeTestimonials />
                     </div>
                 </motion.section>
                 {/* Contribute Section */}
+                
                 <motion.section
+                    id="contribute"
                     initial="initial"
                     whileInView="animate"
                     viewport={{ once: true, amount: 0.2 }}
@@ -1120,7 +1123,7 @@ export default function Home() {
 
                                 <div className="mt-10">
                                     <button className="bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white font-medium rounded-full px-8 py-3">
-                                        Coming Soon
+                                        Coming Soon!
                                     </button>
                                 </div>
                             </div>
@@ -1132,7 +1135,7 @@ export default function Home() {
                             {/* FAQ Section */}
                             <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
                                 <div className="max-w-3xl mx-auto px-6">
-                                    <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-10" style={{ color: '#37C2C4' }}>FAQs – Sawal Jo Aksar Puchte Hain</h2>
+                                    <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-10" style={{ color: '#37C2C4' }}>FAQs – Sawal jo aksar puche jaate hai    </h2>
                                     <div className="space-y-4">
                                         <Accordion
                                             question="How does The Modern Chanakya work?"
@@ -1182,7 +1185,7 @@ export default function Home() {
 
                                                                 {/* Waitlist Button */}
                                                                 <a
-                                                                    href="/waitlist"
+                                                                      href="/waitlist-survey"
                                                                     className="mt-4 px-6 py-2 rounded-2xl bg-[#37C2C4] text-white font-medium text-sm shadow hover:bg-[#2aa1a3] transition-colors"
                                                                 >
                                                                     Join the Waitlist

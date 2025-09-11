@@ -23,7 +23,7 @@ export default function ComingSoon() {
             <Plane className="w-10 h-10 text-white rotate-12" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 text-center font-poppins">
-            Coming Soon
+            Coming Soon!
           </h1>
           <p className="text-base text-gray-600 mb-2 text-center max-w-xs">
             We’re almost ready to launch your next travel companion.<br />
