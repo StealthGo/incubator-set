@@ -551,7 +551,7 @@ export default function Home() {
                                  AI-powered travel assistant, tailored for you.
                           </p>
                         <div className="inline-block px-5.5 py-2.5 rounded-full bg-[#37C2C4]/10 text-[#37C2C4] font-bold text-xl mb-6" style={{ letterSpacing: '0.05em' }}>
-                            Coming Soon...
+                            Coming Soon
                         </div>
                     
                     {/* Search Section */}
