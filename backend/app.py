@@ -87,6 +87,40 @@ db = client_mongo["user_database"]
 
 users_collection = db["users"]
 # Only survey collection is used for survey responses
+waitlist_collection = db["waitlist_emails"]
+# Endpoint to check if email exists in waitlist or survey
+from fastapi import Body
+
+@app.post("/api/check-email")
+async def check_email(payload: dict = Body(...)):
+    email = payload.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email required")
+    exists = False
+    # Check in waitlist
+    if await waitlist_collection.find_one({"email": email}):
+        exists = True
+    # Check in survey responses
+    elif await survey_collection.find_one({"email": email}):
+        exists = True
+    return {"exists": exists}
+
+# Endpoint to add email to waitlist if unique
+class WaitlistEmail(BaseModel):
+    email: str
+    joined_at: Optional[datetime.datetime] = None
+
+@app.post("/api/waitlist")
+async def join_waitlist(payload: WaitlistEmail):
+    email = payload.email
+    if not email:
+        raise HTTPException(status_code=400, detail="Email required")
+    # Check uniqueness
+    if await waitlist_collection.find_one({"email": email}) or await survey_collection.find_one({"email": email}):
+        return {"exists": True}
+    doc = {"email": email, "joined_at": datetime.datetime.now(datetime.timezone.utc)}
+    await waitlist_collection.insert_one(doc)
+    return {"exists": False, "message": "Email added to waitlist"}
 survey_collection = db["survey_responses"]
 class SurveyResponse(BaseModel):
     step_1: str

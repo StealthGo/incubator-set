@@ -71,6 +71,7 @@ export default function WaitlistSurvey() {
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState("");
 	const [showThanks, setShowThanks] = useState(false);
+	const [showWaitlist, setShowWaitlist] = useState(false);
 	const [inputValue, setInputValue] = useState("");
 	const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
 	const [isTyping, setIsTyping] = useState(false);
@@ -129,26 +130,54 @@ export default function WaitlistSurvey() {
 		e.preventDefault();
 		setError("");
 
-		// Validation logic
-		if (step === 0 && !selected) {
+		// Step 0: Ask for email
+		if (step === 0) {
+			if (!email || !email.includes("@")) {
+				setError("Please enter a valid email address");
+				return;
+			}
+			setStep(1);
+			return;
+		}
+		// Step 1: Ask if user wants to fill survey
+		if (step === 1) {
+			if (!selected) {
+				setError("Please select an option");
+				return;
+			}
+			if (selected === "No") {
+				// Store email in backend as waitlist
+				try {
+					await fetch("https://incubator-set.onrender.com/api/waitlist", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ email }),
+					});
+				} catch (err) {
+					console.error("Failed to join waitlist:", err);
+				}
+				setShowWaitlist(true);
+				return;
+			}
+			setStep(2);
+			setSelected("");
+			return;
+		}
+		// Step 2+: Survey as before
+		if (step === 2 && !selected) {
 			setError("Please select an option");
 			return;
 		}
-		if (step === 0 && selected === "Other" && !other.trim()) {
+		if (step === 2 && selected === "Other" && !other.trim()) {
 			setError("Please specify your frustration");
 			return;
 		}
-		if (step === 2 && !selected) {
-			setError("Please select a price range");
-			return;
-		}
-		if (step === 3 && !text.trim()) {
+		if (step === 4 && !text.trim()) {
 			setError("Please share your idea");
 			return;
 		}
-
-		if (step === 4) {
-			// Submit form: send data to backend
+		if (step === 5) {
+			// Submit survey
 			const surveyData = {
 				step_1: selected === "Other" ? other : selected,
 				step_2: slider,
@@ -171,8 +200,6 @@ export default function WaitlistSurvey() {
 			}, 2000);
 			return;
 		}
-
-		// Move to next step
 		setStep(step + 1);
 		setSelected("");
 	};
@@ -184,10 +211,25 @@ export default function WaitlistSurvey() {
 
 	return (
 		<div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFAF8] px-4">
-			
-			{showThanks ? (
+			{showWaitlist ? (
 				<div className="flex items-center justify-center">
-				<div className="bg-gradient-to-br from-[#37C2C4]/20 via-white to-[#37C2C4]/10 rounded-3xl shadow-2xl p-10 text-center max-w-sm border-2 border-[#37C2C4]">
+					<div className="bg-gradient-to-br from-[#37C2C4]/20 via-white to-[#37C2C4]/10 rounded-3xl shadow-2xl p-10 text-center max-w-sm border-2 border-[#37C2C4]">
+						<div className="flex justify-center mb-4">
+							<span className="inline-block bg-[#37C2C4] rounded-full p-4 shadow-lg">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 48 48" className="w-10 h-10 text-white">
+									<circle cx="24" cy="24" r="24" fill="#37C2C4" />
+									<path d="M16 24l6 6 10-14" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+								</svg>
+							</span>
+						</div>
+						<h2 className="text-3xl font-extrabold mb-2" style={{ color: '#37C2C4' }}>You have joined the waitlist!</h2>
+						<p className="text-lg text-gray-700 mb-2">We'll keep you updated at <span className="font-bold">{email}</span>.</p>
+						<p className="text-sm text-gray-500">Thank you for your interest!</p>
+					</div>
+				</div>
+			) : showThanks ? (
+				<div className="flex items-center justify-center">
+					<div className="bg-gradient-to-br from-[#37C2C4]/20 via-white to-[#37C2C4]/10 rounded-3xl shadow-2xl p-10 text-center max-w-sm border-2 border-[#37C2C4]">
 						<div className="flex justify-center mb-4">
 							<span className="inline-block bg-[#37C2C4] rounded-full p-4 shadow-lg">
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 48 48" className="w-10 h-10 text-white">
@@ -208,29 +250,57 @@ export default function WaitlistSurvey() {
 				>
 					<div className="mb-4">
 						<div className="text-xs text-gray-500 mb-1">
-							Question {step + 1} of 5
+							{step === 0 ? "Step 1 of 2" : step === 1 ? "Step 2 of 2" : `Question ${step - 1} of 4`}
 						</div>
 						<div className="w-full bg-gray-200 rounded-full h-2 mb-4">
 							<div
 								className="bg-[#37C2C4] h-2 rounded-full"
-								style={{ width: `${((step + 1) / 5) * 100}%` }}
+								style={{ width: step === 0 ? "20%" : step === 1 ? "40%" : `${((step - 1) / 4) * 100}%` }}
 							></div>
 						</div>
-						{step === 0 && steps[0] && (
+						{step === 0 && (
 							<>
-								<h2 className="text-lg font-semibold mb-6">
-									{steps[0].question}
-								</h2>
+								<h2 className="text-lg font-semibold mb-6">Enter your email to join the waitlist</h2>
+								<input
+									type="email"
+									className="w-full border rounded px-3 py-2 text-sm mb-4"
+									placeholder="you@email.com"
+									value={email}
+									onChange={e => setEmail(e.target.value)}
+									required
+								/>
+							</>
+						)}
+						{step === 1 && (
+							<>
+								<h2 className="text-lg font-semibold mb-6">Would you like to fill out a short survey to help us improve?</h2>
+								<div className="flex gap-4">
+									<button
+										type="button"
+										className={`flex-1 py-2 rounded-lg font-semibold transition ${selected === "Yes" ? "bg-[#37C2C4] text-white" : "bg-gray-200 text-gray-700"}`}
+										onClick={() => setSelected("Yes")}
+									>
+										Yes
+									</button>
+									<button
+										type="button"
+										className={`flex-1 py-2 rounded-lg font-semibold transition ${selected === "No" ? "bg-[#37C2C4] text-white" : "bg-gray-200 text-gray-700"}`}
+										onClick={() => setSelected("No")}
+									>
+										No
+									</button>
+								</div>
+							</>
+						)}
+						{step >= 2 && steps[0] && (
+							<>
+								<h2 className="text-lg font-semibold mb-6">{steps[0].question}</h2>
 								<div className="space-y-3">
 									{Array.isArray(steps[0].options) &&
 										steps[0].options.map((opt) => (
 											<label
 												key={opt}
-												className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
-													selected === opt
-														? "border-[#37C2C4] bg-[#37C2C4]/10"
-														: "border-gray-200 bg-white"
-												}`}
+												className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${selected === opt ? "border-[#37C2C4] bg-[#37C2C4]/10" : "border-gray-200 bg-white"}`}
 											>
 												<input
 													type="radio"
@@ -243,18 +313,14 @@ export default function WaitlistSurvey() {
 												<span className="flex-1 text-gray-800">
 													{opt === "Other" ? (
 														<>
-															Other (e.g., finding trustworthy
-															information, language barriers, or just
-															not knowing where to look.)
+															Other (e.g., finding trustworthy information, language barriers, or just not knowing where to look.)
 															{selected === "Other" && (
 																<input
 																	type="text"
 																	className="mt-2 w-full border rounded px-2 py-1 text-sm"
 																	placeholder="Please specify..."
 																	value={other}
-																	onChange={(e) =>
-																		setOther(e.target.value)
-																	}
+																	onChange={(e) => setOther(e.target.value)}
 																/>
 															)}
 														</>
@@ -267,11 +333,9 @@ export default function WaitlistSurvey() {
 								</div>
 							</>
 						)}
-						{step === 1 && steps[1] && (
+						{step === 3 && steps[1] && (
 							<>
-								<h2 className="text-lg font-semibold mb-6">
-									{steps[1].question}
-								</h2>
+								<h2 className="text-lg font-semibold mb-6">{steps[1].question}</h2>
 								<div className="flex justify-between text-xs text-gray-500 mb-2">
 									<span>{steps[1].leftLabel}</span>
 									<span>{slider}</span>
@@ -282,35 +346,25 @@ export default function WaitlistSurvey() {
 									min={steps[1].min}
 									max={steps[1].max}
 									value={slider}
-									onChange={(e) =>
-										setSlider(Number(e.target.value))
-									}
+									onChange={(e) => setSlider(Number(e.target.value))}
 									className="w-full accent-amber-500"
 								/>
 								<div className="flex justify-between text-xs text-gray-400 mt-1">
 									{[...Array(10)].map((_, i) => (
-										<span key={i} className="w-4 text-center">
-											{i + 1}
-										</span>
+										<span key={i} className="w-4 text-center">{i + 1}</span>
 									))}
 								</div>
 							</>
 						)}
-						{step === 2 && steps[2] && (
+						{step === 4 && steps[2] && (
 							<>
-								<h2 className="text-lg font-semibold mb-6">
-									{steps[2].question}
-								</h2>
+								<h2 className="text-lg font-semibold mb-6">{steps[2].question}</h2>
 								<div className="space-y-3">
 									{Array.isArray(steps[2].options) &&
 										steps[2].options.map((opt) => (
 											<label
 												key={opt}
-												className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
-													selected === opt
-														? "border-amber-500 bg-amber-50"
-														: "border-gray-200 bg-white"
-												}`}
+												className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${selected === opt ? "border-amber-500 bg-amber-50" : "border-gray-200 bg-white"}`}
 											>
 												<input
 													type="radio"
@@ -326,11 +380,9 @@ export default function WaitlistSurvey() {
 								</div>
 							</>
 						)}
-						{step === 3 && steps[3] && (
+						{step === 5 && steps[3] && (
 							<>
-								<h2 className="text-lg font-semibold mb-6">
-									{steps[3].question}
-								</h2>
+								<h2 className="text-lg font-semibold mb-6">{steps[3].question}</h2>
 								<textarea
 									className="w-full border rounded px-3 py-2 text-sm mb-4"
 									placeholder={steps[3].placeholder}
@@ -340,27 +392,12 @@ export default function WaitlistSurvey() {
 								/>
 							</>
 						)}
-						{step === 4 && steps[4] && (
-							<>
-								<h2 className="text-lg font-semibold mb-6">
-									{steps[4].question}
-								</h2>
-								<input
-									type="email"
-									className="w-full border rounded px-3 py-2 text-sm mb-4"
-									placeholder={steps[4].placeholder}
-									value={email}
-									onChange={e => setEmail(e.target.value)}
-								/>
-								<p className="text-xs text-gray-500">We'll only use this to keep you updated. Optional!</p>
-							</>
-						)}
 					</div>
 					{error && (
-					<div className="text-[#37C2C4] text-sm mb-3">{error}</div>
+						<div className="text-[#37C2C4] text-sm mb-3">{error}</div>
 					)}
 					<div className="flex gap-2">
-						{step > 0 && (
+						{step > 0 && step < 6 && (
 							<button
 								type="button"
 								className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition"
@@ -371,9 +408,9 @@ export default function WaitlistSurvey() {
 						)}
 						<button
 							type="submit"
-						className="flex-1 bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white font-semibold py-2 rounded-lg mt-0 transition"
+							className="flex-1 bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white font-semibold py-2 rounded-lg mt-0 transition"
 						>
-							{step === 4 ? (
+							{step === 5 ? (
 								<span className="flex items-center justify-center gap-2">
 									<span>Submit</span>
 									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">

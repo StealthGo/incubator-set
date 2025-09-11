@@ -487,7 +487,7 @@ export default function Home() {
         >
             {/* Fixed Transparent Navbar */}
             <nav
-                className="fixed top-0 left-0 right-0 z-[9999] w-full"
+                className="fixed top-0 left-0 right-0 z-[9999] w-full bg-white shadow"
                 style={{ 
                     position: 'fixed',
                     top: 0,
@@ -544,7 +544,15 @@ export default function Home() {
                                     {/* Backdrop */}
                                     <div className="fixed inset-0 bg-black bg-opacity-40 z-[99998]" onClick={() => setMobileMenuOpen(false)}></div>
                                     {/* Slide-in Menu */}
-                                    <div className="fixed top-0 right-0 h-full w-4/5 max-w-xs bg-white z-[99999] shadow-xl flex flex-col pt-8 pb-6 px-6 animate-slidein">
+                                    <div className="fixed top-0 right-0 h-full w-full bg-white shadow-xl flex flex-col pt-8 pb-6 px-6 animate-slidein">
+                                        <button
+                                            className="absolute top-6 right-6 text-gray-500 hover:text-[#37C2C4] text-3xl"
+                                            aria-label="Close menu"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            style={{ background: 'none', border: 'none', boxShadow: 'none' }}
+                                        >
+                                            &times;
+                                        </button>
                                         <button
                                             className="self-end text-gray-500 hover:text-[#37C2C4] text-3xl mb-8"
                                             aria-label="Close menu"
