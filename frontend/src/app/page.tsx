@@ -1155,12 +1155,40 @@ export default function Home() {
                             </motion.section>
 
                             {/* Footer - Only support email */}
-                            <footer className="bg-white border-t border-gray-200/80 mt-12">
-                                <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center justify-center">
-                                    <p className="text-gray-500 text-sm mb-4">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
-                                    <a href="mailto:humans@tmchanakya.com" className="text-[#37C2C4] font-medium text-sm">humans@tmchanakya.com</a>
-                                </div>
-                            </footer>
+                                                        <footer className="bg-white border-t border-gray-200/80 mt-12">
+                                                            <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center justify-center space-y-4">
+                                                                {/* Copyright */}
+                                                                <p className="text-gray-500 text-sm">
+                                                                    © {new Date().getFullYear()} The Modern Chanakya. All rights reserved.
+                                                                </p>
+
+                                                                {/* Email */}
+                                                                <a
+                                                                    href="mailto:humans@tmchanakya.com"
+                                                                    className="text-[#37C2C4] font-medium text-sm"
+                                                                >
+                                                                    humans@tmchanakya.com
+                                                                </a>
+
+                                                                {/* Links */}
+                                                                <div className="flex space-x-6 text-sm text-gray-500">
+                                                                    <a href="/terms" className="hover:text-[#37C2C4] transition-colors">
+                                                                        Terms & Conditions
+                                                                    </a>
+                                                                    <a href="/privacy" className="hover:text-[#37C2C4] transition-colors">
+                                                                        Privacy Policy
+                                                                    </a>
+                                                                </div>
+
+                                                                {/* Waitlist Button */}
+                                                                <a
+                                                                    href="/waitlist"
+                                                                    className="mt-4 px-6 py-2 rounded-2xl bg-[#37C2C4] text-white font-medium text-sm shadow hover:bg-[#2aa1a3] transition-colors"
+                                                                >
+                                                                    Join the Waitlist
+                                                                </a>
+                                                            </div>
+                                                        </footer>
                         </motion.div>
                     );
                 }
