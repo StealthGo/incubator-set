@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/minimal-card";
 import { ImageCursorTrail } from "@/components/ui/image-cursortrail";
 import { BentoGridWhyUs } from "@/components/ui/bento-grid-demo";
+import { BentoGridProblems } from "@/components/ui/bento-grid-problems";
 import {
     ArrowRight,
     CheckCircle,
@@ -673,6 +674,30 @@ export default function Home() {
                         </div>
 
                         {/* See How It Works Link - removed for cleaner design */}
+                    </div>
+                </motion.section>
+
+                {/* Problems Travellers Face Section (Bento Grid Style) */}
+                <motion.section 
+                    id="traveller-problems"
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={fadeInUp} 
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="w-full py-16"
+                    style={{ backgroundColor: '#FCFAF8' }}
+                >
+                    <div className="max-w-6xl mx-auto px-6">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-4xl font-bold text-red-700 mb-3">
+                                Problems Current Travellers Face
+                            </h2>
+                            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                                Real issues and frustrations experienced by modern explorers
+                            </p>
+                        </div>
+                        <BentoGridProblems />
                     </div>
                 </motion.section>
 

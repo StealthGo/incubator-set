@@ -4,6 +4,18 @@ import { BentoGrid, BentoGridItem } from "./bento-grid";
 import { AlertTriangle, MapPin, DollarSign, Users } from "lucide-react";
 import Image from "next/image";
 
+const Skeleton = ({ src }: { src: string }) => (
+  <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl overflow-hidden relative group">
+    <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-100/30 opacity-30 group-hover:opacity-0 transition-opacity duration-300"></div>
+    <Image 
+      src={src} 
+      alt="Problem illustration" 
+      fill 
+      className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+    />
+  </div>
+);
+
 const problems = [
   {
     title: "Stuck with One-Size-Fits-All Itineraries?",
@@ -29,23 +41,11 @@ const problems = [
   {
     title: "Safety & Trust Issues",
     description: "Concerns about safety, hygiene, and trust in recommendations are common among travellers.",
-    header: <Skeleton src="/problem4.jpg" />,
+    header: <Skeleton src="/43.jpeg" />,
     className: "md:col-span-2 bg-white dark:bg-black/90",
     icon: <AlertTriangle className="h-5 w-5 text-red-500" />,
   },
 ];
-
-const Skeleton = ({ src }: { src: string }) => (
-  <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl overflow-hidden relative group">
-    <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-100/30 opacity-30 group-hover:opacity-0 transition-opacity duration-300"></div>
-    <Image 
-      src={src} 
-      alt="Problem illustration" 
-      fill 
-      className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
-    />
-  </div>
-);
 
 export function BentoGridProblems() {
   return (
