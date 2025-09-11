@@ -35,21 +35,21 @@ const Skeleton = ({ src }: { src: string }) => (
 
 const items = [
   {
-    title: "Group and Collaborate Feature",
+    title: "Group and Collaborate",
     description: "Connect with like-minded travelers, plan together, and share experiences in real time.",
     header: <Skeleton src="/11.jpg" />,
   className: "md:col-span-2 hover:border-[#37C2C4] transition-all duration-300 bg-white dark:bg-black/90 border border-[#37C2C4] rounded-2xl shadow-lg",
   icon: <Briefcase className="h-5 w-5" style={{ color: '#37C2C4' }} />,
   },
   {
-    title: "Ignite Your Wanderlust Feature",
+    title: "Ignite Your Wanderlust",
     description: "Get inspired with curated travel ideas, trending spots, and unique destinations.",
     header: <Skeleton src="/12.jpg" />,
   className: "md:col-span-1 hover:border-[#37C2C4] transition-all duration-300 bg-white dark:bg-black/90 border border-[#37C2C4] rounded-2xl shadow-lg",
   icon: <Sparkle className="h-5 w-5" style={{ color: '#37C2C4' }} />,
   },
   {
-    title: "Personalised Discovery Feature",
+    title: "Personalised Discovery",
     description: "Discover places tailored to your preferences, travel style, and past journeys.",
     header: <Skeleton src="/13.jpg" />,
   className: "md:col-span-1 hover:border-[#37C2C4] transition-all duration-300 bg-white dark:bg-black/90 border border-[#37C2C4] rounded-2xl shadow-lg",

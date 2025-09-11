@@ -32,7 +32,7 @@ const problems = [
   icon: <Users className="h-5 w-5" style={{ color: '#37C2C4' }} />,
   },
   {
-    title: "lost in the details",
+    title: "Lost in the details",
     description: "Planning a trip can be overwhelming with too many options, hidden costs, and confusing logistics.",
     header: <Skeleton src="/23.jpg" />,
   className: "md:col-span-1 bg-white dark:bg-black/90 border border-[#37C2C4] hover:border-[#37C2C4] transition-all duration-300 rounded-2xl shadow-lg",
