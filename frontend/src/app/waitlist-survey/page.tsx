@@ -136,6 +136,22 @@ export default function WaitlistSurvey() {
 				setError("Please enter a valid email address");
 				return;
 			}
+			// Check uniqueness
+			try {
+				const res = await fetch("https://incubator-set.onrender.com/api/check-email", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email }),
+				});
+				const data = await res.json();
+				if (data.exists) {
+					setError("This email is already registered.");
+					return;
+				}
+			} catch (err) {
+				setError("Could not verify email. Please try again.");
+				return;
+			}
 			setStep(1);
 			return;
 		}
@@ -145,17 +161,23 @@ export default function WaitlistSurvey() {
 				setError("Please select an option");
 				return;
 			}
-			if (selected === "No") {
-				// Store email in backend as waitlist
-				try {
-					await fetch("https://incubator-set.onrender.com/api/waitlist", {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ email }),
-					});
-				} catch (err) {
-					console.error("Failed to join waitlist:", err);
+			// Always store email in waitlist
+			try {
+				const res = await fetch("https://incubator-set.onrender.com/api/waitlist", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email }),
+				});
+				const data = await res.json();
+				if (data.exists) {
+					setError("This email is already registered.");
+					return;
 				}
+			} catch (err) {
+				setError("Failed to join waitlist.");
+				return;
+			}
+			if (selected === "No") {
 				setShowWaitlist(true);
 				return;
 			}
