@@ -35,69 +35,60 @@ const Skeleton = ({ src }: { src: string }) => (
 
 const items = [
   {
-    title: "group and collaborate feature",
-    description: "group and collaborate feature",
+    title: "Group and Collaborate Feature",
+    description: "Connect with like-minded travelers, plan together, and share experiences in real time.",
     header: <Skeleton src="/11.jpg" />,
     className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Briefcase className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Ignite your wanderlust feature",
-    description: "Ignite your wanderlust feature",
+    title: "Ignite Your Wanderlust Feature",
+    description: "Get inspired with curated travel ideas, trending spots, and unique destinations.",
     header: <Skeleton src="/12.jpg" />,
     className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Sparkle className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Personalised discovery feature",
-    description: "Personalised discovery feature",
+    title: "Personalised Discovery Feature",
+    description: "Discover places tailored to your preferences, travel style, and past journeys.",
     header: <Skeleton src="/13.jpg" />,
     className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <CalendarDays className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Smart savings",
-    description: "Smart savings",
+    title: "Smart Savings",
+    description: "Find budget-friendly options, deals, and discounts without compromising on experience.",
     header: <Skeleton src="/14.jpg" />,
     className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Users className="h-5 w-5 text-amber-500" />,
   },
   {
     title: "Smarter Routes, Deeper Discoveries",
-    description: "Smarter Routes, Deeper Discoveries",
+    description: "Get optimized routes that help you explore more while saving time and effort.",
     header: <Skeleton src="/15.jpg" />,
     className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Briefcase className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Hidden treasures",
-    description: "Hidden treasures",
+    title: "Hidden Treasures",
+    description: "Uncover lesser-known gems and authentic local experiences beyond tourist hotspots.",
     header: <Skeleton src="/16.jpg" />,
     className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Sparkle className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Guidance from Those Who Know",
-    description: "Guidance from Those Who Know",
+    title: "Guidance from Those Who Know",
+    description: "Benefit from tips and insights shared by locals and experienced travelers.",
     header: <Skeleton src="/17.jpg" />,
     className: "md:col-span-1 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <CalendarDays className="h-5 w-5 text-amber-500" />,
   },
   {
-    title: "Seamless convenience",
-    description: "Seamless convenience",
+    title: "Seamless Convenience",
+    description: "Enjoy a smooth travel experience with easy planning, booking, and on-the-go support.",
     header: <Skeleton src="/18.jpg" />,
     className: "md:col-span-2 hover:border-amber-200 transition-all duration-300 bg-white dark:bg-black/90",
     icon: <Users className="h-5 w-5 text-amber-500" />,
   },
-
-
-
-
-
-
-
-
-
 
 ];
