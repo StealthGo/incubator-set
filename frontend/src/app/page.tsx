@@ -175,12 +175,12 @@ const ReviewCard = ({
     const gradients = [
         'bg-gradient-to-br from-green-400 to-blue-600',
         'bg-gradient-to-br from-purple-400 to-pink-600', 
-        'bg-gradient-to-br from-yellow-400 to-orange-600',
+    'bg-gradient-to-br from-[#37C2C4] to-[#37C2C4]',
         'bg-gradient-to-br from-blue-400 to-purple-600',
         'bg-gradient-to-br from-pink-400 to-red-600',
         'bg-gradient-to-br from-indigo-400 to-cyan-600',
         'bg-gradient-to-br from-green-400 to-teal-600',
-        'bg-gradient-to-br from-orange-400 to-red-600'
+    'bg-gradient-to-br from-[#37C2C4] to-[#37C2C4]'
     ];
     
     const gradientIndex = name.charCodeAt(0) % gradients.length;
@@ -367,17 +367,17 @@ const SearchInput = () => {
                     }
                 }}
                 placeholder={prompts[currentPromptIndex]}
-                className="w-full h-full text-lg text-gray-800 placeholder-amber-400 bg-transparent border-none outline-none px-3 py-1 cursor-text"
+                className="w-full h-full text-lg text-gray-800 placeholder-[#37C2C4] bg-transparent border-none outline-none px-3 py-1 cursor-text"
                 onClick={(e) => e.stopPropagation()}
             />
             {/* Only one mic button retained, duplicate removed */}
             <button
                 type="button"
                 aria-label={listening ? "Stop voice input" : "Voice input"}
-                className={`p-2 rounded-full ml-2 transition-colors group ${listening ? 'bg-amber-100' : 'hover:bg-gray-100'}`}
+                className={`p-2 rounded-full ml-2 transition-colors group ${listening ? 'bg-[#37C2C4]/20' : 'hover:bg-gray-100'}`}
                 onClick={handleMicClick}
             >
-                <Mic className={`w-5 h-5 ${listening ? 'text-amber-500 animate-pulse' : 'text-gray-500 group-hover:text-amber-500'}`} />
+                <Mic className={`w-5 h-5 ${listening ? 'animate-pulse' : 'text-gray-500 group-hover:text-[#37C2C4]'}`} style={{ color: listening ? '#37C2C4' : undefined }} />
             </button>
         </form>
     );
@@ -511,16 +511,16 @@ export default function Home() {
 
                         {/* Navigation Links */}
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#home" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
-                            <a href="#how-it-works" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
-                            <a href="#why-us" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">WHY US</a>
-                            <a href="#contact" className="text-gray-700 hover:text-amber-600 transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
+                            <a href="#home" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
+                            <a href="#how-it-works" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
+                            <a href="#why-us" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">WHY US</a>
+                            <a href="#contact" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">CONTACT</a>
                         </div>
 
                         {/* CTA Button */}
                         <div className="hidden md:flex items-center">
                             <button
-                                className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
+                                className="bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
                                 onClick={() => router.push('/waitlist-survey')}
                             >
                                 Join the Waitlist
@@ -529,7 +529,7 @@ export default function Home() {
 
                         {/* Mobile Menu Button */}
                         <div className="md:hidden">
-                            <button className="text-gray-700 hover:text-amber-600 transition-colors duration-200">
+                            <button className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
@@ -552,7 +552,7 @@ export default function Home() {
                     className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-20 px-6"
                 >
                           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                              Discover India, <span className="text-amber-500">Your Way.</span>
+                              Discover India, <span className="text-[#37C2C4]">Your Way.</span>
                           </h1>
                           <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
                                  AI-powered itineraries, tailored for you.
@@ -563,7 +563,7 @@ export default function Home() {
                         {/* Main Search Bar */}
                         <div className="relative mb-8">
                             <div 
-                                className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-amber-300 transition-colors cursor-pointer"
+                                className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-[#37C2C4] transition-colors cursor-pointer"
                                 onClick={() => {
                                     const input = document.querySelector<HTMLInputElement>('input[type="text"]');
                                     const value = input?.value || "";
@@ -603,10 +603,10 @@ export default function Home() {
                                             // Voice input logic here
                                         }}
                                     >
-                                        <Mic className="w-5 h-5 text-gray-500 group-hover:text-amber-500" />
+                                        <Mic className="w-5 h-5 text-gray-500 group-hover:text-[#37C2C4]" />
                                     </button>
                                     <button 
-                                        className={`bg-amber-500 hover:bg-amber-600 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         aria-label="Search"
                                         disabled={!inputValue.trim()}
                                         onClick={(e) => {
@@ -628,47 +628,47 @@ export default function Home() {
                         {/* Quick Action Buttons */}
                         <div className="flex flex-wrap justify-center gap-4 mb-8">
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
                                 onClick={() => {
                                     const query = 'Create a new trip';
                                     localStorage.setItem('pendingQuery', query);
                                     window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
-                                <span className="text-amber-500">✈️</span>
+                                <span className="text-[#37C2C4]">✈️</span>
                                 Create a new trip
                             </button>
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
                                 onClick={() => {
                                     const query = 'Inspire me where to go';
                                     localStorage.setItem('pendingQuery', query);
                                     window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
-                                <span className="text-amber-500">🗺️</span>
+                                <span className="text-[#37C2C4]">🗺️</span>
                                 Inspire me where to go
                             </button>
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
                                 onClick={() => {
                                     const query = 'Weekend getaways';
                                     localStorage.setItem('pendingQuery', query);
                                     window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
-                                <span className="text-amber-500">🏖️</span>
+                                <span className="text-[#37C2C4]">🏖️</span>
                                 Weekend getaways
                             </button>
                             <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-amber-300 text-gray-700 px-4 py-3 rounded-full transition-colors"
+                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-4 py-3 rounded-full transition-colors"
                                 onClick={() => {
                                     const query = 'Beautiful hotel in Dubai';
                                     localStorage.setItem('pendingQuery', query);
                                     window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
                                 }}
                             >
-                                <span className="text-amber-500">🏨</span>
+                                <span className="text-[#37C2C4]">🏨</span>
                                 Beautiful hotel in Dubai
                             </button>
                         </div>
@@ -690,7 +690,7 @@ export default function Home() {
                 >
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-red-700 mb-3">
+                            <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: '#37C2C4' }}>
                                 Problems Current Travellers Face
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -715,7 +715,7 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                How It Works: Your Journey, <span className="text-amber-600">Unfolded</span>
+                                How It Works: Your Journey, <span className="text-[#37C2C4]">Unfolded</span>
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                                 From idea to reality in three simple steps
@@ -739,14 +739,14 @@ export default function Home() {
                                             alt="Step 1 - Unveil Your Soul" 
                                         />
                                         <MinimalCardContent>
-                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 1</div>
+                                            <div className="mb-2" style={{ color: '#37C2C4', fontWeight: 'bold' }}>Step 1</div>
                                             <MinimalCardTitle>Unveil Your Soul</MinimalCardTitle>
                                             <MinimalCardDescription>
                                                 Tell us what you love (Food, History, Art) in our fun, personalized onboarding.
                                             </MinimalCardDescription>
                                         </MinimalCardContent>
                                         <MinimalCardFooter>
-                                            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                            <div className="w-10 h-10 bg-[#37C2C4] rounded-full flex items-center justify-center">
                                                 <Compass className="w-5 h-5 text-white" />
                                             </div>
                                         </MinimalCardFooter>
@@ -766,14 +766,14 @@ export default function Home() {
                                             alt="Step 2 - Let Chanakya Weave the Path" 
                                         />
                                         <MinimalCardContent>
-                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 2</div>
+                                            <div className="mb-2" style={{ color: '#37C2C4', fontWeight: 'bold' }}>Step 2</div>
                                             <MinimalCardTitle>Let Chanakya Weave the Path</MinimalCardTitle>
                                             <MinimalCardDescription>
                                                 Our AI instantly creates a bespoke itinerary from our database of authentic gems.
                                             </MinimalCardDescription>
                                         </MinimalCardContent>
                                         <MinimalCardFooter>
-                                            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                            <div className="w-10 h-10 bg-[#37C2C4] rounded-full flex items-center justify-center">
                                                 <Settings className="w-5 h-5 text-white" />
                                             </div>
                                         </MinimalCardFooter>
@@ -793,14 +793,14 @@ export default function Home() {
                                             alt="Step 3 - Discover & Do" 
                                         />
                                         <MinimalCardContent>
-                                            <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">Step 3</div>
+                                            <div className="mb-2" style={{ color: '#37C2C4', fontWeight: 'bold' }}>Step 3</div>
                                             <MinimalCardTitle>Discover & Do</MinimalCardTitle>
                                             <MinimalCardDescription>
                                                 Experience India effortlessly with seamless navigation and direct booking for unique local experiences.
                                             </MinimalCardDescription>
                                         </MinimalCardContent>
                                         <MinimalCardFooter>
-                                            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                            <div className="w-10 h-10 bg-[#37C2C4] rounded-full flex items-center justify-center">
                                                 <MapPin className="w-5 h-5 text-white" />
                                             </div>
                                         </MinimalCardFooter>
@@ -849,12 +849,12 @@ export default function Home() {
                                                 alt={`Step ${index + 1} - ${item.title}`}
                                             />
                                             <MinimalCardContent>
-                                                <div className="mb-2 text-amber-600 font-bold text-sm tracking-wider uppercase">{item.step}</div>
+                                                <div className="mb-2" style={{ color: '#37C2C4', fontWeight: 'bold' }}>{item.step}</div>
                                                 <MinimalCardTitle>{item.title}</MinimalCardTitle>
                                                 <MinimalCardDescription>{item.description}</MinimalCardDescription>
                                             </MinimalCardContent>
                                             <MinimalCardFooter>
-                                                <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                                                <div className="w-10 h-10 bg-[#37C2C4] rounded-full flex items-center justify-center">
                                                     <item.icon className="w-5 h-5 text-white" />
                                                 </div>
                                             </MinimalCardFooter>
@@ -863,7 +863,7 @@ export default function Home() {
                                         {/* Connecting Arrow for Mobile */}
                                         {index < 2 && (
                                             <div className="flex justify-center py-4">
-                                                <ArrowRight className="w-6 h-6 text-amber-400" />
+                                                <ArrowRight className="w-6 h-6" style={{ color: '#37C2C4' }} />
                                             </div>
                                         )}
                                     </motion.div>
@@ -878,7 +878,7 @@ export default function Home() {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.8 }}
                         >
-                            <button className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                            <button className="bg-[#37C2C4] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#37C2C4]/80 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                 Start Your Journey
                             </button>
                         </motion.div>
@@ -897,7 +897,7 @@ export default function Home() {
                     <div className="max-w-6xl mx-auto px-6">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                Why Choose <span className="text-amber-600">The Modern Chanakya</span>?
+                                Why Choose <span style={{ color: '#37C2C4' }}>The Modern Chanakya</span>?
                             </h2>
                             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                                 Experience the difference of truly personalized travel with authentic local insights
@@ -915,19 +915,19 @@ export default function Home() {
                             transition={{ delay: 0.4 }}
                         >
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-amber-600 mb-1">10,000+</div>
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>10,000+</div>
                                 <div className="text-gray-600 text-xs">Curated Experiences</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-amber-600 mb-1">500+</div>
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>500+</div>
                                 <div className="text-gray-600 text-xs">Local Experts</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-amber-600 mb-1">98%</div>
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>98%</div>
                                 <div className="text-gray-600 text-xs">Satisfaction Rate</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-amber-600 mb-1">24/7</div>
+                                <div className="text-2xl font-bold mb-1" style={{ color: '#37C2C4' }}>24/7</div>
                                 <div className="text-gray-600 text-xs">Support Available</div>
                             </div>
                         </motion.div>
@@ -968,7 +968,7 @@ export default function Home() {
                             <p className="max-w-3xl mx-auto text-center text-lg text-gray-600 mb-8 leading-relaxed">
                                 Each image tells a story of our rich heritage and breathtaking landscapes. Hover to explore vibrant traditions, ancient wonders, and scenic beauty that awaits your discovery.
                             </p>
-                            <button className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                            <button className="bg-[#37C2C4] text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-[#37C2C4]/80 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                                 Begin Your Journey
                             </button>
                         </div>
@@ -1079,14 +1079,14 @@ export default function Home() {
                             </div>
                             <div className="lg:w-1/2">
                                 <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                                    Contribute to a <span className="text-amber-500">Legacy</span>. <br />
-                                    Become a Modern Chanakya Lorekeeper.
+                                    Contribute to a <span style={{ color: '#37C2C4' }}>Legacy</span>. <br />
+                                    <span style={{ color: '#37C2C4', fontWeight: 'bold' }}>Become a Modern Chanakya Lorekeeper.</span>
                                 </h2>
 
                                 <div className="space-y-8 mt-8">
                                     <div className="flex items-start gap-4">
-                                        <div className="bg-amber-100 p-3 rounded-full">
-                                            <Sparkle className="w-6 h-6 text-amber-600" />
+                                        <div className="p-3 rounded-full" style={{ background: '#37C2C420' }}>
+                                            <Sparkle className="w-6 h-6" style={{ color: '#37C2C4' }} />
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-lg mb-1">Share Your Passion</h3>
@@ -1097,8 +1097,8 @@ export default function Home() {
                                     </div>
 
                                     <div className="flex items-start gap-4">
-                                        <div className="bg-amber-100 p-3 rounded-full">
-                                            <Users className="w-6 h-6 text-amber-600" />
+                                        <div className="p-3 rounded-full" style={{ background: '#37C2C420' }}>
+                                            <Users className="w-6 h-6" style={{ color: '#37C2C4' }} />
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-lg mb-1">Join the Community</h3>
@@ -1109,8 +1109,8 @@ export default function Home() {
                                     </div>
 
                                     <div className="flex items-start gap-4">
-                                        <div className="bg-amber-100 p-3 rounded-full">
-                                            <Globe className="w-6 h-6 text-amber-600" />
+                                        <div className="p-3 rounded-full" style={{ background: '#37C2C420' }}>
+                                            <Globe className="w-6 h-6" style={{ color: '#37C2C4' }} />
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-lg mb-1">Empower Communities</h3>
@@ -1122,7 +1122,7 @@ export default function Home() {
                                 </div>
 
                                 <div className="mt-10">
-                                    <button className="bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-full px-8 py-3">
+                                    <button className="bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white font-medium rounded-full px-8 py-3">
                                         Coming Soon
                                     </button>
                                 </div>
@@ -1135,7 +1135,7 @@ export default function Home() {
                             {/* FAQ Section */}
                             <motion.section initial="initial" whileInView="animate" viewport={{ once: true, amount: 0.2 }} variants={fadeInUp} className="py-24">
                                 <div className="max-w-3xl mx-auto px-6">
-                                    <h2 className="text-4xl md:text-5xl font-extrabold text-amber-700 text-center mb-10">FAQs – Sawal Jo Aksar Puchte Hain</h2>
+                                    <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-10" style={{ color: '#37C2C4' }}>FAQs – Sawal Jo Aksar Puchte Hain</h2>
                                     <div className="space-y-4">
                                         <Accordion
                                             question="How does The Modern Chanakya work?"
@@ -1166,11 +1166,11 @@ export default function Home() {
                                             <input 
                                                 type="email" 
                                                 placeholder="Enter your email" 
-                                                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-gray-900 text-sm"
+                                                className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 text-gray-900 text-sm" style={{ boxShadow: '0 0 0 2px #37C2C4' }}
                                             />
                                             <button 
                                                 type="submit" 
-                                                className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium"
+                                                className="px-4 py-2 bg-[#37C2C4] text-white rounded-lg hover:bg-[#37C2C4]/80 transition-colors text-sm font-medium"
                                             >
                                                 →
                                             </button>
@@ -1179,37 +1179,37 @@ export default function Home() {
                                     <div>
                                         <h4 className="font-semibold text-gray-900 mb-4">Travel Services</h4>
                                         <ul className="space-y-3 text-gray-600 text-sm">
-                                            <li><a href="/custom-itineraries" className="hover:text-amber-600 transition">Custom Itineraries</a></li>
-                                            <li><a href="/group-travel" className="hover:text-amber-600 transition">Group Travel</a></li>
-                                            <li><a href="/solo-adventures" className="hover:text-amber-600 transition">Solo Adventures</a></li>
-                                            <li><a href="/family-trips" className="hover:text-amber-600 transition">Family Trips</a></li>
-                                            <li><a href="/business-travel" className="hover:text-amber-600 transition">Business Travel</a></li>
-                                            <li><a href="/weekend-getaways" className="hover:text-amber-600 transition">Weekend Getaways</a></li>
-                                            <li><a href="/luxury-experiences" className="hover:text-amber-600 transition">Luxury Experiences</a></li>
+                                            <li><a href="/custom-itineraries" className="hover:text-[#37C2C4] transition">Custom Itineraries</a></li>
+                                            <li><a href="/group-travel" className="hover:text-[#37C2C4] transition">Group Travel</a></li>
+                                            <li><a href="/solo-adventures" className="hover:text-[#37C2C4] transition">Solo Adventures</a></li>
+                                            <li><a href="/family-trips" className="hover:text-[#37C2C4] transition">Family Trips</a></li>
+                                            <li><a href="/business-travel" className="hover:text-[#37C2C4] transition">Business Travel</a></li>
+                                            <li><a href="/weekend-getaways" className="hover:text-[#37C2C4] transition">Weekend Getaways</a></li>
+                                            <li><a href="/luxury-experiences" className="hover:text-[#37C2C4] transition">Luxury Experiences</a></li>
                                         </ul>
                                     </div>
                                     <div>
                                         <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
                                         <ul className="space-y-3 text-gray-600 text-sm">
-                                            <li><a href="/travel-guides" className="hover:text-amber-600 transition">Travel Guides</a></li>
-                                            <li><a href="/travel-tips" className="hover:text-amber-600 transition">Travel Tips</a></li>
-                                            <li><a href="/destination-insights" className="hover:text-amber-600 transition">Destination Insights</a></li>
-                                            <li><a href="/budget-planning" className="hover:text-amber-600 transition">Budget Planning</a></li>
-                                            <li><a href="/packing-lists" className="hover:text-amber-600 transition">Packing Lists</a></li>
-                                            <li><a href="/travel-stories" className="hover:text-amber-600 transition">Travel Stories</a></li>
-                                            <li><a href="/cultural-guides" className="hover:text-amber-600 transition">Cultural Guides</a></li>
+                                            <li><a href="/travel-guides" className="hover:text-[#37C2C4] transition">Travel Guides</a></li>
+                                            <li><a href="/travel-tips" className="hover:text-[#37C2C4] transition">Travel Tips</a></li>
+                                            <li><a href="/destination-insights" className="hover:text-[#37C2C4] transition">Destination Insights</a></li>
+                                            <li><a href="/budget-planning" className="hover:text-[#37C2C4] transition">Budget Planning</a></li>
+                                            <li><a href="/packing-lists" className="hover:text-[#37C2C4] transition">Packing Lists</a></li>
+                                            <li><a href="/travel-stories" className="hover:text-[#37C2C4] transition">Travel Stories</a></li>
+                                            <li><a href="/cultural-guides" className="hover:text-[#37C2C4] transition">Cultural Guides</a></li>
                                         </ul>
                                     </div>
                                     <div>
                                         <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
                                         <ul className="space-y-3 text-gray-600 text-sm">
-                                            <li><a href="/help-center" className="hover:text-amber-600 transition">Help Center</a></li>
-                                            <li><a href="/contact-us" className="hover:text-amber-600 transition">Contact Us</a></li>
-                                            <li><a href="/faq" className="hover:text-amber-600 transition">FAQ</a></li>
-                                            <li><a href="#" className="hover:text-amber-600 transition">Live Chat</a></li>
-                                            <li><a href="#" className="hover:text-amber-600 transition">WhatsApp Support</a></li>
-                                            <li><a href="#" className="hover:text-amber-600 transition">Community Forum</a></li>
-                                            <li><a href="#" className="hover:text-amber-600 transition">Feedback</a></li>
+                                            <li><a href="/help-center" className="hover:text-[#37C2C4] transition">Help Center</a></li>
+                                            <li><a href="/contact-us" className="hover:text-[#37C2C4] transition">Contact Us</a></li>
+                                            <li><a href="/faq" className="hover:text-[#37C2C4] transition">FAQ</a></li>
+                                            <li><a href="#" className="hover:text-[#37C2C4] transition">Live Chat</a></li>
+                                            <li><a href="#" className="hover:text-[#37C2C4] transition">WhatsApp Support</a></li>
+                                            <li><a href="#" className="hover:text-[#37C2C4] transition">Community Forum</a></li>
+                                            <li><a href="#" className="hover:text-[#37C2C4] transition">Feedback</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -1217,15 +1217,15 @@ export default function Home() {
                                     <p className="text-gray-500 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} The Modern Chanakya. All rights reserved.</p>
                                     <div className="flex items-center gap-6">
                                         <div className="flex gap-4 text-gray-500 text-sm">
-                                            <a href="/privacy-policy" className="hover:text-amber-600 transition">Privacy Policy</a>
-                                            <a href="/terms-of-service" className="hover:text-amber-600 transition">Terms of Service</a>
-                                            <a href="/cookie-policy" className="hover:text-amber-600 transition">Cookie Policy</a>
+                                            <a href="/privacy-policy" className="hover:text-[#37C2C4] transition">Privacy Policy</a>
+                                            <a href="/terms-of-service" className="hover:text-[#37C2C4] transition">Terms of Service</a>
+                                            <a href="/cookie-policy" className="hover:text-[#37C2C4] transition">Cookie Policy</a>
                                         </div>
                                         <div className="flex gap-4 text-gray-500">
-                                            <a href="#" aria-label="Instagram" className="hover:text-amber-600 transition"><Instagram size={18} /></a>
-                                            <a href="#" aria-label="LinkedIn" className="hover:text-amber-600 transition"><Linkedin size={18} /></a>
-                                            <a href="#" aria-label="YouTube" className="hover:text-amber-600 transition"><Youtube size={18} /></a>
-                                            <a href="#" aria-label="Twitter" className="hover:text-amber-600 transition"><Globe size={18} /></a>
+                                            <a href="#" aria-label="Instagram" className="hover:text-[#37C2C4] transition"><Instagram size={18} /></a>
+                                            <a href="#" aria-label="LinkedIn" className="hover:text-[#37C2C4] transition"><Linkedin size={18} /></a>
+                                            <a href="#" aria-label="YouTube" className="hover:text-[#37C2C4] transition"><Youtube size={18} /></a>
+                                            <a href="#" aria-label="Twitter" className="hover:text-[#37C2C4] transition"><Globe size={18} /></a>
                                         </div>
                                     </div>
                                 </div>

@@ -184,55 +184,19 @@ export default function WaitlistSurvey() {
 
 	return (
 		<div className="min-h-screen flex flex-col items-center justify-center bg-[#FCFAF8] px-4">
-			{/* Prompt bar at the top, styled like landing page */}
-			{step === 0 && !showThanks && (
-				<form
-					onSubmit={handlePromptSubmit}
-					className="w-full max-w-xl flex items-center bg-white rounded-full shadow-md px-6 py-3 mb-8 border border-amber-100"
-					onClick={e => e.stopPropagation()}
-				>
-					<input
-						type="text"
-						value={inputValue}
-						onChange={e => setInputValue(e.target.value)}
-						onFocus={() => setIsTyping(true)}
-						onBlur={() => { if (!inputValue.trim()) setIsTyping(false); }}
-						placeholder={prompts[currentPromptIndex]}
-						className="flex-1 text-lg text-amber-500 placeholder-amber-400 bg-transparent border-none outline-none px-2 py-1"
-						onClick={e => e.stopPropagation()}
-					/>
-					<button
-						type="button"
-						aria-label={listening ? "Stop voice input" : "Voice input"}
-						className={`p-2 rounded-full ml-2 transition-colors group ${listening ? 'bg-amber-100' : 'hover:bg-gray-100'}`}
-						onClick={handleMicClick}
-					>
-						<Mic className={`w-5 h-5 ${listening ? 'text-amber-500 animate-pulse' : 'text-gray-500 group-hover:text-amber-500'}`} />
-					</button>
-					<button
-						type="submit"
-						className="ml-2 bg-amber-400 hover:bg-amber-500 text-white rounded-full p-2 transition"
-						aria-label="Submit prompt"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-							<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-						</svg>
-					</button>
-				</form>
-			)}
 			
 			{showThanks ? (
 				<div className="flex items-center justify-center">
-					<div className="bg-gradient-to-br from-amber-100 via-white to-amber-200 rounded-3xl shadow-2xl p-10 text-center max-w-sm border-2 border-amber-300">
+				<div className="bg-gradient-to-br from-[#37C2C4]/20 via-white to-[#37C2C4]/10 rounded-3xl shadow-2xl p-10 text-center max-w-sm border-2 border-[#37C2C4]">
 						<div className="flex justify-center mb-4">
-							<span className="inline-block bg-amber-400 rounded-full p-4 shadow-lg">
+							<span className="inline-block bg-[#37C2C4] rounded-full p-4 shadow-lg">
 								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 48 48" className="w-10 h-10 text-white">
 									<circle cx="24" cy="24" r="24" fill="#f59e0b" />
 									<path d="M16 24l6 6 10-14" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
 								</svg>
 							</span>
 						</div>
-						<h2 className="text-3xl font-extrabold mb-2 text-amber-600">Thank you!</h2>
+						<h2 className="text-3xl font-extrabold mb-2" style={{ color: '#37C2C4' }}>Thank you!</h2>
 						<p className="text-lg text-gray-700 mb-2">Your responses have been recorded.</p>
 						<p className="text-sm text-gray-500">We appreciate your input and will keep you posted!</p>
 					</div>
@@ -248,7 +212,7 @@ export default function WaitlistSurvey() {
 						</div>
 						<div className="w-full bg-gray-200 rounded-full h-2 mb-4">
 							<div
-								className="bg-amber-400 h-2 rounded-full"
+								className="bg-[#37C2C4] h-2 rounded-full"
 								style={{ width: `${((step + 1) / 5) * 100}%` }}
 							></div>
 						</div>
@@ -264,7 +228,7 @@ export default function WaitlistSurvey() {
 												key={opt}
 												className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${
 													selected === opt
-														? "border-amber-500 bg-amber-50"
+														? "border-[#37C2C4] bg-[#37C2C4]/10"
 														: "border-gray-200 bg-white"
 												}`}
 											>
@@ -274,7 +238,7 @@ export default function WaitlistSurvey() {
 													value={opt}
 													checked={selected === opt}
 													onChange={() => setSelected(opt)}
-													className="mt-1 accent-amber-500"
+													className="mt-1 accent-[#37C2C4]"
 												/>
 												<span className="flex-1 text-gray-800">
 													{opt === "Other" ? (
@@ -393,7 +357,7 @@ export default function WaitlistSurvey() {
 						)}
 					</div>
 					{error && (
-						<div className="text-red-600 text-sm mb-3">{error}</div>
+					<div className="text-[#37C2C4] text-sm mb-3">{error}</div>
 					)}
 					<div className="flex gap-2">
 						{step > 0 && (
@@ -407,7 +371,7 @@ export default function WaitlistSurvey() {
 						)}
 						<button
 							type="submit"
-							className="flex-1 bg-amber-400 hover:bg-amber-500 text-white font-semibold py-2 rounded-lg mt-0 transition"
+						className="flex-1 bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white font-semibold py-2 rounded-lg mt-0 transition"
 						>
 							{step === 4 ? (
 								<span className="flex items-center justify-center gap-2">
