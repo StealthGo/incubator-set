@@ -588,12 +588,22 @@ export default function Home() {
                         AI-powered travel assistant, tailored for you.
                     </p>
                     <div className="w-full max-w-lg mb-8">
-                        <input
-                            type="text"
-                            placeholder="Where to next?"
-                            className="w-full rounded-full px-6 py-4 text-xl bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-[#37C2C4] placeholder-gray-400"
-                            style={{ fontWeight: 500 }}
-                        />
+                        <div className="flex w-full">
+                            <input
+                                type="text"
+                                value="Coming Soon"
+                                readOnly
+                                className="flex-1 rounded-l-full px-6 py-4 text-xl bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-[#37C2C4] placeholder-gray-400"
+                                style={{ fontWeight: 500 }}
+                            />
+                            <button
+                                className="rounded-r-full px-6 py-4 bg-[#37C2C4] text-white font-bold text-xl shadow hover:bg-[#2aa1a3] transition-colors"
+                                style={{ fontWeight: 500 }}
+                                tabIndex={0}
+                            >
+                                Enter
+                            </button>
+                        </div>
                     </div>
                     <div className="flex flex-wrap gap-4 justify-center mb-10">
                         <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#e0f7fa] to-[#fff] shadow text-[#0097a7] font-semibold text-base hover:bg-[#e0f7fa] transition">
