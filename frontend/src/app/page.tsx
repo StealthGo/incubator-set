@@ -594,7 +594,8 @@ export default function Home() {
                     </p>
                     <div className="w-full max-w-lg mb-8">
                         <form
-                            className="flex items-center w-full rounded-2xl border border-gray-200 bg-white px-5 py-4"
+                            className="flex items-center w-full rounded-2xl border border-gray-200 bg-white px-10 py-7"
+                            style={{ maxWidth: '700px' }}
                             onSubmit={e => { e.preventDefault(); alert('Coming Soon'); }}
                         >
                             <input
@@ -646,16 +647,12 @@ export default function Home() {
                             </button>
                         </div>
                         <div className="w-full flex flex-col items-center mb-2">
-                            <span className="text-gray-400 text-base">Not sure where to start? <span className="text-gray-700 font-semibold cursor-pointer hover:underline">See how it works</span> <span className="inline-block align-middle">&#8595;</span></span>
+                                                        <span className="text-gray-400 text-base">Not sure where to start? <span className="text-gray-700 font-semibold cursor-pointer hover:underline" onClick={() => {
+                                                            const el = document.getElementById('how-it-works');
+                                                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                                        }}>See how it works</span> <span className="inline-block align-middle">&#8595;</span></span>
                         </div>
                     </div>
-                    <a
-                        href="/waitlist-survey"
-                        className="mt-2 px-12 py-4 rounded-full bg-[#37C2C4] text-white font-bold text-xl shadow-lg hover:bg-[#2aa1a3] transition-colors text-center"
-                        style={{ minWidth: 260, boxShadow: '0 2px 12px 0 rgba(55,194,196,0.15)' }}
-                    >
-                        Join the Waitlist
-                    </a>
                 </section>
 
                                 {/* Why Us Section */}
