@@ -487,7 +487,8 @@ export default function Home() {
         >
             {/* Fixed Transparent Navbar */}
             <nav
-                className="fixed top-0 left-0 right-0 z-[9999] w-full bg-white"
+                className="fixed top-0 left-0 right-0 z-[9999] w-full"
+                style={{ backgroundColor: '#FCFAF8' }}
                 style={{ 
                     position: 'fixed',
                     top: 0,
