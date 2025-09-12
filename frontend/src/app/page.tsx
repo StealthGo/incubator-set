@@ -19,35 +19,40 @@ import {
 import { ImageCursorTrail } from "@/components/ui/image-cursortrail";
 import { BentoGridWhyUs } from "@/components/ui/bento-grid-demo";
 import { BentoGridProblems } from "@/components/ui/bento-grid-problems";
+
 import {
-    ArrowRight,
-    CheckCircle,
-    ChevronDown,
-    MapPin,
-    Users,
-    Star,
-    Send,
-    Mic,
-    Plus,
-    Compass,
-    LineChart,
-    Globe,
-    PlaneTakeoff,
-    CloudOff,
-    MessageSquare,
-    Route,
-    Ticket,
-    FileText,
-    Settings,
-    Instagram,
-    Linkedin,
-    Youtube,
-    Briefcase,
-    Map,
-    CalendarDays,
-    Clock,
-    Sparkle
+  ArrowRight,
+  Briefcase,
+  CalendarDays,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Sparkle,
+  CloudOff,
+  Compass,
+  FileText,
+  Globe,
+  House,
+  Instagram,
+  LineChart,
+  Linkedin,
+  Map,
+  MapPin,
+  MessageSquare,
+  Mic,
+  PlaneTakeoff,
+  Plus,
+  Route,
+  Send,
+  Settings,
+  Star,
+  Ticket,
+  Trees,
+  Users,
+  Youtube
 } from "lucide-react";
+
+
 
 // Assuming imageLinks is a file like: export default { delhi: '...', kashmir: '...' }
 // If not, replace with actual paths or import statements.
@@ -624,18 +629,25 @@ export default function Home() {
                         </form>
                     </div>
                     <div className="flex flex-wrap gap-4 justify-center mb-10">
-                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#e0f7fa] to-[#fff] shadow text-[#0097a7] font-semibold text-base hover:bg-[#e0f7fa] transition">
-                            <Compass className="w-5 h-5 text-[#00bcd4]" /> Spiritual Journey
-                        </button>
-                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#fce4ec] to-[#fff] shadow text-[#d81b60] font-semibold text-base hover:bg-[#fce4ec] transition">
-                            <MapPin className="w-5 h-5 text-[#d81b60]" /> Weekend Getaway
-                        </button>
-                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#e8f5e9] to-[#fff] shadow text-[#43a047] font-semibold text-base hover:bg-[#e8f5e9] transition">
-                            <Settings className="w-5 h-5 text-[#43a047]" /> Luxury Stay
-                        </button>
-                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#ede7f6] to-[#fff] shadow text-[#5e35b1] font-semibold text-base hover:bg-[#ede7f6] transition">
-                            <Users className="w-5 h-5 text-[#5e35b1]" /> Family Trip
-                        </button>
+                        <div className="flex flex-wrap gap-4 justify-center mb-2">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-green-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                                <Globe className="w-4 h-4 text-green-500" /> Create a new trip
+                            </button>
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-cyan-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                                <Compass className="w-4 h-4 text-cyan-500" /> Inspire me where to go
+                            </button>
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-lime-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                                <Trees className="w-4 h-4 text-lime-500" /> Build a road trip
+                            </button>
+                        </div>
+                        <div className="flex flex-wrap gap-4 justify-center mb-2">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-blue-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                                <House className="w-4 h-4 text-blue-500" /> Plan a last minute getaway
+                            </button>
+                        </div>
+                        <div className="w-full flex flex-col items-center mb-2">
+                            <span className="text-gray-400 text-base">Not sure where to start? <span className="text-gray-700 font-semibold cursor-pointer hover:underline">See how it works</span> <span className="inline-block align-middle">&#8595;</span></span>
+                        </div>
                     </div>
                     <a
                         href="/waitlist-survey"
