@@ -65,6 +65,8 @@ const prompts = [
 export default function WaitlistSurvey() {
 	const [step, setStep] = useState(0);
 	const [selected, setSelected] = useState("");
+	const [selected1, setSelected1] = useState(""); // Step 1 answer
+	const [selected3, setSelected3] = useState(""); // Step 3 answer
 	const [other, setOther] = useState("");
 	const [slider, setSlider] = useState(5);
 	const [text, setText] = useState("");
@@ -156,46 +158,50 @@ export default function WaitlistSurvey() {
 			return;
 		}
 		// Step 1: Ask if user wants to fill survey
-		if (step === 1) {
-			if (!selected) {
-				setError("Please select an option");
-				return;
-			}
-			// Always store email in waitlist
-			try {
-				const res = await fetch("https://incubator-set.onrender.com/api/waitlist", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ email }),
-				});
-				const data = await res.json();
-				if (data.exists) {
-					setError("This email is already registered.");
+				if (step === 1) {
+					if (!selected) {
+						setError("Please select an option");
+						return;
+					}
+					// Always store email in waitlist
+					try {
+						const res = await fetch("https://incubator-set.onrender.com/api/waitlist", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ email }),
+						});
+						const data = await res.json();
+						if (data.exists) {
+							setError("This email is already registered.");
+							return;
+						}
+					} catch (err) {
+						setError("Failed to join waitlist.");
+						return;
+					}
+					if (selected === "No") {
+						setShowWaitlist(true);
+						return;
+					}
+					setStep(2);
+					setSelected("");
 					return;
 				}
-			} catch (err) {
-				setError("Failed to join waitlist.");
-				return;
-			}
-			if (selected === "No") {
-				setShowWaitlist(true);
-				return;
-			}
-			setStep(2);
-			setSelected("");
-			return;
-		}
 		// Step 2: Q1 (radio)
-		if (step === 2) {
-			if (!selected) {
-				setError("Please select an option");
-				return;
-			}
-			if (selected === "Other" && !other.trim()) {
-				setError("Please specify your frustration");
-				return;
-			}
-		}
+				if (step === 2) {
+					if (!selected) {
+						setError("Please select an option");
+						return;
+					}
+					if (selected === "Other" && !other.trim()) {
+						setError("Please specify your frustration");
+						return;
+					}
+					setSelected1(selected === "Other" ? other : selected); // Save answer for step 1 (frustration)
+					setStep(3);
+					setSelected("");
+					return;
+				}
 		// Step 3: Q2 (slider)
 		if (step === 3) {
 			if (slider < 1 || slider > 10) {
@@ -204,43 +210,47 @@ export default function WaitlistSurvey() {
 			}
 		}
 		// Step 4: Q3 (radio)
-		if (step === 4) {
-			if (!selected) {
-				setError("Please select a price range");
-				return;
-			}
-		}
+				if (step === 4) {
+					if (!selected) {
+						setError("Please select a price range");
+						return;
+					}
+					setSelected3(selected); // Save answer for step 3 (price range)
+					setStep(5);
+					setSelected("");
+					return;
+				}
 		// Step 5: Q4 (text)
-		if (step === 5) {
-			if (!text.trim()) {
-				setError("Please share your idea");
-				return;
-			}
-		}
-		if (step === 5) {
-			// Submit survey
-			const surveyData = {
-				step_1: selected === "Other" ? other : selected,
-				step_2: slider,
-				step_3: selected,
-				step_4: text,
-				email: email,
-			};
-			try {
-				await fetch("https://incubator-set.onrender.com/api/survey", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(surveyData),
-				});
-			} catch (err) {
-				console.error("Failed to submit survey:", err);
-			}
-			setShowThanks(true);
-			setTimeout(() => {
-				router.push("/");
-			}, 2000);
-			return;
-		}
+				if (step === 5) {
+					if (!text.trim()) {
+						setError("Please share your idea");
+						return;
+					}
+				}
+				if (step === 5) {
+					// Submit survey
+					const surveyData = {
+						step_1: selected1,
+						step_2: slider,
+						step_3: selected3,
+						step_4: text,
+						email: email,
+					};
+					try {
+						await fetch("https://incubator-set.onrender.com/api/survey", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify(surveyData),
+						});
+					} catch (err) {
+						console.error("Failed to submit survey:", err);
+					}
+					setShowThanks(true);
+					setTimeout(() => {
+						router.push("/");
+					}, 2000);
+					return;
+				}
 		setStep(step + 1);
 		setSelected("");
 	};
