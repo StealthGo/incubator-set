@@ -575,6 +575,48 @@ export default function Home() {
 
             {/* Main Content */}
             <main className="flex-grow pt-24" id="home">
+                {/* Desktop Hero Section (hidden on mobile) */}
+                <section className="hidden md:flex flex-col items-center justify-center w-full max-w-5xl mx-auto py-20 px-6" style={{ background: 'url(/luxury-india-bg.jpg) center/cover no-repeat', borderRadius: '2rem' }}>
+                    {/* <div className="flex items-center gap-4 mb-8">
+                        <Image src="/logo.png" alt="Modern Chanakya Logo" width={48} height={48} className="w-12 h-12" />
+                        <span className="text-4xl font-bold text-[#37C2C4] font-serif tracking-tight">The Modern Chanakya</span>
+                    </div> */}
+                    <h1 className="text-5xl font-extrabold text-gray-900 mb-6 leading-tight text-center">
+                        Discover India, <span className="text-[#37C2C4]">Your Way.</span>
+                    </h1>
+                    <p className="text-xl text-gray-700 mb-10 max-w-2xl mx-auto text-center">
+                        AI-powered travel assistant, tailored for you.
+                    </p>
+                    <div className="w-full max-w-lg mb-8">
+                        <input
+                            type="text"
+                            placeholder="Where to next?"
+                            className="w-full rounded-full px-6 py-4 text-xl bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-[#37C2C4] placeholder-gray-400"
+                            style={{ fontWeight: 500 }}
+                        />
+                    </div>
+                    <div className="flex flex-wrap gap-4 justify-center mb-10">
+                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#e0f7fa] to-[#fff] shadow text-[#0097a7] font-semibold text-base hover:bg-[#e0f7fa] transition">
+                            <Compass className="w-5 h-5 text-[#00bcd4]" /> Spiritual Journey
+                        </button>
+                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#fce4ec] to-[#fff] shadow text-[#d81b60] font-semibold text-base hover:bg-[#fce4ec] transition">
+                            <MapPin className="w-5 h-5 text-[#d81b60]" /> Weekend Getaway
+                        </button>
+                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#e8f5e9] to-[#fff] shadow text-[#43a047] font-semibold text-base hover:bg-[#e8f5e9] transition">
+                            <Settings className="w-5 h-5 text-[#43a047]" /> Luxury Stay
+                        </button>
+                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#ede7f6] to-[#fff] shadow text-[#5e35b1] font-semibold text-base hover:bg-[#ede7f6] transition">
+                            <Users className="w-5 h-5 text-[#5e35b1]" /> Family Trip
+                        </button>
+                    </div>
+                    <a
+                        href="/waitlist-survey"
+                        className="mt-2 px-12 py-4 rounded-full bg-[#37C2C4] text-white font-bold text-xl shadow-lg hover:bg-[#2aa1a3] transition-colors text-center"
+                        style={{ minWidth: 260, boxShadow: '0 2px 12px 0 rgba(55,194,196,0.15)' }}
+                    >
+                        Join the Waitlist
+                    </a>
+                </section>
 
                                 {/* Why Us Section */}
                 <motion.section 
