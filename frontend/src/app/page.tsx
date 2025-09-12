@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Typewriter } from 'react-simple-typewriter';
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -334,15 +335,7 @@ const SearchInput = () => {
         "Luxury stay in Mumbai hotels"
     ];
 
-    // Only rotate prompts if user is not typing
-    useEffect(() => {
-        if (!inputValue && !isTyping) {
-            const interval = setInterval(() => {
-                setCurrentPromptIndex((prev) => (prev + 1) % prompts.length);
-            }, 3000);
-            return () => clearInterval(interval);
-        }
-    }, [inputValue, prompts.length, isTyping]);
+    // Remove old interval logic, handled by Typewriter
 
     // Waitlist: All prompt submissions go to coming soon
     // Prompt bar: always go to coming soon page
@@ -353,30 +346,62 @@ const SearchInput = () => {
 
     // ...existing code before...
     return (
-        <form
-            onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit(e);
-            }}
-            className="w-full h-full flex items-center"
-            onClick={(e) => e.stopPropagation()}
-        >
-            <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onFocus={() => setIsTyping(true)}
-                onBlur={() => {
-                    if (!inputValue.trim()) {
-                        setIsTyping(false);
-                    }
+        <div style={{ position: 'relative', width: '100%' }}>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(e);
                 }}
-                placeholder={prompts[currentPromptIndex]}
-                className="w-full h-full text-lg text-gray-800 placeholder-[#37C2C4] bg-transparent border-none outline-none px-3 py-1 cursor-text"
+                className="w-full h-full flex items-center"
                 onClick={(e) => e.stopPropagation()}
-            />
-            {/* Microphone icons removed as requested */}
-        </form>
+            >
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onFocus={() => setIsTyping(true)}
+                    onBlur={() => {
+                        if (!inputValue.trim()) {
+                            setIsTyping(false);
+                        }
+                    }}
+                    placeholder=""
+                    className="w-full h-full text-lg text-gray-800 bg-transparent border-none outline-none px-3 py-1 cursor-text"
+                    style={{ position: 'relative', zIndex: 2, background: 'transparent' }}
+                    onClick={(e) => e.stopPropagation()}
+                />
+                {/* Microphone icons removed as requested */}
+            </form>
+            {/* Animated prompt overlay */}
+            {!inputValue && !isTyping && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        left: '1.2rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        fontSize: '1.1rem',
+                        color: '#37C2C4',
+                        pointerEvents: 'none',
+                        zIndex: 10,
+                        background: 'transparent',
+                        width: 'calc(100% - 2.4rem)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <Typewriter
+                        words={prompts}
+                        loop={0}
+                        cursor
+                        cursorStyle='|'
+                        typeSpeed={60}
+                        deleteSpeed={40}
+                        delaySpeed={1500}
+                    />
+                </div>
+            )}
+        </div>
     );
 };
 
@@ -598,13 +623,52 @@ export default function Home() {
                             style={{ maxWidth: '700px' }}
                             onSubmit={e => { e.preventDefault(); alert('Coming Soon'); }}
                         >
-                            <input
-                                type="text"
-                                className="flex-1 text-base font-medium text-gray-700 bg-transparent outline-none border-none"
-                                placeholder="Ask Gemini"
-                                style={{ minWidth: 0 }}
-                                onClick={() => alert('Coming Soon')}
-                            />
+                            <div style={{ position: 'relative', width: '100%' }}>
+                                <input
+                                    type="text"
+                                    className="flex-1 text-base font-medium text-gray-700 bg-transparent outline-none border-none"
+                                    placeholder=""
+                                    style={{ minWidth: 0, position: 'relative', zIndex: 2, background: 'transparent' }}
+                                    onClick={() => alert('Coming Soon')}
+                                />
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        left: '16px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        fontSize: '1.1rem',
+                                        color: '#37C2C4',
+                                        pointerEvents: 'none',
+                                        zIndex: 10,
+                                        background: 'transparent',
+                                        width: 'calc(100% - 32px)',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <Typewriter
+                                        words={[
+                                            'Discover soulful Ganga Aarti in Varanasi',
+                                            'Romantic houseboat honeymoon in Kerala',
+                                            'Explore forts & palaces of Rajasthan',
+                                            'Thrilling bike trip to Leh–Ladakh',
+                                            'Taste authentic street food in Delhi',
+                                            'Budget-friendly backpacking in Himachal',
+                                            'Luxury stay in royal Jaipur havelis',
+                                            'Witness Durga Puja in Kolkata',
+                                            'Coming soon: India’s smartest travel planner',
+                                            'Plan a spiritual Char Dham Yatra',
+                                        ]}
+                                        loop={0}
+                                        cursor
+                                        cursorStyle='|'
+                                        typeSpeed={60}
+                                        deleteSpeed={40}
+                                        delaySpeed={1500}
+                                    />
+                                </div>
+                            </div>
                             <button
                                 className="flex items-center justify-center mr-2"
                                 style={{ width: '32px', height: '32px', background: 'none', border: 'none' }}
@@ -631,18 +695,18 @@ export default function Home() {
                     </div>
                     <div className="flex flex-wrap gap-4 justify-center mb-10">
                         <div className="flex flex-wrap gap-4 justify-center mb-2">
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-green-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-green-600 font-medium text-sm hover:bg-gray-50 transition">
                                 <Globe className="w-4 h-4 text-green-500" /> Create a new trip
                             </button>
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-cyan-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-cyan-600 font-medium text-sm hover:bg-gray-50 transition">
                                 <Compass className="w-4 h-4 text-cyan-500" /> Inspire me where to go
                             </button>
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-lime-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-lime-600 font-medium text-sm hover:bg-gray-50 transition">
                                 <Trees className="w-4 h-4 text-lime-500" /> Build a road trip
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-4 justify-center mb-2">
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-blue-600 font-medium text-sm shadow-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-blue-600 font-medium text-sm hover:bg-gray-50 transition">
                                 <House className="w-4 h-4 text-blue-500" /> Plan a last minute getaway
                             </button>
                         </div>
