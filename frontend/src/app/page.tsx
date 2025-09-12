@@ -1215,42 +1215,39 @@ export default function Home() {
                                     </div>
                                 </div>
                             </motion.section>
-
-                            {/* Footer - Only support email */}
-                                                        <footer className="mt-12" style={{ backgroundColor: '#FCFAF8' }}>
-                                                            <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center justify-center space-y-4">
-                                                                {/* Copyright */}
-                                                                <p className="text-gray-500 text-sm">
-                                                                    © {new Date().getFullYear()} The Modern Chanakya. All rights reserved.
-                                                                </p>
-
-                                                                {/* Email */}
-                                                                <a
-                                                                    href="mailto:humans@tmchanakya.com"
-                                                                    className="text-[#37C2C4] font-medium text-sm"
-                                                                >
-                                                                    humans@tmchanakya.com
-                                                                </a>
-
-                                                                {/* Links */}
-                                                                <div className="flex space-x-6 text-sm text-gray-500">
-                                                                    <a href="/terms" className="hover:text-[#37C2C4] transition-colors">
-                                                                        Terms & Conditions
-                                                                    </a>
-                                                                    <a href="/privacy" className="hover:text-[#37C2C4] transition-colors">
-                                                                        Privacy Policy
-                                                                    </a>
-                                                                </div>
-
-                                                                {/* Waitlist Button */}
-                                                                <a
-                                                                      href="/waitlist-survey"
-                                                                    className="mt-4 px-6 py-2 rounded-2xl bg-[#37C2C4] text-white font-medium text-sm shadow hover:bg-[#2aa1a3] transition-colors"
-                                                                >
-                                                                    Join the Waitlist
-                                                                </a>
-                                                            </div>
-                                                        </footer>
+                            
+                            <footer className="mt-12" style={{ backgroundColor: '#FCFAF8' }}>
+                                <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col items-center justify-center">
+                                    <p className="text-gray-500 text-xs mb-2 text-center" style={{ fontSize: '0.95rem' }}>
+                                        © {new Date().getFullYear()} The Modern Chanakya. All rights reserved.
+                                    </p>
+                                    <div className="text-center text-gray-700 font-semibold text-base mb-2" style={{ fontWeight: 600 }}>
+                                        Have questions, feedback, or ideas?
+                                    </div>
+                                    <div className="text-center text-gray-600 text-base mb-4">
+                                        We’d love to hear from you — drop us a mail at
+                                    </div>
+                                    <a
+                                        href="mailto:humans@tmchanakya.com"
+                                        className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full border border-[#37C2C4] bg-white text-[#37C2C4] font-semibold text-base mb-4 shadow-sm hover:bg-[#e6f8f8] hover:underline transition-all duration-150"
+                                        style={{ minWidth: 200 }}
+                                    >
+                                        <span role="img" aria-label="envelope">📩</span> humans@tmchanakya.com
+                                    </a>
+                                    <div className="flex flex-row justify-center items-center gap-4 text-sm text-gray-500 mb-8">
+                                        <a href="/terms" className="hover:text-[#37C2C4] transition-colors opacity-70 hover:opacity-100">Terms & Conditions</a>
+                                        <span className="mx-1 text-gray-400">•</span>
+                                        <a href="/privacy" className="hover:text-[#37C2C4] transition-colors opacity-70 hover:opacity-100">Privacy Policy</a>
+                                    </div>
+                                    <a
+                                        href="/waitlist-survey"
+                                        className="px-8 py-3 rounded-full bg-[#37C2C4] text-white font-bold text-lg shadow-md hover:bg-[#2aa1a3] transition-colors text-center"
+                                        style={{ minWidth: 220, boxShadow: '0 2px 12px 0 rgba(55,194,196,0.10)' }}
+                                    >
+                                        Join the Waitlist
+                                    </a>
+                                </div>
+                            </footer>
                         </motion.div>
                     );
                 }
