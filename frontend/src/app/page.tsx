@@ -1217,7 +1217,7 @@ export default function Home() {
                             </motion.section>
 
                             {/* Footer - Only support email */}
-                                                        <footer className="bg-white border-t border-gray-200/80 mt-12">
+                                                        <footer className="mt-12" style={{ backgroundColor: '#FCFAF8' }}>
                                                             <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center justify-center space-y-4">
                                                                 {/* Copyright */}
                                                                 <p className="text-gray-500 text-sm">
