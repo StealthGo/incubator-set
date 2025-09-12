@@ -530,14 +530,7 @@ export default function Home() {
             {/* Fixed Transparent Navbar */}
             <nav
                 className="fixed top-0 left-0 right-0 z-[9999] w-full"
-                style={{ backgroundColor: '#FCFAF8' }}
-                style={{ 
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 9999
-                }}
+                style={{ backgroundColor: '#FCFAF8', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999 }}
             >
                 <motion.div
                     initial={{ y: -20, opacity: 0 }}
@@ -548,6 +541,7 @@ export default function Home() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <a href="/" className="flex items-center gap-2">
+                                <Image src="/logo.png" alt="Modern Chanakya Logo" width={32} height={32} className="w-8 h-8" />
                                 <span className="text-xl font-bold text-[#37C2C4] tracking-wide font-poppins">The Modern Chanakya</span>
                             </a>
                         </div>
