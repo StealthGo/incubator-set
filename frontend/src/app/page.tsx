@@ -485,6 +485,48 @@ export default function Home() {
             className="min-h-screen antialiased relative overflow-x-hidden flex flex-col"
             style={{ backgroundColor: '#FCFAF8', color: '#333333' }}
         >
+            {/* Hero Section for Mobile */}
+            <section className="relative w-full min-h-[70vh] flex flex-col items-center justify-center px-4 pt-24 pb-10 md:hidden" style={{ background: 'url(/luxury-india-bg.jpg) center/cover no-repeat', boxShadow: '0 0 0 100vmax rgba(252,250,248,0.85) inset' }}>
+      
+                <h2 className="text-2xl font-bold text-center mb-4 leading-tight" style={{ maxWidth: 320 }}>
+                    Discover India, <span className="text-[#37C2C4]">Your Way.</span>
+                </h2>
+                <div className="mb-30 text-center text-gray-700 font-small text-base">
+                    AI-powered travel assistant, tailored for you.
+                </div>
+                {/* Search Bar */}
+                <div className="w-full max-w-xs mb-5">
+                    <input
+                        type="text"
+                        placeholder="Where to next?"
+                        className="w-full rounded-full px-5 py-3 text-lg bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-[#37C2C4] placeholder-gray-400"
+                        style={{ fontWeight: 500 }}
+                    />
+                </div>
+                {/* Suggestion Chips */}
+                <div className="flex flex-wrap gap-3 justify-center mb-8">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                        <Compass className="w-4 h-4" /> Spiritual Journey
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                        <MapPin className="w-4 h-4" /> Weekend Getaway
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                        <Settings className="w-4 h-4" /> Luxury Stay
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                        <Users className="w-4 h-4" /> Family Trip
+                    </button>
+                </div>
+                {/* Join Waitlist Button */}
+                <a
+                    href="/waitlist-survey"
+                    className="mt-2 px-8 py-3 rounded-full bg-[#37C2C4] text-white font-bold text-lg shadow-lg hover:bg-[#2aa1a3] transition-colors text-center"
+                    style={{ minWidth: 220, boxShadow: '0 2px 12px 0 rgba(55,194,196,0.15)' }}
+                >
+                    Join the Waitlist
+                </a>
+            </section>
             {/* Fixed Transparent Navbar */}
             <nav
                 className="fixed top-0 left-0 right-0 z-[9999] w-full"
@@ -530,63 +572,7 @@ export default function Home() {
                         </div>
 
                         {/* Mobile Menu Button */}
-                        <div className="md:hidden">
-                            <button
-                                className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200"
-                                aria-label="Open menu"
-                                onClick={() => setMobileMenuOpen(true)}
-                            >
-                                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                            {mobileMenuOpen && (
-                                <>
-                                    {/* Backdrop */}
-                                    <div className="fixed inset-0 bg-black bg-opacity-40 z-[99998]" onClick={() => setMobileMenuOpen(false)}></div>
-                                    {/* Slide-in Menu */}
-                                    <div className="fixed top-0 right-0 h-full w-full bg-white shadow-xl flex flex-col pt-8 pb-6 px-6 animate-slidein">
-                                        <button
-                                            className="absolute top-6 right-6 text-gray-500 hover:text-[#37C2C4] text-3xl"
-                                            aria-label="Close menu"
-                                            onClick={() => setMobileMenuOpen(false)}
-                                            style={{ background: 'none', border: 'none', boxShadow: 'none' }}
-                                        >
-                                            &times;
-                                        </button>
-                                        <button
-                                            className="self-end text-gray-500 hover:text-[#37C2C4] text-3xl mb-8"
-                                            aria-label="Close menu"
-                                            onClick={() => setMobileMenuOpen(false)}
-                                        >
-                                            &times;
-                                        </button>
-                                        <nav className="flex flex-col gap-6 mt-2">
-                                            <a href="#home" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>HOME</a>
-                                            <a href="#how-it-works" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>HOW IT WORKS</a>
-                                            <a href="#why-us" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>WHY US</a>
-                                            <a href="#contribute" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>CREATE WITH US</a>
-                                            <a href="#contact" className="text-gray-700 hover:text-[#37C2C4] font-bold text-lg py-2 px-2 rounded transition-colors" onClick={() => setMobileMenuOpen(false)}>SUPPORT</a>
-                                        </nav>
-                                        <button
-                                            className="bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white px-6 py-3 rounded-full font-bold text-lg mt-8 shadow w-full"
-                                            onClick={() => { setMobileMenuOpen(false); router.push('/waitlist-survey'); }}
-                                        >
-                                            Join the Waitlist
-                                        </button>
-                                    </div>
-                                    <style jsx>{`
-                                        @keyframes slidein {
-                                            from { transform: translateX(100%); }
-                                            to { transform: translateX(0); }
-                                        }
-                                        .animate-slidein {
-                                            animation: slidein 0.3s cubic-bezier(0.4,0,0.2,1);
-                                        }
-                                    `}</style>
-                                </>
-                            )}
-                        </div>
+                        {/* Mobile Menu Button removed for mobile view */}
                     </div>
                 </motion.div>
             </nav>
@@ -596,142 +582,6 @@ export default function Home() {
             {/* Main Content */}
             <main className="flex-grow pt-24" id="home">
 
-                {/* Hero Section */}
-                <motion.section
-                    initial="initial"
-                    animate="animate"
-                    variants={fadeInUp}
-                    className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center py-5 px-2 md:py-14 md:px-6 mb-2"
-                >
-                          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight flex items-center justify-center gap-4">
-                              <Image src="/logo.png" alt="Modern Chanakya Logo" width={32} height={32} className="w-8 h-8 inline-block mr-2" />
-                              <span className="block md:inline text-xl md:text-6xl font-bold">Discover India, <span className="text-[#37C2C4]">Your Way.</span></span>
-                          </h1>
-                          <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed text-center">
-                                 <span className="block md:inline text-sm md:text-lg mb-2">AI-powered travel assistant, tailored for you.</span>
-                          </p>
-                        <div className="inline-block px-5.5 py-2.5 rounded-full bg-[#37C2C4]/10 text-[#37C2C4] font-bold text-xl mb-6" style={{ letterSpacing: '0.05em' }}>
-                            Coming Soon
-                        </div>
-                    
-                    {/* Search Section */}
-                    <div className="max-w-4xl mx-auto mb-16">
-                        {/* Main Search Bar */}
-                        <div className="relative mb-6">
-                            <div 
-                                className="flex items-center bg-gray-50 rounded-full border border-gray-200 p-4 hover:border-[#37C2C4] transition-colors cursor-pointer"
-                                onClick={() => {
-                                    const input = document.querySelector<HTMLInputElement>('input[type="text"]');
-                                    const value = input?.value || "";
-                                    const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
-                                    if (query) {
-                                        // Check if user is signed in with correct token key
-                                        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                                        const authToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-                                        const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-                                        const accessToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-                                        const jwt = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
-                                        
-                                        const isAuthenticated = !!(token || authToken || user || accessToken || jwt);
-                                        console.log('Search box click:', { token, authToken, user, accessToken, jwt, isAuthenticated, query });
-                                        
-                                        if (isAuthenticated) {
-                                            // User is signed in, redirect directly to preferences
-                                            console.log('Redirecting to preferences with query:', query);
-                                            window.location.href = `/preferences?prompt=${encodeURIComponent(query)}`;
-                                        } else {
-                                            // Store the query in localStorage to use after sign-in
-                                            console.log('Redirecting to signin, storing query:', query);
-                                            localStorage.setItem('pendingQuery', query);
-                                            // Redirect to sign-in page
-                                            window.location.href = '/signin';
-                                        }
-                                    }
-                                }}
-                            >
-                                <SearchInput />
-                                <div className="flex items-center gap-2 ml-4">
-                                    <button 
-                                        aria-label="Voice input"
-                                        className="p-2 rounded-full hover:bg-gray-100 transition-colors group"
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Prevent the parent div's onClick from firing
-                                            // Voice input logic here
-                                        }}
-                                    >
-                                        <Mic className="w-5 h-5 text-gray-500 group-hover:text-[#37C2C4]" />
-                                    </button>
-                                    <button 
-                                        className={`bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white rounded-full p-2.5 transition-all duration-200 hover:scale-105 ${!inputValue.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        aria-label="Search"
-                                        disabled={!inputValue.trim()}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            const input = document.querySelector<HTMLInputElement>('input[type="text"]');
-                                            const value = input?.value || "";
-                                            const query = value || (typeof window !== 'undefined' ? input?.placeholder : "");
-                                            if (!query.trim()) return;
-                                            // Always route to coming soon page for now
-                                            window.location.href = '/coming-soon';
-                                        }}
-                                    >
-                                        <Send className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Quick Action Buttons */}
-                        <div className="flex flex-wrap justify-center gap-4 mb-8">
-                            <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
-                                onClick={() => {
-                                    const query = 'Create a new trip';
-                                    localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
-                                }}
-                            >
-                                <span className="text-[#37C2C4]">✈️</span>
-                                Create a new trip
-                            </button>
-                            <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
-                                onClick={() => {
-                                    const query = 'Inspire me where to go';
-                                    localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
-                                }}
-                            >
-                                <span className="text-[#37C2C4]">🗺️</span>
-                                Inspire me where to go
-                            </button>
-                            <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
-                                onClick={() => {
-                                    const query = 'Weekend getaways';
-                                    localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
-                                }}
-                            >
-                                <span className="text-[#37C2C4]">🏖️</span>
-                                Weekend getaways
-                            </button>
-                            <button
-                                className="flex items-center gap-2 bg-white border border-gray-200 hover:border-[#37C2C4] text-gray-700 px-3 py-2 rounded-full transition-colors text-xs"
-                                onClick={() => {
-                                    const query = 'Beautiful hotel in Dubai';
-                                    localStorage.setItem('pendingQuery', query);
-                                    window.location.href = '/waitlist-survey?prompt=' + encodeURIComponent(query);
-                                }}
-                            >
-                                <span className="text-[#37C2C4]">🏨</span>
-                                Beautiful stays
-                            </button>
-                        </div>
-
-                        {/* See How It Works Link - removed for cleaner design */}
-                    </div>
-                </motion.section>
                                 {/* Why Us Section */}
                 <motion.section 
                     id="why-us"
