@@ -588,22 +588,40 @@ export default function Home() {
                         AI-powered travel assistant, tailored for you.
                     </p>
                     <div className="w-full max-w-lg mb-8">
-                        <div className="flex w-full">
+                        <form
+                            className="flex items-center w-full rounded-2xl border border-gray-200 bg-white px-5 py-4"
+                            onSubmit={e => { e.preventDefault(); alert('Coming Soon'); }}
+                        >
                             <input
                                 type="text"
-                                value="Coming Soon"
-                                readOnly
-                                className="flex-1 rounded-l-full px-6 py-4 text-xl bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-[#37C2C4] placeholder-gray-400"
-                                style={{ fontWeight: 500 }}
+                                className="flex-1 text-base font-medium text-gray-700 bg-transparent outline-none border-none"
+                                placeholder="Ask Gemini"
+                                style={{ minWidth: 0 }}
+                                onClick={() => alert('Coming Soon')}
                             />
                             <button
-                                className="rounded-r-full px-6 py-4 bg-[#37C2C4] text-white font-bold text-xl shadow hover:bg-[#2aa1a3] transition-colors"
-                                style={{ fontWeight: 500 }}
+                                className="flex items-center justify-center mr-2"
+                                style={{ width: '32px', height: '32px', background: 'none', border: 'none' }}
                                 tabIndex={0}
+                                aria-label="Tools"
+                                type="button"
+                                onClick={() => alert('Coming Soon')}
                             >
-                                Enter
+                                {/* Tools icon */}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b0b3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09c.7 0 1.31-.4 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06c.46.46 1.12.6 1.82.33h.09c.7 0 1.31-.4 1.51-1V3a2 2 0 0 1 4 0v.09c0 .7.4 1.31 1 1.51.7.27 1.36.13 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c0 .7.4 1.31 1 1.51.7.27 1.36.13 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c0 .7.4 1.31 1 1.51z"/></svg>
                             </button>
-                        </div>
+                            <button
+                                className="flex items-center justify-center"
+                                style={{ width: '32px', height: '32px', background: 'none', border: 'none' }}
+                                tabIndex={0}
+                                aria-label="Mic"
+                                type="button"
+                                onClick={() => alert('Coming Soon')}
+                            >
+                                {/* Mic icon */}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b0b3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                            </button>
+                        </form>
                     </div>
                     <div className="flex flex-wrap gap-4 justify-center mb-10">
                         <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#e0f7fa] to-[#fff] shadow text-[#0097a7] font-semibold text-base hover:bg-[#e0f7fa] transition">
