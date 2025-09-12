@@ -185,18 +185,37 @@ export default function WaitlistSurvey() {
 			setSelected("");
 			return;
 		}
-		// Step 2+: Survey as before
-		if (step === 2 && !selected) {
-			setError("Please select an option");
-			return;
+		// Step 2: Q1 (radio)
+		if (step === 2) {
+			if (!selected) {
+				setError("Please select an option");
+				return;
+			}
+			if (selected === "Other" && !other.trim()) {
+				setError("Please specify your frustration");
+				return;
+			}
 		}
-		if (step === 2 && selected === "Other" && !other.trim()) {
-			setError("Please specify your frustration");
-			return;
+		// Step 3: Q2 (slider)
+		if (step === 3) {
+			if (slider < 1 || slider > 10) {
+				setError("Please select a value between 1 and 10");
+				return;
+			}
 		}
-		if (step === 4 && !text.trim()) {
-			setError("Please share your idea");
-			return;
+		// Step 4: Q3 (radio)
+		if (step === 4) {
+			if (!selected) {
+				setError("Please select a price range");
+				return;
+			}
+		}
+		// Step 5: Q4 (text)
+		if (step === 5) {
+			if (!text.trim()) {
+				setError("Please share your idea");
+				return;
+			}
 		}
 		if (step === 5) {
 			// Submit survey
@@ -314,7 +333,7 @@ export default function WaitlistSurvey() {
 								</div>
 							</>
 						)}
-						{step >= 2 && steps[0] && (
+						{step === 2 && steps[0] && (
 							<>
 								<h2 className="text-lg font-semibold mb-6">{steps[0].question}</h2>
 								<div className="space-y-3">
