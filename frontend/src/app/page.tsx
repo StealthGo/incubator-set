@@ -638,7 +638,7 @@ export default function Home() {
                             </a>
                         </div>
 
-                        {/* Navigation Links */}
+                        {/* Navigation Links (Desktop) */}
                         <div className="hidden md:flex items-center space-x-8">
                             <a href="#home" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOME</a>
                             <a href="#how-it-works" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">HOW IT WORKS</a>
@@ -647,7 +647,7 @@ export default function Home() {
                             <a href="#contact" className="text-gray-700 hover:text-[#37C2C4] transition-colors duration-200 font-medium font-inter text-sm">SUPPORT</a>
                         </div>
 
-                        {/* CTA Button */}
+                        {/* CTA Button (Desktop) */}
                         <div className="hidden md:flex items-center">
                             <button
                                 className="bg-[#37C2C4] hover:bg-[#37C2C4]/80 text-white px-6 py-2 rounded-full transition-colors duration-200 font-medium font-inter text-sm"
@@ -657,9 +657,33 @@ export default function Home() {
                             </button>
                         </div>
 
-                        {/* Mobile Menu Button */}
-                        {/* Mobile Menu Button removed for mobile view */}
+                        {/* Hamburger Menu (Mobile) */}
+                        <div className="md:hidden flex items-center">
+                            <button
+                                className="p-2 rounded focus:outline-none"
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                aria-label="Open menu"
+                            >
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#37C2C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                            </button>
+                        </div>
                     </div>
+                    {/* Mobile Menu Drawer */}
+                    {mobileMenuOpen && (
+                        <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg rounded-b-xl z-[99999] flex flex-col items-center py-6 animate-fade-in">
+                            <a href="#home" className="block py-2 px-6 text-gray-700 hover:text-[#37C2C4] font-medium text-lg">HOME</a>
+                            <a href="#how-it-works" className="block py-2 px-6 text-gray-700 hover:text-[#37C2C4] font-medium text-lg">HOW IT WORKS</a>
+                            <a href="#why-us" className="block py-2 px-6 text-gray-700 hover:text-[#37C2C4] font-medium text-lg">WHY US</a>
+                            <a href="#contribute" className="block py-2 px-6 text-gray-700 hover:text-[#37C2C4] font-medium text-lg">CREATE WITH US</a>
+                            <a href="#contact" className="block py-2 px-6 text-gray-700 hover:text-[#37C2C4] font-medium text-lg">SUPPORT</a>
+                            <button
+                                className="mt-4 bg-[#37C2C4] text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg hover:bg-[#2aa1a3] transition-colors"
+                                onClick={() => { setMobileMenuOpen(false); router.push('/waitlist-survey'); }}
+                            >
+                                Join the Waitlist
+                            </button>
+                        </div>
+                    )}
                 </motion.div>
             </nav>
 
