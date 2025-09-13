@@ -524,14 +524,66 @@ export default function Home() {
                 <div className="mb-30 text-center text-gray-700 font-small text-base">
                     AI-powered travel assistant, tailored for you.
                 </div>
-                {/* Search Bar */}
-                <div className="w-full max-w-xs mb-5">
-                    <input
-                        type="text"
-                        placeholder="Where to next?"
-                        className="w-full rounded-full px-5 py-3 text-lg bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-[#37C2C4] placeholder-gray-400"
-                        style={{ fontWeight: 500 }}
-                    />
+                {/* Search Bar (updated for mobile) */}
+                <div className="w-full max-w-xs mb-5" style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative' }}>
+                        <input
+                            type="text"
+                            value={""}
+                            placeholder=""
+                            className="w-full rounded-full px-5 py-3 pr-12 text-lg bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-[#37C2C4]"
+                            style={{ fontWeight: 500, position: 'relative', zIndex: 2, background: 'white' }}
+                            readOnly
+                        />
+                        <div
+                            style={{
+                                position: 'absolute',
+                                left: '24px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                fontSize: '1.1rem',
+                                color: '#37C2C4',
+                                pointerEvents: 'none',
+                                zIndex: 10,
+                                background: 'transparent',
+                                width: 'calc(100% - 80px)',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <Typewriter
+                                words={[
+                                    'Discover soulful Ganga Aarti in Varanasi',
+                                    'Romantic houseboat honeymoon in Kerala',
+                                    'Explore forts & palaces of Rajasthan',
+                                    'Thrilling bike trip to Leh–Ladakh',
+                                    'Taste authentic street food in Delhi',
+                                    'Budget-friendly backpacking in Himachal',
+                                    'Luxury stay in royal Jaipur havelis',
+                                    'Witness Durga Puja in Kolkata',
+                                    'Coming soon: India’s smartest travel planner',
+                                    'Plan a spiritual Char Dham Yatra',
+                                ]}
+                                loop={0}
+                                cursor
+                                cursorStyle='|'
+                                typeSpeed={60}
+                                deleteSpeed={40}
+                                delaySpeed={1500}
+                            />
+                        </div>
+                        <button
+                            className="flex items-center justify-center"
+                            style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', width: '32px', height: '32px', background: 'none', border: 'none', cursor: 'not-allowed', opacity: 0.5, zIndex: 11 }}
+                            tabIndex={-1}
+                            aria-label="Send"
+                            type="button"
+                            disabled
+                        >
+                            {/* Send icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b0b3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </div>
                 </div>
                 {/* Suggestion Chips */}
                 <div className="flex flex-wrap gap-3 justify-center mb-8">
