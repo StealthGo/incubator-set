@@ -618,6 +618,15 @@ export default function Home() {
                         AI-powered travel assistant, tailored for you.
                     </p>
                     <div className="w-full max-w-lg mb-8">
+                        <div className="flex justify-center mb-4">
+                            <button
+                                className="px-6 py-2 rounded-full bg-[#37C2C4] text-white font-semibold text-base cursor-not-allowed opacity-70"
+                                disabled
+                                style={{ pointerEvents: 'none', backgroundColor: '#37C2C4', color: '#fff' }}
+                            >
+                                Coming Soon!
+                            </button>
+                        </div>
                         <form
                             className="flex items-center w-full rounded-2xl border border-gray-200 bg-white px-10 py-7"
                             style={{ maxWidth: '700px' }}
