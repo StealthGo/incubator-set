@@ -524,6 +524,16 @@ export default function Home() {
                 <div className="mb-30 text-center text-gray-700 font-small text-base">
                     AI-powered travel assistant, tailored for you.
                 </div>
+                {/* Coming Soon Button (mobile) */}
+                <div className="flex justify-center mb-4">
+                    <button
+                        className="px-6 py-2 rounded-full bg-[#37C2C4] text-white font-semibold text-base cursor-not-allowed opacity-70"
+                        disabled
+                        style={{ pointerEvents: 'none', backgroundColor: '#37C2C4', color: '#fff' }}
+                    >
+                        Coming Soon
+                    </button>
+                </div>
                 {/* Search Bar (updated for mobile) */}
                 <div className="w-full max-w-xs mb-5" style={{ position: 'relative' }}>
                     <div style={{ position: 'relative' }}>
@@ -587,16 +597,16 @@ export default function Home() {
                 </div>
                 {/* Suggestion Chips */}
                 <div className="flex flex-wrap gap-3 justify-center mb-8">
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-gray-700 font-medium text-sm hover:bg-[#37C2C410] transition">
                         <Compass className="w-4 h-4" /> Spiritual Journey
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-gray-700 font-medium text-sm hover:bg-[#37C2C410] transition">
                         <MapPin className="w-4 h-4" /> Weekend Getaway
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-gray-700 font-medium text-sm hover:bg-[#37C2C410] transition">
                         <Settings className="w-4 h-4" /> Luxury Stay
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-[#37C2C4] font-medium text-sm hover:bg-[#37C2C410] transition">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 shadow text-gray-700 font-medium text-sm hover:bg-[#37C2C410] transition">
                         <Users className="w-4 h-4" /> Family Trip
                     </button>
                 </div>
@@ -756,18 +766,18 @@ export default function Home() {
                     </div>
                     <div className="flex flex-wrap gap-4 justify-center mb-10">
                         <div className="flex flex-wrap gap-4 justify-center mb-2">
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-green-600 font-medium text-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-black font-medium text-sm hover:bg-gray-50 transition">
                                 <Globe className="w-4 h-4 text-green-500" /> Create a new trip
                             </button>
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-cyan-600 font-medium text-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-black font-medium text-sm hover:bg-gray-50 transition">
                                 <Compass className="w-4 h-4 text-cyan-500" /> Inspire me where to go
                             </button>
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-lime-600 font-medium text-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-black font-medium text-sm hover:bg-gray-50 transition">
                                 <Trees className="w-4 h-4 text-lime-500" /> Build a road trip
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-4 justify-center mb-2">
-                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-blue-600 font-medium text-sm hover:bg-gray-50 transition">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-black font-medium text-sm hover:bg-gray-50 transition">
                                 <House className="w-4 h-4 text-blue-500" /> Plan a last minute getaway
                             </button>
                         </div>
