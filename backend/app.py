@@ -448,6 +448,88 @@ async def health_check():
 #         # @app.post("/api/generate-itinerary")
 #         # async def generate_itinerary(...):
 #         #     ...existing code...
+from bson import ObjectId
+itineraries_collection = db["itineraries"]
+
+# Get itinerary details (secured)
+@app.get("/api/itinerary/{itinerary_id}")
+async def get_itinerary_details(itinerary_id: str, current_user: dict = Depends(get_current_user)):
+    if not ObjectId.is_valid(itinerary_id):
+        raise HTTPException(status_code=400, detail="Invalid itinerary ID")
+    itinerary = await itineraries_collection.find_one({"_id": ObjectId(itinerary_id)})
+    if not itinerary:
+        raise HTTPException(status_code=404, detail="Itinerary not found")
+    if itinerary.get("user_email") != current_user["email"]:
+        raise HTTPException(status_code=403, detail="Not authorized to view this itinerary")
+    itinerary["_id"] = str(itinerary["_id"])
+    return itinerary
+
+# Delete itinerary (secured)
+@app.delete("/api/itinerary/{itinerary_id}")
+async def delete_itinerary(itinerary_id: str, current_user: dict = Depends(get_current_user)):
+    if not ObjectId.is_valid(itinerary_id):
+        raise HTTPException(status_code=400, detail="Invalid itinerary ID")
+    itinerary = await itineraries_collection.find_one({"_id": ObjectId(itinerary_id)})
+    if not itinerary:
+        raise HTTPException(status_code=404, detail="Itinerary not found")
+    if itinerary.get("user_email") != current_user["email"]:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this itinerary")
+    await itineraries_collection.delete_one({"_id": ObjectId(itinerary_id)})
+    await users_collection.update_one(
+        {"email": current_user["email"]},
+        {"$inc": {"itineraries_created": -1}}
+    )
+    return {"message": "Itinerary deleted"}
+
+# Generate itinerary (secured, minimal logic)
+class ItineraryRequest(BaseModel):
+    destination: str
+    dates: str
+    travelers: str
+    interests: str
+    food_preferences: str
+    budget: str
+    pace: str
+    personalized_title: Optional[str] = None
+
+@app.post("/api/generate-itinerary")
+async def generate_itinerary(req: ItineraryRequest, current_user: dict = Depends(get_current_user)):
+    if not current_user.get("has_premium_subscription", False) and current_user.get("free_itinerary_used", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You have already used your free itinerary. Please upgrade to premium for unlimited itinerary generation."
+        )
+    itinerary_data = req.dict()
+    if not itinerary_data.get("personalized_title"):
+        itinerary_data["personalized_title"] = f"Trip to {itinerary_data['destination']}"
+    itinerary_document = {
+        "user_email": current_user["email"],
+        "user_name": current_user.get("name", ""),
+        "destination": req.destination,
+        "dates": req.dates,
+        "travelers": req.travelers,
+        "food_preferences": req.food_preferences,
+        "interests": req.interests,
+        "budget": req.budget,
+        "pace": req.pace,
+        "itinerary_data": itinerary_data,
+        "created_at": datetime.datetime.now(datetime.timezone.utc),
+        "updated_at": datetime.datetime.now(datetime.timezone.utc)
+    }
+    result = await itineraries_collection.insert_one(itinerary_document)
+    itinerary_id = str(result.inserted_id)
+    itinerary_data["itinerary_id"] = itinerary_id
+    if not current_user.get("has_premium_subscription", False):
+        await users_collection.update_one(
+            {"email": current_user["email"]},
+            {"$set": {"free_itinerary_used": True}, "$inc": {"itineraries_created": 1}}
+        )
+    else:
+        await users_collection.update_one(
+            {"email": current_user["email"]},
+            {"$inc": {"itineraries_created": 1}}
+        )
+    return {"message": "Itinerary generated", "itinerary_id": itinerary_id, "itinerary": itinerary_data}
 #         if not itinerary_data.get("personalized_title") or itinerary_data.get("personalized_title") in [None, "", "undefined"]:
 #             itinerary_data["personalized_title"] = f"Trip to {itinerary_data['destination_name']}"
 

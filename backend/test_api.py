@@ -50,10 +50,48 @@ def test_groq_api():
         return False
 
 if __name__ == "__main__":
-    success = test_groq_api()
-    if success:
-        print("\nAPI test passed. You can now run the application.")
-        exit(0)
+
+# --- FastAPI endpoint tests for itinerary management ---
+import pytest
+from fastapi.testclient import TestClient
+from backend.app import app
+
+client = TestClient(app)
+
+def get_auth_token(email="testuser@example.com", password="testpass", name="Test User"):
+    # Signup or signin to get token
+    signup_resp = client.post("/api/signup", json={"email": email, "password": password, "name": name})
+    if signup_resp.status_code == 400 and "already registered" in signup_resp.text:
+        signin_resp = client.post("/api/signin", data={"username": email, "password": password})
+        token = signin_resp.json()["access_token"]
     else:
-        print("\nAPI test failed. Please fix the issues before running the application.")
-        exit(1)
+        token = signup_resp.json()["access_token"]
+    return token
+
+def test_generate_get_delete_itinerary():
+    token = get_auth_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    # Generate itinerary
+    payload = {
+        "destination": "Paris",
+        "dates": "2025-10-20 to 2025-10-25",
+        "travelers": "2",
+        "interests": "art, food",
+        "food_preferences": "vegetarian",
+        "budget": "medium",
+        "pace": "relaxed",
+        "personalized_title": "Romantic Paris Trip"
+    }
+    gen_resp = client.post("/api/generate-itinerary", json=payload, headers=headers)
+    assert gen_resp.status_code == 200
+    itinerary_id = gen_resp.json()["itinerary_id"]
+    # Get itinerary
+    get_resp = client.get(f"/api/itinerary/{itinerary_id}", headers=headers)
+    assert get_resp.status_code == 200
+    assert get_resp.json()["destination"] == "Paris"
+    # Delete itinerary
+    del_resp = client.delete(f"/api/itinerary/{itinerary_id}", headers=headers)
+    assert del_resp.status_code == 200
+    # Confirm deletion
+    get_resp2 = client.get(f"/api/itinerary/{itinerary_id}", headers=headers)
+    assert get_resp2.status_code == 404
