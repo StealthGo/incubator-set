@@ -219,6 +219,8 @@ async def authenticate_user(email: str, password: str):
         raise
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
+    import logging
+    logger = logging.getLogger("auth")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -228,24 +230,48 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
+            logger.warning("JWT missing subject (sub) claim.")
             raise credentials_exception
-    except JWTError:
+    except jwt.ExpiredSignatureError:
+        logger.warning("JWT token expired.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired. Please sign in again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except jwt.JWTClaimsError:
+        logger.warning("JWT claims error.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token claims.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except jwt.JWTError as e:
+        logger.warning(f"JWT error: {str(e)}")
         raise credentials_exception
+    except Exception as e:
+        logger.error(f"Unexpected error during JWT decode: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal authentication error. Please try again later."
+        )
+    try:
+        user = await get_user(email)
+        if user is None:
+            logger.warning(f"User not found for email: {email}")
+            raise credentials_exception
+        return user
     except asyncio.CancelledError:
+        logger.warning("Service is shutting down during user fetch.")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Service is shutting down"
         )
-    
-    try:
-        user = await get_user(email)
-        if user is None:
-            raise credentials_exception
-        return user
-    except asyncio.CancelledError:
+    except Exception as e:
+        logger.error(f"Unexpected error during user fetch: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service is shutting down"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal authentication error. Please try again later."
         )
     
 
@@ -253,8 +279,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @app.post("/api/signup", response_model=Token)
 async def signup(user: UserIn):
+    import logging
+    logger = logging.getLogger("auth")
     try:
         if await users_collection.find_one({"email": user.email}):
+            logger.warning(f"Signup failed: Email already registered: {user.email}")
             raise HTTPException(status_code=400, detail="Email already registered")
         hashed_password = get_password_hash(user.password)
         await users_collection.insert_one({
@@ -274,12 +303,13 @@ async def signup(user: UserIn):
     except HTTPException:
         raise
     except asyncio.CancelledError:
+        logger.warning("Signup cancelled by server.")
         raise HTTPException(
             status_code=status.HTTP_408_REQUEST_TIMEOUT,
             detail="Request was cancelled. Please try again."
         )
     except Exception as e:
-        print(f"Signup error: {e}")
+        logger.error(f"Signup error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create account. Please try again."
@@ -287,20 +317,29 @@ async def signup(user: UserIn):
 
 @app.post("/api/signin", response_model=Token)
 async def signin(form_data: OAuth2PasswordRequestForm = Depends()):
+    import logging
+    logger = logging.getLogger("auth")
     try:
         user = await authenticate_user(form_data.username, form_data.password)
         if not user:
+            logger.warning(f"Signin failed: Incorrect email or password for {form_data.username}")
             raise HTTPException(status_code=400, detail="Incorrect email or password")
         access_token = create_access_token(data={"sub": user["email"]})
         return {"access_token": access_token, "token_type": "bearer"}
     except asyncio.CancelledError:
-        print("Signin cancelled")
+        logger.warning("Signin cancelled by server.")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Service is shutting down"
         )
     except HTTPException:
         raise
+    except Exception as e:
+        logger.error(f"Signin error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to sign in. Please try again."
+        )
 
 @app.get("/api/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
