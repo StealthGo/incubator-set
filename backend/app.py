@@ -343,16 +343,24 @@ async def signin(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.get("/api/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
-    return {
-        "name": current_user.get("name", ""),
-        "email": current_user.get("email", ""),
-        # "dob": current_user.get("dob", ""),  # <-- Removed dob
-        "subscription_status": current_user.get("subscription_status", "free"),
-        "has_premium_subscription": current_user.get("has_premium_subscription", False),
-        "itineraries_created": current_user.get("itineraries_created", 0),
-        "free_itinerary_used": current_user.get("free_itinerary_used", False),
-        "chat_messages_used": current_user.get("chat_messages_used", 0)
-    }
+        import logging
+        logger = logging.getLogger("auth")
+        try:
+            return {
+                "name": current_user.get("name", ""),
+                "email": current_user.get("email", ""),
+                "subscription_status": current_user.get("subscription_status", "free"),
+                "has_premium_subscription": current_user.get("has_premium_subscription", False),
+                "itineraries_created": current_user.get("itineraries_created", 0),
+                "free_itinerary_used": current_user.get("free_itinerary_used", False),
+                "chat_messages_used": current_user.get("chat_messages_used", 0)
+            }
+        except Exception as e:
+            logger.error(f"Error in /api/me endpoint: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch user profile. Please try again."
+            )
 
 
 # --- COMMENTED OUT: Subscription upgrade endpoint (not in use for waitlist/survey) ---
