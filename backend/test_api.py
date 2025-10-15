@@ -1,3 +1,42 @@
+import jwt
+import datetime
+def test_signin_wrong_password():
+    # Try to sign in with wrong password
+    email = "testuser2@example.com"
+    password = "rightpass"
+    name = "Test User2"
+    # Ensure user exists
+    client.post("/api/signup", json={"email": email, "password": password, "name": name})
+    resp = client.post("/api/signin", data={"username": email, "password": "wrongpass"})
+    assert resp.status_code == 400
+    assert "Incorrect email or password" in resp.text
+
+def test_access_me_missing_token():
+    # No token provided
+    resp = client.get("/api/me")
+    assert resp.status_code == 401
+    assert "Could not validate credentials" in resp.text
+
+def test_access_me_invalid_token():
+    # Invalid token
+    headers = {"Authorization": "Bearer invalidtoken123"}
+    resp = client.get("/api/me", headers=headers)
+    assert resp.status_code == 401
+    assert "Could not validate credentials" in resp.text
+
+def test_access_me_expired_token():
+    # Create expired JWT
+    email = "testuser3@example.com"
+    password = "testpass3"
+    name = "Test User3"
+    client.post("/api/signup", json={"email": email, "password": password, "name": name})
+    secret = app.dependency_overrides.get('SECRET_KEY', 'supersecret')
+    expired = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)
+    token = jwt.encode({"sub": email, "exp": expired}, secret, algorithm="HS256")
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = client.get("/api/me", headers=headers)
+    assert resp.status_code == 401
+    assert "Token has expired" in resp.text
 """
 Test script for verifying Groq API integration
 Run this script before starting the application to ensure the API is working correctly
